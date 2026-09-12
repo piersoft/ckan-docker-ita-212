@@ -6,20 +6,21 @@ from datetime import datetime
 from sqlalchemy import and_
 
 import ckan.plugins.toolkit as toolkit
-from ckan.lib.base import config
+from ckan.common import config
 from ckan.lib.navl.dictization_functions import Invalid
 from ckan.logic import ValidationError
 from ckan.logic.validators import tag_name_validator
 from ckan.model.meta import Session
 from ckan.model import (
     Group,
-    GroupExtra,
     Package,
-    PackageExtra,
     repo,
 )
 
-from ckanext.multilang.model import PackageMultilang as ML_PM
+try:
+    from ckanext.multilang.model import PackageMultilang as ML_PM
+except ImportError:  # multilang facoltativo: il comando fallisce solo se usato
+    ML_PM = None
 
 from ckanext.dcatapit.schema import FIELD_THEMES_AGGREGATE
 from ckanext.dcatapit import validators
@@ -428,33 +429,32 @@ def get_temp_org_identifier():
 
 def package_temp_code_count(BASE_CODE):
     s = Session
-    q = s.query(PackageExtra.value).join(Package, and_(Package.id == PackageExtra.package_id,
-                                                       PackageExtra.state == 'active')) \
+    # CKAN >= 2.12: extras JSONB
+    ident = Package.extras['identifier'].astext
+    q = s.query(ident) \
         .filter(Package.type == 'organization',
                 Package.state == 'active',
-                PackageExtra.key == 'identifier',
-                PackageExtra.value.startswith(BASE_CODE)) \
-        .group_by(PackageExtra.value) \
+                ident.startswith(BASE_CODE)) \
+        .group_by(ident) \
         .count()
     return q
 
 
 def group_temp_code_count(BASE_CODE):
     s = Session
-    q = s.query(GroupExtra.value).join(Group, and_(Group.id == GroupExtra.group_id,
-                                                   GroupExtra.state == 'active')) \
+    gident = Group.extras['identifier'].astext
+    q = s.query(gident) \
         .filter(Group.type == 'organization',
                 Group.state == 'active',
-                GroupExtra.key == 'identifier',
-                GroupExtra.value.startswith(BASE_CODE)) \
-        .group_by(GroupExtra.value) \
+                gident.startswith(BASE_CODE)) \
+        .group_by(gident) \
         .count()
     return q
 
 
 def update_organization_identifier(org_id, org_identifier):
     s = Session
-    s.revision = getattr(s, 'revision', None) or repo.new_revision()
+    # CKAN >= 2.9 non ha piu' le revision
     g = s.query(Group).filter(Group.id == org_id).one()
     g.extras['identifier'] = org_identifier
     s.add(g)

@@ -71,11 +71,11 @@ class DCATAPITCSWHarvester(CSWHarvester, SingletonPlugin):
                 'code': 'temp_ipa',
                 'role': 'publisher',
                 'code_regex': {
-                    'regex': '\(([^)]+)\:([^)]+)\)',
+                    'regex': r'\(([^)]+)\:([^)]+)\)',
                     'groups': [2]  # optional, dependes by the regular expression
                 },
                 'name_regex': {
-                    'regex': '([^(]*)(\(IPA[^)]*\))(.+)',
+                    'regex': r'([^(]*)(\(IPA[^)]*\))(.+)',
                     'groups': [1, 3]  # optional, dependes by the regular expression
                 }
             },
@@ -83,11 +83,11 @@ class DCATAPITCSWHarvester(CSWHarvester, SingletonPlugin):
                 'code': 'temp_ipa',
                 'role': 'owner',
                 'code_regex': {
-                    'regex': '\(([^)]+)\:([^)]+)\)',
+                    'regex': r'\(([^)]+)\:([^)]+)\)',
                     'groups': [2]  # optional, dependes by the regular expression
                 },
                 'name_regex': {
-                    'regex': '([^(]*)(\(IPA[^)]*\))(.+)',
+                    'regex': r'([^(]*)(\(IPA[^)]*\))(.+)',
                     'groups': [1, 3]  # optional, dependes by the regular expression
                 }
             },
@@ -95,11 +95,11 @@ class DCATAPITCSWHarvester(CSWHarvester, SingletonPlugin):
                 'code': 'temp_ipa',
                 'role': 'author',
                 'code_regex': {
-                    'regex': '\(([^)]+)\:([^)]+)\)',
+                    'regex': r'\(([^)]+)\:([^)]+)\)',
                     'groups': [2]  # optional, dependes by the regular expression
                 },
                 'name_regex': {
-                    'regex': '([^(]*)(\(IPA[^)]*\))(.+)',
+                    'regex': r'([^(]*)(\(IPA[^)]*\))(.+)',
                     'groups': [1, 3]  # optional, dependes by the regular expression
                 }
             }

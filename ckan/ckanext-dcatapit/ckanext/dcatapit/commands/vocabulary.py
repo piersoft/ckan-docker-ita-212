@@ -7,7 +7,8 @@ from rdflib.term import URIRef
 
 from sqlalchemy.exc import IntegrityError
 
-from ckan.lib.base import config, model
+from ckan.common import config
+from ckan import model
 from ckan.lib.munge import munge_tag
 from ckan.model import Vocabulary
 from ckan.model.meta import Session

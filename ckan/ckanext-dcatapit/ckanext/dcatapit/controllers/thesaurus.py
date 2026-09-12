@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 
 from ckan.common import config
 from ckan.lib import base
-from ckan.lib.base import abort
+from ckan.plugins.toolkit import abort
 from ckan.model import Session
 import ckan.plugins.toolkit as tk
 

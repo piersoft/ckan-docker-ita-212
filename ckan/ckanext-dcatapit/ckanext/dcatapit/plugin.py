@@ -701,40 +701,15 @@ class DCATAPITOrganizationPlugin(plugins.SingletonPlugin, toolkit.DefaultOrganiz
         # registers itself as the default (above).
         return ['organization']
 
-    def form_to_db_schema_options(self, options):
-        ''' This allows us to select different schemas for different
-        purpose eg via the web interface or via the api or creation vs
-        updating. It is optional and if not available form_to_db_schema
-        should be used.
-        If a context is provided, and it contains a schema, it will be
-        returned.
-        '''
-        schema = options.get('context', {}).get('schema', None)
-        if schema:
-            return schema
-
-        if options.get('api'):
-            if options.get('type') == 'create':
-                return self.form_to_db_schema_api_create()
-            else:
-                return self.form_to_db_schema_api_update()
-        else:
-            return self.form_to_db_schema()
-
-    def form_to_db_schema_api_create(self):
+    # CKAN >= 2.12: form_to_db_* / db_to_form_* sono stati rimossi da IGroupForm
+    # in favore di create/update/show_group_schema().
+    def create_group_schema(self):
         schema = logic.schema.default_group_schema()
-        schema = self._modify_group_schema(schema)
-        return schema
+        return self._modify_group_schema(schema)
 
-    def form_to_db_schema_api_update(self):
+    def update_group_schema(self):
         schema = logic.schema.default_update_group_schema()
-        schema = self._modify_group_schema(schema)
-        return schema
-
-    def form_to_db_schema(self):
-        schema = logic.schema.group_form_schema()
-        schema = self._modify_group_schema(schema)
-        return schema
+        return self._modify_group_schema(schema)
 
     def _modify_group_schema(self, schema):
         TO_EXTRAS = toolkit.get_converter('convert_to_extras')
@@ -744,9 +719,8 @@ class DCATAPITOrganizationPlugin(plugins.SingletonPlugin, toolkit.DefaultOrganiz
 
         return schema
 
-    def db_to_form_schema(self):
-        '''This is an interface to manipulate data from the database
-        into a format suitable for the form (optional)'''
+    def show_group_schema(self):
+        '''Schema di lettura: riporta i campi DCAT-AP_IT dagli extras dell'organizzazione'''
         schema = logic.schema.default_show_group_schema()
         schema['extras'] = logic.schema.default_extras_schema()
 

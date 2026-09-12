@@ -1,0 +1,4 @@
+# Le dipendenze reali sono fornite da CKAN 2.12 e ckanext-dcat 2.4.4
+# (rdflib, markupsafe, requests). I vecchi pin pyjwt/cryptography/markupsafe
+# non sono compatibili con Python 3.14 e non sono usati dal codice.
+ckantoolkit>=0.0.7
