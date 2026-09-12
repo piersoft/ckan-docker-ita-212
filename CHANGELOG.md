@@ -1,5 +1,11 @@
 # Changelog
 
+## `2026-09-12` — Fase 5: OAI-PMH server e profilo MQA
+- `ckan/ckanext-oai-pmh-server`: `iteritems`->`items`; `pyoai` patchato a build time (`patches/patch_pyoai.py`) perche' importa `pkg_resources`, assente con i setuptools recenti. Configurazione OAI riapplicata a ogni avvio (idempotente), token xloader ricreato quando manca in `ckan.ini`.
+- `ckan/ckanext-dcat-ap-edp-mqa`: il profilo `dcat_ap_edp_mqa` ora estende `EuropeanDCATAP3Profile` e va usato **al posto** di `euro_dcat_ap_3` (`dcat_ap_edp_mqa it_dcat_ap dcat_ita`); cache dei vocabolari EDP nel volume `ckan_storage` con fallback ai file bundled (il nome file upstream conteneva una virgoletta tipografica).
+- `dcat_ita`: potatura dei nodi-licenza orfani (`dct:type adms:licencetype/UnknownIPR`) lasciati dal profilo EU quando `it_dcat_ap` sostituisce `dct:license`.
+- Init: `initdb`/`load` dei vocabolari dcatapit saltati se `dcatapit_vocabulary` e' gia' popolata (controllo sul DB).
+
 ## `2026-09-12` — Fase 4: ckanext-dcatapit e ckanext-multilang su CKAN 2.12
 - `ckan/ckanext-dcatapit` (fork con le fix DGA/licenze in `profiles.py`) adeguato a CKAN 2.12 / Python 3.14 / SQLAlchemy 2: extras JSONB al posto di `PackageExtra`/`GroupExtra`, `IGroupForm` con `create/update/show_group_schema()`, CSRF nel form thesaurus, import senza Pylons/routes, `map_imperatively` e `has_table` nei modelli, `ConfigParser.read_file`, regex raw, migrazione Alembic tollerante all'ordine con `initdb`, guardie su `holder_identifier`/`frequency`/multilang assenti.
 - Autocomplete dei vocabolari (`/api/2/util/vocabulary/autocomplete`) riscritto come blueprint Flask: sul 2.10 la rotta Pylons era gia' morta.
