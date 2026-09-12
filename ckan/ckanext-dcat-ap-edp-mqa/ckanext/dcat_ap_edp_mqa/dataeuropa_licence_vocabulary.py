@@ -9,6 +9,20 @@ import traceback
 
 import logging
 
+
+# ckan-docker-ita: la cache dei vocabolari scaricati va in una cartella
+# scrivibile (volume ckan_storage); se il download fallisce si usa la copia
+# bundled in /srv/app/patches (es. rete assente in build/avvio).
+def _cache_path(name):
+    base = os.environ.get("CKAN_STORAGE_PATH") or "/var/lib/ckan"
+    d = os.path.join(base, "edp-vocabularies")
+    os.makedirs(d, exist_ok=True)
+    return os.path.join(d, name)
+
+
+def _bundled_path(name):
+    return os.path.join(os.environ.get("APP_DIR", "/srv/app"), "patches", name)
+
 log = logging.getLogger(__name__)
 
 
@@ -47,9 +61,10 @@ class DataEuropaVocabularyBuilder:
             "https://gitlab.com/european-data-portal/edp-vocabularies/-/raw/master/edp-machine-readable-format.rdf",
         ],
         prefix="http://publications.europa.eu/resource/authority/file-type/",
-        filename="/srv/app/patches/edp-licences-skos.rdf”",
+        filename=None,
     ):
         if not self.__instance:
+            filename = filename or _cache_path("edp-licences-skos.rdf")
             # Create local file
             try:
                 self._create_local_file(urls, filename)
@@ -57,6 +72,9 @@ class DataEuropaVocabularyBuilder:
                 traceback.print_exc()
                 log.warn("Using local file")
 
+            if not os.path.exists(filename):
+                log.warning("Vocabolario EDP non scaricato, uso la copia bundled")
+                filename = _bundled_path("edp-licences-skos.rdf")
             file_types = self._read_local_file(filename)
             self.__instance = DataEuropaVocabulary(file_types, prefix)
 
