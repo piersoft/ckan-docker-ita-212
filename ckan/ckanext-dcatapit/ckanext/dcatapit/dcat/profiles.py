@@ -1393,7 +1393,7 @@ class ItalianDCATAPProfile(RDFProfile):
         # Add localized entries in dataset
         # TODO: should we remove the non-localized nodes?
 
-        loc_dict = interfaces.get_for_package(dataset_dict['id'])
+        loc_dict = interfaces.get_for_package(dataset_dict['id']) or {}
         #  The multilang fields
         loc_package_mapping = {
             'title': (dataset_ref, DCT.title),
@@ -1403,7 +1403,7 @@ class ItalianDCATAPProfile(RDFProfile):
 
         dataset_is_local = dataset_dict.get('dataset_is_local')
         if dataset_is_local:
-            _org_name = interfaces.get_for_group_or_organization(dataset_dict['owner_org'])
+            _org_name = interfaces.get_for_group_or_organization(dataset_dict['owner_org']) or {}
             if _org_name.get('title'):
                 loc_dict['holder_name'] = _org_name['title']
 
@@ -1627,7 +1627,7 @@ class ItalianDCATAPProfile(RDFProfile):
             # Add localized entries in resource
             # TODO: should we remove the not-localized nodes?
 
-            loc_dict = interfaces.get_for_resource(resource_dict['id'])
+            loc_dict = interfaces.get_for_resource(resource_dict['id']) or {}
 
             #  The multilang fields
             loc_resource_mapping = {
