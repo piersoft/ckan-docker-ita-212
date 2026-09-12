@@ -1,22 +1,18 @@
-# generic
+# generico
 .DS_Store
 .vagrant
 
 # python
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+build/
+dist/
 
-# code & config
-_service-provider/*
-_solr/schema.xml
-_src/*
-local/*
+# configurazione locale
 .env
 
-# certificati generati a runtime
+# certificati generati a runtime e configurazione nginx di produzione
 nginx/certs/
-*.pem
-
-# configurazione nginx di produzione (dominio/certificati reali)
 nginx/prod/default.conf
-nginx/certs/
+*.pem
