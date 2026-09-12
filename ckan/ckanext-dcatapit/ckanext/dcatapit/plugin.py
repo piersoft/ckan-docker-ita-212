@@ -310,10 +310,16 @@ class DCATAPITPackagePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm,
         '''
 
         extra_theme1 = dataset_dict.get(f'extras_{FIELD_THEMES_AGGREGATE}', None) or ''
-       # theme_normal = dataset_dict.get(tuple['theme'])
-        if json.loads(dataset_dict['theme']):
-         log.warning('json.loads del tema %s',str(json.loads(dataset_dict['theme'])))
-         theme_normal1 = str(json.loads(dataset_dict['theme']))
+        # ckan-docker-ita: su CKAN 2.12 il dict indicizzato puo' non avere `theme`
+        # (dataset senza tema, o tema solo negli extras): niente KeyError, si
+        # ricade su OP_DATPRO come faceva il ramo else.
+        _raw_theme = dataset_dict.get('theme') or dataset_dict.get('extras_theme') or ''
+        try:
+            _parsed_theme = json.loads(_raw_theme) if _raw_theme else None
+        except (ValueError, TypeError):
+            _parsed_theme = _raw_theme or None
+        if _parsed_theme:
+         theme_normal1 = str(_parsed_theme)
         else:
          dataset_dict['theme'] = 'OP_DATPRO'
          theme_normal1 = dataset_dict['theme']
