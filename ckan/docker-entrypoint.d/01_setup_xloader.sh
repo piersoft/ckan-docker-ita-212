@@ -1,13 +1,12 @@
 #!/bin/bash
 # Configurazione Xloader (+ OAI-PMH quando il plugin e' attivo).
-# Eseguito a ogni avvio; le parti "una tantum" sono protette dal marker
-# $INIT_MARKER (file nel volume ckan_storage, sopravvive alla ricreazione del container).
-INIT_MARKER="${CKAN_STORAGE_PATH:-/var/lib/ckan}/.ckan-docker-ita.init-done"
+# Eseguito a ogni avvio.
 
-# Il token xloader si crea una volta sola; la configurazione OAI e' idempotente
-# e viene riapplicata a ogni avvio (dipende da CKAN_SITE_URL).
-if [ -f "$INIT_MARKER" ]; then
-  echo "[init] Xloader gia' configurato, salto la creazione del token."
+# ckan.ini vive nel container e si perde a ogni rebuild: il token xloader va
+# (ri)creato quando manca dall'ini, indipendentemente dal marker di init.
+# La configurazione OAI e' idempotente e viene riapplicata a ogni avvio.
+if [[ $CKAN__PLUGINS == *"xloader"* ]] && grep -qE "^ckanext.xloader.api_token ?= ?\S" "$CKAN_INI"; then
+  echo "[init] Xloader gia' configurato in ckan.ini."
 elif [[ $CKAN__PLUGINS == *"xloader"* ]]; then
   echo "[init] Configuro ckanext.xloader"
   ckan config-tool "$CKAN_INI" "ckanext.xloader.api_token=$(ckan -c "$CKAN_INI" user token add "${CKAN_SYSADMIN_NAME:-ckan_admin}" xloader | tail -n 1 | tr -d '\t')"
