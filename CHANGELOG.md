@@ -1,5 +1,11 @@
 # Changelog
 
+## `2026-09-12` — Fase 3: ckanext-dcat 2.4.4 (DCAT-AP 3) + ckanext-dcatita
+- `ckanext-dcat` upstream **v2.4.4** (DCAT-AP 3, CKAN 2.12, Python 3.14) al posto della copia patchata basata su un master 2024. Profilo di default `euro_dcat_ap_3` (funziona senza ckanext-scheming: il ramo scheming si autodisattiva).
+- Le ~1.400 righe di patch storiche sono state riscritte come estensione **`ckan/ckanext-dcatita`** che usa le interfacce ufficiali (`IDCATRDFHarvester`, `IDCATURIGenerator`, `ckan.rdf.profiles`): plugin `dcatita_harvest`, `dcatita_uri`, profilo `dcat_ita`. Le mappe per ente (URI dei subcatalog, publisher, licenze, formati, media type) stanno in `subcatalogs.json`.
+- Restano 4 patch minime in `ckan/patches/ckanext-dcat-patches/` (subcatalog dell'organizzazione via `site`, `dcat:service`, `dcatapit:Catalog`/`dct:issued`/`themeTaxonomy`, `fq` multipli ed esclusione RESTRICTED per l'harvest EDP, file-type nel JSON harvester).
+- Differenze volute: `access_rights` non viene piu' forzato a PUBLIC se la sorgente dichiara RESTRICTED (DGA); gli errori di validazione in creazione non vengono piu' nascosti.
+
 ## `2026-09-12` — Fase 2: ckanext-harvest 1.6.3
 - `ckanext-harvest` upstream **v1.6.3** (supporto ufficiale CKAN 2.12) installato in editable + 2 patch locali in `ckan/patches/ckanext-harvest-patches/` (normalizzazione cataloghi federati in `ckanharvester.py`; harvest source con URL duplicato non bloccante). La copia vendorizzata e' stata rimossa: gli upgrade futuri sono `@vX.Y.Z` nel Dockerfile + riapplicazione patch.
 - Consumer `gather` e `fetch` come servizi Compose (`ckan-gather`, `ckan-fetch`) al posto di supervisord.

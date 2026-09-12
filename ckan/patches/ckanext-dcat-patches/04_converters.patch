@@ -1,0 +1,13 @@
+--- a/ckanext/dcat/converters.py	2026-09-12 13:49:18.152064807 +0000
++++ b/ckanext/dcat/converters.py	2026-09-12 13:58:20.239924986 +0000
+@@ -64,7 +64,9 @@
+             'name': distribution.get('title'),
+             'description': distribution.get('description'),
+             'url': distribution.get('downloadURL') or distribution.get('accessURL'),
+-            'format': distribution.get('format'),
++            # ckan-docker-ita: alcuni cataloghi JSON mettono l'URI EU file-type nel format
++            'format': (distribution.get('format') or '').replace(
++                'http://publications.europa.eu/resource/authority/file-type/', '') or None,
+         }
+ 
+         if distribution.get('byteSize'):

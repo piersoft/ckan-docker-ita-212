@@ -1,0 +1,27 @@
+--- a/ckanext/dcat/logic.py	2026-09-12 13:49:18.152064807 +0000
++++ b/ckanext/dcat/logic.py	2026-09-12 13:58:30.181878413 +0000
+@@ -105,8 +105,13 @@
+     }
+ 
+     search_data_dict['q'] = data_dict.get('q', '*:*')
+-    search_data_dict['fq'] = data_dict.get('fq')
+     search_data_dict['fq_list'] = []
++    # ckan-docker-ita: fq puo' essere una lista (vedi utils.read_catalog_page)
++    custom_fq = data_dict.get('fq')
++    if isinstance(custom_fq, list):
++        search_data_dict['fq_list'].extend(custom_fq)
++    elif custom_fq:
++        search_data_dict['fq'] = custom_fq
+ 
+     # Exclude certain dataset types
+     search_data_dict['fq_list'].append('-dataset_type:harvest')
+@@ -147,7 +152,8 @@
+         base_url = '%s%s' % (
+             base_url, toolkit.request.path)
+ 
+-        params = [p for p in toolkit.request.args.items()
++        # ckan-docker-ita: multi=True per non perdere i parametri fq ripetuti nei link di paginazione
++        params = [p for p in toolkit.request.args.items(multi=True)
+                   if p[0] != 'page' and p[0] in ('modified_since', 'profiles', 'q', 'fq')]
+         if params:
+             qs = '&'.join(

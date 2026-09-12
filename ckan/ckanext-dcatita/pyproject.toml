@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ckanext-dcatita"
+version = "0.1.0"
+description = "Regole dati.gov.it / DCAT-AP_IT sopra ckanext-dcat 2.x: normalizzazione harvest, URI dei subcatalog, profilo RDF di rifinitura"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "AGPL-3.0-or-later"}
+authors = [{name = "Francesco Piero Paolicelli (Piersoft)"}]
+classifiers = ["Programming Language :: Python :: 3"]
+
+[project.entry-points."ckan.plugins"]
+dcatita_harvest = "ckanext.dcatita.plugins:DCATItaHarvestPlugin"
+dcatita_uri = "ckanext.dcatita.plugins:DCATItaURIPlugin"
+
+[project.entry-points."ckan.rdf.profiles"]
+dcat_ita = "ckanext.dcatita.profile:DCATItaProfile"
+
+[tool.setuptools.packages.find]
+include = ["ckanext*"]
+
+[tool.setuptools.package-data]
+"ckanext.dcatita" = ["*.json"]
