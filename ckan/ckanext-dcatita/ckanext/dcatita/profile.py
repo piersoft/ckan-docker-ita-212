@@ -79,7 +79,7 @@ class DCATItaProfile(RDFProfile):
                        keep_if=lambda v: "authority" in v)
 
         # --- publisher: dct:type dal codice IPA, identificatore, classe dcatapit ---
-        holder = dataset_dict.get("holder_identifier") or ""
+        holder = dataset_dict.get("holder_identifier") or rules._get_extra(dataset_dict, "holder_identifier") or ""
         pub_type = rules.publisher_type_from_ipa(holder, cfg)
         for pub in g.objects(dataset_ref, DCT.publisher):
             if pub_type:
@@ -117,9 +117,9 @@ class DCATItaProfile(RDFProfile):
             self._add_statement(dist, DCT.rights, r.get("rights") or rules.PUBLIC_ACCESS_RIGHTS,
                                 DCT.RightsStatement)
 
-        # licenza: mapping URI italiane -> URI canoniche
+        # licenza: mapping URI italiane -> URI canoniche (solo le voci lato grafo)
         for obj in list(g.objects(dist, DCT.license)):
-            new = rules.normalize_license(str(obj), cfg)
+            new = rules.normalize_license(str(obj), cfg, side="graph")
             if new != str(obj):
                 g.remove((dist, DCT.license, obj))
                 g.add((dist, DCT.license, URIRef(new)))
@@ -190,12 +190,18 @@ class DCATItaProfile(RDFProfile):
             self.g.remove((subject, predicate, old))
         self.g.add((subject, predicate, obj))
 
+    # predicati il cui oggetto e' un URL "vero" e non va riscritto quando si
+    # rinomina il nodo della distribuzione
+    _KEEP_OBJECT = (DCAT.accessURL, DCAT.downloadURL, DCAT.landingPage, FOAF.homepage)
+
     def _rename_node(self, old, new):
         g = self.g
         for s, p, o in list(g.triples((old, None, None))):
             g.remove((s, p, o))
             g.add((new, p, o))
         for s, p, o in list(g.triples((None, None, old))):
+            if p in self._KEEP_OBJECT:
+                continue
             g.remove((s, p, o))
             g.add((s, p, new))
 
