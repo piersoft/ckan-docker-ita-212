@@ -173,8 +173,9 @@ class DCATItaProfile(RDFProfile):
             if not any(g.objects(svc, DCT.accessRights)):
                 g.add((svc, DCT.accessRights, URIRef(rules.PUBLIC_ACCESS_RIGHTS)))
 
-        # URI della distribuzione con la base del catalogo d'origine (per ultima:
-        # da qui in poi `dist` non e' piu' il nodo giusto)
+        # URI della distribuzione: normalmente gia' riscritta da dcatita_uri
+        # (IDCATURIGenerator.resource_uri); la rinomina qui resta come rete di
+        # sicurezza per nodi prodotti senza passare da resource_uri().
         if entry.get("base_uri") and not entry.get("dataset_only"):
             new = rewrite_uri(str(dist), entry)
             if new != str(dist):
