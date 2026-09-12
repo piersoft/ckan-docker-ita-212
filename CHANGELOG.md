@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-09-12` — Pulizia dei residui 2.10
+- Rimossi dalla repo `ckan/Dockerfile.legacy-2.10` e i file di `ckan/patches` non piu' usati (copie intere di moduli CKAN/Pylons: `base.py`, `core.py`, `xmlrpc.py`, `jsonrpc.py`, `supervisord.conf`, `command.py`, `model_dictize.py`, `validators.py`, `util.py`, template ecc.). Restano nella history.
+- Le due patch core ancora necessarie sono riportate come `.patch` contro CKAN 2.12.0 in `ckan/patches/ckan-core-patches/`: selettore lingua con campo `redirect_url` (un campo `url` nel form dataset sovrascriveva l'extra `landingpage`). La patch `resource_id_validator` min 5 non serve piu': il validator non esiste in 2.12.
+- **Attenzione (CKAN >= 2.11)**: gli `id` di risorse devono essere UUID v4. La patch al CKAN harvester (`03_ckanharvester.patch`) non allunga piu' gli id corti con cifre casuali (oggi invalidi) ma rimuove gli id non-UUID lasciandoli generare a CKAN. Gli id dei dataset remoti restano ammessi (schema sostituito dall'harvester).
+
 ## `2026-09-12` — Post-switch: landingPage in subcatalogs.json, cache organizzazioni, log
 - Le ~200 righe di mapping `holder_identifier -> landingPage` di `dcatapit/dcat/profiles.py` (e la riscrittura per ente delle URI delle distribuzioni, ormai doppia) sono sostituite da `rules.landing_page()` di ckanext-dcatita, guidata dalla chiave `landing` di `subcatalogs.json` (45 voci). Unico posto per le regole per ente.
 - `organization_show` in dcatapit (indicizzazione, `package_search`, profilo RDF) passa da una cache per processo con TTL 120 s, invalidata alla modifica di un'organizzazione: `catalog.ttl` non interroga piu' il DB per l'organizzazione di ogni dataset.

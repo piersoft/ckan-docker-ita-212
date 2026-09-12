@@ -1,12 +1,12 @@
 --- a/ckanext/harvest/harvesters/ckanharvester.py	2026-09-12 13:40:55.654980332 +0000
-+++ b/ckanext/harvest/harvesters/ckanharvester.py	2026-09-12 13:08:05.814116268 +0000
++++ b/ckanext/harvest/harvesters/ckanharvester.py	2026-09-12 17:44:06.058127045 +0000
 @@ -1,7 +1,8 @@
  from __future__ import absolute_import
 +import re
  import requests
  from requests.exceptions import HTTPError, RequestException
 -
-+import random
++import uuid
  import datetime
  
  from urllib.parse import urlencode
@@ -22,7 +22,7 @@
          api_key = self.config.get('api_key')
          if api_key:
              headers['Authorization'] = api_key
-@@ -534,12 +530,216 @@
+@@ -534,12 +530,219 @@
  
                      package_dict['extras'].append({'key': key, 'value': value})
  
@@ -172,9 +172,12 @@
 +                else:
 +                   resource['license_type'] = "https://w3id.org/italia/controlled-vocabulary/licences/C1_Unknown"
 +                   resource['license_id'] = 'Licenza sconosciuta'
-+                if len(resource['id'])<=5 :
-+                 #    resource.pop('id', None)
-+                    resource['id']=str(random.randint(1, 20))+resource['id']+str(random.randint(1, 20))
++                # ckan-docker-ita (CKAN >= 2.12): gli id delle risorse devono essere
++                # UUID v4; se il catalogo remoto usa id diversi si lascia generare a CKAN
++                try:
++                    uuid.UUID(str(resource.get('id') or ''), version=4)
++                except ValueError:
++                    resource.pop('id', None)
 +                for extra in package_dict.get('extras', []):
 +                  if 'frequency' in extra:
 +                 #   Dato non disponibile nel catalog della Regione Lazio. Spacca il catalog. Sostituisco

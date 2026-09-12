@@ -1,0 +1,11 @@
+--- a/ckan/templates/snippets/language_selector.html	2026-09-12 17:42:38.687650502 +0000
++++ b/ckan/templates/snippets/language_selector.html	2026-09-12 17:42:38.951091672 +0000
+@@ -3,7 +3,7 @@
+   {{ h.csrf_input() }}
+   <div class="form-group">
+     <label for="field-lang-select">{{ _('Language') }}</label>
+-    <select id="field-lang-select" name="url" data-module="autocomplete" data-module-dropdown-class="lang-dropdown" data-module-container-class="lang-container">
++    <select id="field-lang-select" name="redirect_url" data-module="autocomplete" data-module-dropdown-class="lang-dropdown" data-module-container-class="lang-container">
+       {% for locale in h.get_available_locales() %}
+         <option value="{% url_for h.current_url(), locale=locale.short_name %}" lang="{{ locale.short_name.replace('_', '-') }}" {% if locale.short_name == current_lang %}selected="selected"{% endif %}>
+           {{ locale.display_name or locale.english_name }}
