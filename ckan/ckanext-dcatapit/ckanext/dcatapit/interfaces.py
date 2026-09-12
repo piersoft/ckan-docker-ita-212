@@ -372,7 +372,27 @@ def get_resource_licenses_tree(value, lang):
     return out
 
 
+# ckan-docker-ita: il vocabolario licenze e' piccolo e statico (si ricarica con
+# `ckan dcatapit load`): cache per processo con TTL, altrimenti catalog.ttl fa
+# 2-3 query per risorsa (2.500+ per pagina).
+_LICENSE_CACHE = {}
+_LICENSE_CACHE_TTL = 600
+
+
 def get_license_for_dcat(license_type):
+    import time as _time
+    now = _time.monotonic()
+    hit = _LICENSE_CACHE.get(license_type)
+    if hit and hit[0] > now:
+        return hit[1]
+    result = _get_license_for_dcat_uncached(license_type)
+    if len(_LICENSE_CACHE) > 5000:
+        _LICENSE_CACHE.clear()
+    _LICENSE_CACHE[license_type] = (now + _LICENSE_CACHE_TTL, result)
+    return result
+
+
+def _get_license_for_dcat_uncached(license_type):
     l = License.get(license_type or License.DEFAULT_LICENSE)
     if not l or not l.license_type:
         l = License.get(License.DEFAULT_LICENSE)

@@ -78,7 +78,19 @@ class MqaEuropeanDCATAP2Profile(EuropeanDCATAP3Profile):
         
         g: Graph = self.g
 
-        for s, p, o in g.triples((None, DCT.spatial, None)):
+        # ckan-docker-ita: i cicli sotto scorrevano l'INTERO grafo (None, pred, None)
+        # a ogni dataset: sulle pagine di catalog.ttl e' O(n^2) (44 s su 64 per 100
+        # dataset). Si limitano al dataset corrente e alle sue distribuzioni.
+        _dists = list(g.objects(dataset_ref, DCAT.distribution))
+        _nodes = [dataset_ref] + _dists
+
+        def _scoped(pred, obj=None):
+            for _s in _nodes:
+                for _o in list(g.objects(_s, pred)):
+                    if obj is None or _o == obj:
+                        yield _s, pred, _o
+
+        for s, p, o in list(_scoped(DCT.spatial)):
             # locn:geometry if available        
             location = g.value(o, LOCN["geometry"])
             if location:
@@ -99,7 +111,7 @@ class MqaEuropeanDCATAP2Profile(EuropeanDCATAP3Profile):
                         )
                     )
             
-        for s, p, o in g.triples((None, DCT.language, None)):  
+        for s, p, o in list(_scoped(DCT.language)):
             # dct:language if available        
             g.remove((s, p, o))
             g.add(
@@ -111,7 +123,7 @@ class MqaEuropeanDCATAP2Profile(EuropeanDCATAP3Profile):
             )
                 
         # TODO: add vocabulary_providers
-        for s, p, o in g.triples((None, DCT.accessRights, None)):
+        for s, p, o in list(_scoped(DCT.accessRights)):
             # dct:accessRigths if available
             g.remove((s, p, o))
             g.add(
@@ -122,7 +134,7 @@ class MqaEuropeanDCATAP2Profile(EuropeanDCATAP3Profile):
                 )
             )
 
-        for s, p, o in g.triples((None, DCAT.theme, None)):
+        for s, p, o in list(_scoped(DCAT.theme)):
             # dcat:theme if available
             g.remove((s, p, o))
             g.add(
@@ -133,7 +145,7 @@ class MqaEuropeanDCATAP2Profile(EuropeanDCATAP3Profile):
                 )
             )
     
-        for s, p, o in g.triples((None, RDF.type, DCAT.Distribution)):
+        for s, p, o in [(_d, RDF.type, DCAT.Distribution) for _d in _dists]:
             # dct:format if available
             format = g.value(s, DCT["format"])
             if format:
