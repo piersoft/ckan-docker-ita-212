@@ -52,6 +52,15 @@ Variabili chiave:
 | `NGINX_PORT_HOST` / `NGINX_SSLPORT_HOST` | Porte host per accesso **non-SSL** e **SSL**. |
 | `GEONAMES_USERNAME` | Username GeoNames per il geocoding (default `demo`). |
 | `CKAN_OAIPMH_BASE_URL` | (opzionale) forza l'URL base OAI; se vuoto usa `${CKAN_SITE_URL}/oai`. |
+| `CKAN__PLUGINS` | Plugin attivi. Facoltativi: `dcat_ap_edp_mqa` (profilo MQA), `oai_pmh_server` (OpenAIRE). Cambiarli richiede `docker compose up -d ckan` (ricrea il container), non basta `restart`. |
+| `CKANEXT__DCAT__RDF__PROFILES` | Catena dei profili RDF: `dcat_ap_edp_mqa it_dcat_ap dcat_ita` (o `euro_dcat_ap_3 it_dcat_ap dcat_ita` senza MQA). `dcat_ita` sempre per ultimo. |
+| `CKANEXT__DCATITA__MQA_BADGE` | `true` mostra nella pagina di ogni dataset il riquadro "Punteggio qualità dal portale europeo" letto via API da data.europa.eu (default `false`). Ha senso solo se il catalogo è harvestato dal portale europeo; per gli altri il riquadro resta senza punteggio. |
+| `CKANEXT__DCATITA__HARVEST_VERIFY_SSL` | `false` (default) non verifica i certificati TLS dei cataloghi harvestati via RDF. |
+| `CKANEXT__OAI_PMH_SERVER__RESUMPTION_TOKEN_BATCH_SIZE` | Record per pagina di `ListRecords` (default `1024`). |
+| `CKAN_LOG_LEVEL_EXTENSIONS` | Livello di log delle estensioni (default `INFO`; `DEBUG` è molto verboso). |
+
+> Le variabili `CKAN___*` / `CKANEXT__*` sono lette dal plugin `envvars` e finiscono in
+> `ckan.ini` (`CKANEXT__DCATITA__MQA_BADGE` → `ckanext.dcatita.mqa_badge`).
 
 ### Demo locale vs dominio reale
 
@@ -71,8 +80,7 @@ NGINX espone **entrambi** gli accessi contemporaneamente:
   self-signed generato in automatico al primo avvio).
 
 Si usa quello che si preferisce; `CKAN_SITE_URL` deve coerentemente puntare
-allo schema/porta scelti. In produzione, terminare il TLS con un certificato
-valido (es. reverse proxy esterno o sostituendo il cert in `nginx/certs`).
+allo schema/porta scelti. In produzione vedi la sezione *Produzione* (Let's Encrypt).
 
 ---
 
