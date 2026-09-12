@@ -110,9 +110,16 @@ class DCATItaProfile(RDFProfile):
         candidates = {s for s, o in g.subject_objects(DCT.type)
                       if isinstance(s, URIRef) and str(o).startswith(licence_type_ns)}
         candidates |= set(g.subjects(RDF.type, DCT.LicenseDocument))
+        unknown = URIRef(licence_type_ns + "UnknownIPR")
         for node in candidates:
             if not any(g.subjects(None, node)):
                 g.remove((node, None, None))
+                continue
+            # stessa URI di licenza tipizzata da piu' profili: se c'e' un tipo
+            # specifico (es. Attribution, da dcatapit) UnknownIPR e' ridondante
+            types = set(g.objects(node, DCT.type))
+            if unknown in types and len(types) > 1:
+                g.remove((node, DCT.type, unknown))
 
     # ------------------------------------------------------------------ helpers
     def _fix_distribution(self, dataset_dict, dataset_ref, dist, r, entry, site_url, cfg):
