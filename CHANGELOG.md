@@ -1,5 +1,14 @@
 # Changelog
 
+## `2026-09-12` — Fase 6: migrazione del catalogo reale e switch in produzione
+- Restore del DB del 2.10 (10.437 dataset, 8 harvest source, 204k risorse, 314k extras, 44k righe multilang) nel nuovo stack: `ckan db upgrade` porta lo schema a `9445ce34fc23` (2.12), converte gli extras in JSONB e rimuove `package_extra`; le migrazioni Alembic di harvest/dcatapit/multilang sono compatibili (solo `DROP ... IF EXISTS`).
+- Reindex Solr di 10.437 dataset senza errori (~1,6 dataset/s con dcatapit + multilang).
+- Confronto `dataset.ttl` 2.10 vs 2.12: stesse URI, identificatori, landingPage e cardinalita' dei predicati. Differenze volute: date solo-giorno come `xsd:date`, `dcat:byteSize` come `xsd:nonNegativeInteger` (DCAT-AP 3), landingPage tipizzata `foaf:Document`, downloadURL `rdfs:Resource`, nessun nodo `vcard:Organization` orfano.
+- Fix emersi sul catalogo reale: `before_dataset_index` senza `theme`, `organization_show` mancante in `package_search`, `Group._extras` in multilang `group_list`, byteSize decimal che rompeva il profilo DCAT-AP 3 sulle pagine del catalogo, `UnknownIPR` ridondante sulle licenze, nodo distribuzione sdoppiato (`resource_uri()` ora riscritto per tutti i profili via cache dataset→subcatalog), `//` nella landingPage di dcatapit.
+- Produzione: `docker-compose.prod.yml` + `nginx/prod/default.conf` (Let's Encrypt dell'host, redirect 80→443). Switch di ckan.piersoftckan.biz dal 2.10 al 2.12 con il vecchio stack fermato ma intatto (rollback = `docker compose start`).
+- Tempi di `catalog.ttl`: ~20-27 s/pagina contro ~18 s del 2.10 (ereditati: `organization_show` per dataset in dcatapit e log DEBUG multilang) — ottimizzazione in una fase successiva.
+- Dichiarate le opzioni di configurazione di dcatapit e dcatita (`config_declaration.yaml`): niente piu' warning "Option ... is not declared".
+
 ## `2026-09-12` — Fase 5: OAI-PMH server e profilo MQA
 - `ckan/ckanext-oai-pmh-server`: `iteritems`->`items`; `pyoai` patchato a build time (`patches/patch_pyoai.py`) perche' importa `pkg_resources`, assente con i setuptools recenti. Configurazione OAI riapplicata a ogni avvio (idempotente), token xloader ricreato quando manca in `ckan.ini`.
 - `ckan/ckanext-dcat-ap-edp-mqa`: il profilo `dcat_ap_edp_mqa` ora estende `EuropeanDCATAP3Profile` e va usato **al posto** di `euro_dcat_ap_3` (`dcat_ap_edp_mqa it_dcat_ap dcat_ita`); cache dei vocabolari EDP nel volume `ckan_storage` con fallback ai file bundled (il nome file upstream conteneva una virgoletta tipografica).
