@@ -1,0 +1,11 @@
+# Override di PRODUZIONE: dominio reale con certificato Let's Encrypt gestito da
+# certbot sull'host. Uso:
+#   cp nginx/prod/default.conf.example nginx/prod/default.conf   (e sostituire DOMINIO)
+#   nel .env:  COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml
+#              CKAN_SITE_URL=https://DOMINIO  NGINX_PORT_HOST=80  NGINX_SSLPORT_HOST=443
+# Dopo un rinnovo certbot:  docker compose exec nginx nginx -s reload
+services:
+  nginx:
+    volumes:
+      - ./nginx/prod/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
