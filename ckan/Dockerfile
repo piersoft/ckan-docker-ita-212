@@ -60,7 +60,9 @@ COPY ckanext-dcatapit ${SRC_DIR}/ckanext-dcatapit
 RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcatapit \
     && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-dcatapit/requirements.txt
 # file di mapping usati da dcatapit (temi->gruppi, temi non conformi, regioni, gruppi tematici)
-COPY patches/theme_to_group.ini patches/topics.json patches/regions.rdf ${APP_DIR}/patches/
+COPY patches/theme_to_group.ini patches/topics.json patches/regions.rdf \
+     patches/edp-licences-skos.rdf patches/edp-machine-readable-format.rdf patches/application.csv patches/cataloghvd.ttl \
+     ${APP_DIR}/patches/
 COPY patches/groups ${APP_DIR}/patches/groups
 RUN chmod 666 ${APP_DIR}/patches/theme_to_group.ini ${APP_DIR}/patches/topics.json
 # ckanext-multilang (geosolutions-it, master 2026-05) vendorizzato in ckan/ckanext-multilang
@@ -105,6 +107,6 @@ RUN chmod +x ${APP_DIR}/setup_groups.sh
 RUN pip3 install --no-cache-dir -U certifi
 
 # Permessi: tutto cio' che e' stato aggiunto deve essere leggibile da `ckan`
-RUN chown -R ckan:ckan-sys ${SRC_DIR} ${APP_DIR}/setup_groups.sh
+RUN chown -R ckan:ckan-sys ${SRC_DIR} ${APP_DIR}/patches ${APP_DIR}/setup_groups.sh
 
 USER ckan
