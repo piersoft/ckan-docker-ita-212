@@ -6,7 +6,8 @@
 #    FASE 2  ckanext-harvest 1.6.3 + patch                (fatta)
 #    FASE 3  ckanext-dcat 2.4.4 (DCAT-AP 3) + patch + ckanext-dcatita  (fatta)
 #    FASE 4  ckanext-dcatapit + multilang adeguate a 2.12   (fatta)
-#    FASE 5  oai-pmh-server (OpenAIRE), dcat-ap-edp-mqa (MQA)  <- QUESTA
+#    FASE 5  oai-pmh-server (OpenAIRE), dcat-ap-edp-mqa (MQA)  (fatta)
+#    FASE 6  migrazione DB reale e switch in produzione       (fatta)
 # =====================================================================
 FROM ckan/ckan-base:2.12.0-py3.14
 
@@ -86,13 +87,13 @@ RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcat-ap-edp-mqa \
     && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-dcat-ap-edp-mqa/requirements.txt
 
 # ---------------------------------------------------------------------
-#  Patch a CKAN core (riattivare una per una dopo verifica su 2.12)
+#  Patch a CKAN core (patches/ckan-core-patches/*.patch, generate contro 2.12.0):
+#  01/02 il selettore lingua usava un campo `url` che dentro il form dataset
+#        sovrascriveva l'extra landingpage (dcatapit) -> campo `redirect_url`
 # ---------------------------------------------------------------------
-# COPY patches/language_selector.html ${SRC_DIR}/ckan/ckan/templates/snippets/language_selector.html
-# COPY patches/util.py                ${SRC_DIR}/ckan/ckan/views/util.py
-# COPY patches/validators.py          ${SRC_DIR}/ckan/ckan/logic/validators.py
-# COPY patches/__init__.py            ${SRC_DIR}/ckan/ckan/logic/__init__.py
-# COPY patches/model_dictize.py       ${SRC_DIR}/ckan/ckan/lib/dictization/model_dictize.py
+COPY patches/ckan-core-patches ${APP_DIR}/patches/ckan-core-patches
+RUN cd ${SRC_DIR}/ckan && for f in ${APP_DIR}/patches/ckan-core-patches/*.patch; do \
+        echo "Applying $f"; patch -p1 < "$f"; done
 COPY patches/ckan_logo_col.png patches/sprite-resource-icons.png ${SRC_DIR}/ckan/ckan/public/base/images/
 
 # Script di inizializzazione (eseguiti da start_ckan.sh a ogni avvio)

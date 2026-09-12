@@ -1,0 +1,14 @@
+--- a/ckan/views/util.py	2026-09-12 17:42:38.688798020 +0000
++++ b/ckan/views/util.py	2026-09-12 17:42:38.951225083 +0000
+@@ -18,7 +18,10 @@
+     u''' Redirect to the url parameter.
+     Only internal URLs are allowed'''
+ 
+-    url = request.form.get(u'url') or request.args.get(u'url')
++    # ckan-docker-ita: il selettore lingua usa `redirect_url` perche' un campo
++    # `url` dentro il form dataset sovrascrive l'extra landingpage (dcatapit)
++    url = (request.form.get(u'redirect_url') or request.args.get(u'redirect_url')
++           or request.form.get(u'url') or request.args.get(u'url'))
+     if not url:
+         base.abort(400, _(u'Missing Value') + u': url')
+ 
