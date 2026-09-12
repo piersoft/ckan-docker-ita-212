@@ -79,11 +79,11 @@ class ItalianDCATAPProfile(RDFProfile):
             if value:
                 if ' ' in value:
                   value=re.sub(r'[^a-zA-Z0-9:_]',r'',value)
-                  value=re.sub('\W+','', value)
+                  value=re.sub(r'\W+', '', value)
                   value = value.replace('//', '')
                 if 'http' in value:
                   value=re.sub(r'[^a-zA-Z0-9:_]',r'',value)
-                  value=re.sub('\W+','', value)
+                  value=re.sub(r'\W+', '', value)
                   value = value.replace('//', '')
                 self._remove_from_extra(dataset_dict, key)
                 dataset_dict[key] = value
@@ -1250,7 +1250,7 @@ class ItalianDCATAPProfile(RDFProfile):
             if dataset_dict.get('identifier'):
              if ' ' in dataset_dict.get('identifier'):
               dataset_dict["identifier"]=re.sub(r'[^a-zA-Z0-9:_]',r'',dataset_dict["identifier"])
-              dataset_dict["identifier"]=re.sub('\W+','', dataset_dict["identifier"])
+              dataset_dict["identifier"]=re.sub(r'\W+', '', dataset_dict["identifier"])
               
             dataset_dict['alternate_identifier']=dataset_dict['alternate_identifier'].replace('[','').replace(']','')
             dataset_dict['alternate_identifier']=dataset_dict['alternate_identifier'].replace('["','').replace('"]','')

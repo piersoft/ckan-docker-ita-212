@@ -4,7 +4,7 @@ from enum import Enum
 
 import ckan.lib.search as search
 from ckan.common import config
-from ckan.lib.base import model
+from ckan import model
 from ckan.lib.i18n import get_lang
 from ckan.model import Session
 from ckan.plugins.interfaces import Interface

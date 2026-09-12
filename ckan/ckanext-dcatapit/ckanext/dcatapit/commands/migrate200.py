@@ -6,16 +6,14 @@ from datetime import datetime
 from sqlalchemy import and_
 
 import ckan.plugins.toolkit as toolkit
-from ckan.lib.base import config
+from ckan.common import config
 from ckan.lib.navl.dictization_functions import Invalid
 from ckan.logic import ValidationError
 from ckan.logic.validators import tag_name_validator
 from ckan.model.meta import Session
 from ckan.model import (
     Group,
-    GroupExtra,
     Package,
-    PackageExtra,
     repo,
 )
 
@@ -48,23 +46,25 @@ def migrate(fix_old=False):
 
 def migrate_themes():
     # migrate current extras
-    extra_themes = Session.query(PackageExtra) \
-        .filter(PackageExtra.key == 'theme') \
-        .filter(PackageExtra.value.like('%"subthemes"%'))
+    # CKAN >= 2.12: extras JSONB; il comando storico lavorava su record PackageExtra,
+    # qui si itera sui Package e si usa pkg.extras['theme']
+    extra_themes = Session.query(Package) \
+        .filter(Package.extras['theme'].astext.like('%"subthemes"%'))
 
     cnt_extra = extra_themes.count()
 
     log.info(f'Migrating theme extra keys: {cnt_extra}')
-    for x_theme in extra_themes:
-        x_theme.key = FIELD_THEMES_AGGREGATE
-        x_theme.save()
+    for pkg in extra_themes:
+        # rinomina la chiave 'theme' -> FIELD_THEMES_AGGREGATE dentro il JSONB
+        pkg.extras[FIELD_THEMES_AGGREGATE] = pkg.extras.pop('theme')
+        Session.add(pkg)
+    Session.commit()
 
     return cnt_extra
 
 def check_obsolete_themes(fix_old):
-    bad_extra_themes = Session.query(PackageExtra) \
-            .filter(PackageExtra.key == 'theme') \
-            .filter(PackageExtra.value.notlike('%"subthemes"%'))
+    bad_extra_themes = Session.query(Package) \
+            .filter(Package.extras['theme'].astext.notlike('%"subthemes"%'))
 
     cnt_bad = bad_extra_themes.count()
     migrated = 0
@@ -75,7 +75,7 @@ def check_obsolete_themes(fix_old):
         if fix_old:
             import ckanext.dcatapit.commands.migrate110 as migrate110
 
-            uuid = [pe.package_id for pe in bad_extra_themes]
+            uuid = [pkg.id for pkg in bad_extra_themes]
             log.debug(f'bad packages id {uuid}')
             migrated = migrate110.do_migrate_data(skip_orgs=True, pkg_uuid=uuid)
 

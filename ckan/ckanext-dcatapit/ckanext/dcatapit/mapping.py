@@ -3,7 +3,7 @@ import logging
 import os
 from configparser import SafeConfigParser as ConfigParser
 
-from ckan.lib.base import config
+from ckan.common import config
 from ckan.model import Session
 from ckan.model.group import Group, Member
 from ckan.plugins import toolkit

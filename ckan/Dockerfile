@@ -4,8 +4,8 @@
 #  Le estensioni vengono abilitate una fase alla volta (vedi CHANGELOG):
 #    FASE 1  core + xloader                         (fatta)
 #    FASE 2  ckanext-harvest 1.6.3 + patch                (fatta)
-#    FASE 3  ckanext-dcat 2.4.4 (DCAT-AP 3) + patch + ckanext-dcatita  <- QUESTA
-#    FASE 4  ckanext-dcatapit su 2.12 / DCAT-AP 3
+#    FASE 3  ckanext-dcat 2.4.4 (DCAT-AP 3) + patch + ckanext-dcatita  (fatta)
+#    FASE 4  ckanext-dcatapit adeguata a CKAN 2.12          <- QUESTA
 #    FASE 5  ckanext-multilang, oai-pmh-server, dcat-ap-edp-mqa
 # =====================================================================
 FROM ckan/ckan-base:2.12.0-py3.14
@@ -52,12 +52,17 @@ COPY ckanext-dcatita ${SRC_DIR}/ckanext-dcatita
 RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcatita
 
 # ---------------------------------------------------------------------
-#  FASE 4 — ckanext-dcatapit  (disattivato)
+#  FASE 4 — ckanext-dcatapit (fork in ckan/ckanext-dcatapit, adeguato a 2.12:
+#  extras JSONB, IGroupForm create/update/show_group_schema, CSRF, niente
+#  Pylons). Fornisce form/vocabolari DCAT-AP_IT e il profilo RDF it_dcat_ap.
 # ---------------------------------------------------------------------
-# COPY patches/ckanext-dcatapit ${SRC_DIR}/ckanext-dcatapit
-# RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcatapit
-# COPY patches/theme_to_group.ini patches/topics.json patches/regions.rdf ${APP_DIR}/patches/
-# COPY patches/groups ${APP_DIR}/patches/groups
+COPY ckanext-dcatapit ${SRC_DIR}/ckanext-dcatapit
+RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcatapit \
+    && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-dcatapit/requirements.txt
+# file di mapping usati da dcatapit (temi->gruppi, temi non conformi, regioni, gruppi tematici)
+COPY patches/theme_to_group.ini patches/topics.json patches/regions.rdf ${APP_DIR}/patches/
+COPY patches/groups ${APP_DIR}/patches/groups
+RUN chmod 666 ${APP_DIR}/patches/theme_to_group.ini ${APP_DIR}/patches/topics.json
 
 # ---------------------------------------------------------------------
 #  FASE 5 — multilang, oai-pmh-server, dcat-ap-edp-mqa  (disattivato)

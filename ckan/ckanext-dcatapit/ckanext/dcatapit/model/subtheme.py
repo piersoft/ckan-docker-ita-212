@@ -3,7 +3,7 @@
 
 import logging
 
-from ckan.lib.base import config
+from ckan.common import config
 from ckan.model import Tag, Vocabulary, meta, DomainObject
 
 from sqlalchemy import Column, ForeignKey, Index, and_, or_, orm, types

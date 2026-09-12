@@ -47,23 +47,20 @@ def dcatapit_id_unique(value, context):
         package_id = package.id
 
         # existing dataset, exclude current one from search
-        result = session.query(model.PackageExtra)\
-                        .join(model.Package, and_(model.PackageExtra.package_id == model.Package.id,
-                                                  model.Package.type == 'dataset',
-                                                  model.Package.state == 'active'))\
-                        .filter(model.PackageExtra.package_id != package_id,
-                                model.PackageExtra.key == 'identifier',
-                                model.PackageExtra.value == value)\
+        # CKAN >= 2.12: extras JSONB su Package (PackageExtra non esiste piu')
+        result = session.query(model.Package)\
+                        .filter(model.Package.type == 'dataset',
+                                model.Package.state == 'active',
+                                model.Package.id != package_id,
+                                model.Package.extras['identifier'].astext == value)\
                         .first()
     else:
         # no package in context, so this is new dataset, no exclude here
         # just search among live datasets
-        result = session.query(model.PackageExtra)\
-                        .join(model.Package, and_(model.PackageExtra.package_id == model.Package.id,
-                                                  model.Package.type == 'dataset',
-                                                  model.Package.state == 'active'))\
-                        .filter(model.PackageExtra.key == 'identifier',
-                                model.PackageExtra.value == value)\
+        result = session.query(model.Package)\
+                        .filter(model.Package.type == 'dataset',
+                                model.Package.state == 'active',
+                                model.Package.extras['identifier'].astext == value)\
                         .first()
 
     if result is not None:

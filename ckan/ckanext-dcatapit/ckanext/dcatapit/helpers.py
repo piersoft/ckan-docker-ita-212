@@ -4,8 +4,8 @@ import logging
 
 import ckan.lib.helpers as h
 import ckan.plugins.toolkit as toolkit
-from ckan.lib.base import config
-from ckan.model import GroupExtra, Session
+from ckan.common import config
+from ckan.model import Group, Session
 from ckan.plugins import PluginImplementations
 from ckanext.harvest.model import HarvestObject
 from markupsafe import Markup
@@ -331,9 +331,9 @@ def get_organization_by_identifier(context, identifier):
     from dcat rdf.
     """
     try:
-        ge = Session.query(GroupExtra).filter_by(key='identifier',
-                                                 value=identifier,
-                                                 state='active')\
+        # CKAN >= 2.12: gli extras dei gruppi sono un campo JSONB di Group
+        ge = Session.query(Group).filter(Group.state == 'active',
+                                         Group.extras['identifier'].astext == identifier)\
             .one()
     except MultipleResultsFound:
         raise
@@ -341,11 +341,11 @@ def get_organization_by_identifier(context, identifier):
         ge = None
     if ge:
         # safety check
-        assert ge.group_id is not None
+        assert ge.id is not None
         ctx = context.copy()
         ctx.update(get_org_context())
 
-        return toolkit.get_action('organization_show')(context=ctx, data_dict={'id': ge.group_id})
+        return toolkit.get_action('organization_show')(context=ctx, data_dict={'id': ge.id})
 
 
 def get_enable_form_tabs():
