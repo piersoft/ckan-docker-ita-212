@@ -1,0 +1,8 @@
+{% ckan_extends %}
+
+{% block meta_generator %}
+  {{ super() }}
+  {# ckan-docker-ita: firma del progetto, decodificata dall'helper (vedi plugins.py) #}
+  <!-- {{ h.dcatita_signature() }} -->
+  <meta name="ckan-docker-ita" content="{{ h.dcatita_signature() }}" />
+{% endblock %}
