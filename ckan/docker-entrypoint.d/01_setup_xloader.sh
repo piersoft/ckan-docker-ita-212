@@ -1,9 +1,10 @@
 #!/bin/bash
 # Configurazione Xloader (+ OAI-PMH quando il plugin e' attivo).
 # Eseguito a ogni avvio; le parti "una tantum" sono protette dal marker
-# ckan.build = finito scritto in ckan.ini da 02_ckan-init.sh.
+# $INIT_MARKER (file nel volume ckan_storage, sopravvive alla ricreazione del container).
+INIT_MARKER="${CKAN_STORAGE_PATH:-/var/lib/ckan}/.ckan-docker-ita.init-done"
 
-if grep -q "ckan.build = finito" "$CKAN_INI"; then
+if [ -f "$INIT_MARKER" ]; then
   echo "[init] Xloader/OAI gia' configurati, salto."
   exit 0
 fi

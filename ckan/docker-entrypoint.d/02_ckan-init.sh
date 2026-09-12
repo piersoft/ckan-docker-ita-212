@@ -3,8 +3,11 @@
 # vocabolari DCAT-AP_IT, piu' impostazioni ckan.ini idempotenti.
 # Ogni blocco e' condizionato al plugin effettivamente presente in CKAN__PLUGINS,
 # cosi' lo script resta valido in tutte le fasi della migrazione.
+# Il marker sta nel volume ckan_storage: ckan.ini vive nel container e si perde
+# a ogni rebuild, e ricaricare i vocabolari dcatapit produce IntegrityError.
+INIT_MARKER="${CKAN_STORAGE_PATH:-/var/lib/ckan}/.ckan-docker-ita.init-done"
 
-if grep -q "ckan.build = finito" "$CKAN_INI"; then
+if [ -f "$INIT_MARKER" ]; then
   echo "[init] Init estensioni gia' eseguita, salto."
 else
   # prerun.py ha gia' fatto `ckan db upgrade` (core + migrazioni dei plugin).
@@ -29,6 +32,7 @@ else
   fi
 
   ckan config-tool "$CKAN_INI" "ckan.build = finito"
+  touch "$INIT_MARKER"
   echo -e "\n[init] Init estensioni completata"
 fi
 
