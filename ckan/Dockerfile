@@ -76,6 +76,9 @@ RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-multilang
 COPY ckanext-oai-pmh-server ${SRC_DIR}/ckanext-oai-pmh-server
 RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-oai-pmh-server \
     && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-oai-pmh-server/requirements.txt
+# pyoai (2013) importa pkg_resources, assente con i setuptools recenti: vedi patches/patch_pyoai.py
+COPY patches/patch_pyoai.py ${APP_DIR}/patches/patch_pyoai.py
+RUN python3 ${APP_DIR}/patches/patch_pyoai.py
 COPY ckanext-dcat-ap-edp-mqa ${SRC_DIR}/ckanext-dcat-ap-edp-mqa
 RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcat-ap-edp-mqa \
     && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-dcat-ap-edp-mqa/requirements.txt
