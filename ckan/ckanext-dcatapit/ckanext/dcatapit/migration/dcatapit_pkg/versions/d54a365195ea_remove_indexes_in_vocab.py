@@ -22,7 +22,15 @@ def upgrade():
     op.execute('DROP INDEX IF EXISTS ix_dcatapit_vocabulary_text')
 
     # op.drop_constraint('dcatapit_subtheme_path_key', 'dcatapit_subtheme')
-    op.execute('ALTER TABLE dcatapit_subtheme DROP CONSTRAINT IF EXISTS dcatapit_subtheme_path_key')
+    # CKAN >= 2.11 esegue le migrazioni dei plugin durante `ckan db upgrade`,
+    # cioe' PRIMA di `ckan dcatapit initdb`: la tabella puo' non esistere ancora.
+    op.execute("""
+        DO $$ BEGIN
+            IF to_regclass('dcatapit_subtheme') IS NOT NULL THEN
+                ALTER TABLE dcatapit_subtheme DROP CONSTRAINT IF EXISTS dcatapit_subtheme_path_key;
+            END IF;
+        END $$;
+    """)
 
 
 def downgrade():

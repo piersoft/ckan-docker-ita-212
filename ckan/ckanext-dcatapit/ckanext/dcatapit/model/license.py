@@ -3,7 +3,7 @@ import re
 
 from ckan.model import meta, DomainObject
 from sqlalchemy import Column, ForeignKey, orm, types
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 log = logging.getLogger(__name__)
 
