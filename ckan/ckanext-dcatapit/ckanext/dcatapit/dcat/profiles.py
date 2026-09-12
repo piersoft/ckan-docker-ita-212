@@ -1196,6 +1196,9 @@ class ItalianDCATAPProfile(RDFProfile):
             landing_page_uri_f = landing_page_uri
 
          landing_page_uri_f += '#'
+         # ckan-docker-ita: le sostituzioni PREF_LANDING -> "https://host/" producono
+         # "host//dataset": normalizzo gli slash doppi dopo lo schema
+         landing_page_uri_f = re.sub(r'(?<!:)/{2,}', '/', landing_page_uri_f)
 
 #         self.g.add((dataset_ref, DCAT.landingPage, URIRef(landing_page_uri_f)))
 

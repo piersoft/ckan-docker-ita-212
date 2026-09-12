@@ -190,22 +190,36 @@ class DCATItaHarvestPlugin(p.SingletonPlugin):
 # ---------------------------------------------------------------------------
 # URI
 # ---------------------------------------------------------------------------
+# cache package_id -> voce di subcatalogs.json, riempita da dataset_uri() (che
+# ckanext-dcat chiama sempre prima delle risorse dello stesso dataset) e letta
+# da resource_uri(), dove il dict della risorsa non porta holder_identifier.
+_ENTRY_BY_DATASET = {}
+_ENTRY_CACHE_MAX = 5000
+
+
 class DCATItaURIPlugin(p.SingletonPlugin):
-    """URI di dataset/distribuzioni con la base del catalogo d'origine
+    """URI di dataset e distribuzioni con la base del catalogo d'origine
     (es. https://dati.regione.marche.it/dataset/<id>) anziche' quella di
-    dati.gov.it, per i cataloghi elencati in subcatalogs.json."""
+    dati.gov.it, per i cataloghi elencati in subcatalogs.json. Passando da
+    IDCATURIGenerator la stessa URI viene vista da TUTTI i profili
+    (euro_dcat_ap_3, it_dcat_ap, dcat_ita): nessun nodo sdoppiato."""
     p.implements(IDCATURIGenerator, inherit=True)
 
     def dataset_uri(self, dataset_dict, default_uri):
         entry = rules.match_subcatalog(dataset_dict, _cfg())
+        if len(_ENTRY_BY_DATASET) > _ENTRY_CACHE_MAX:
+            _ENTRY_BY_DATASET.clear()
+        if dataset_dict.get("id"):
+            _ENTRY_BY_DATASET[dataset_dict["id"]] = entry
         if not entry or entry.get("distribution_only"):
             return None
         return rewrite_uri(default_uri, entry)
 
     def resource_uri(self, resource_dict, default_uri):
-        # resource_dict non porta holder_identifier: la riscrittura delle
-        # distribuzioni la fa il profilo dcat_ita, che ha il dataset in mano.
-        return None
+        entry = _ENTRY_BY_DATASET.get(resource_dict.get("package_id"))
+        if not entry or entry.get("dataset_only"):
+            return None
+        return rewrite_uri(default_uri, entry)
 
 
 def rewrite_uri(uri, entry):
