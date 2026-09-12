@@ -4,12 +4,11 @@
 # $INIT_MARKER (file nel volume ckan_storage, sopravvive alla ricreazione del container).
 INIT_MARKER="${CKAN_STORAGE_PATH:-/var/lib/ckan}/.ckan-docker-ita.init-done"
 
+# Il token xloader si crea una volta sola; la configurazione OAI e' idempotente
+# e viene riapplicata a ogni avvio (dipende da CKAN_SITE_URL).
 if [ -f "$INIT_MARKER" ]; then
-  echo "[init] Xloader/OAI gia' configurati, salto."
-  exit 0
-fi
-
-if [[ $CKAN__PLUGINS == *"xloader"* ]]; then
+  echo "[init] Xloader gia' configurato, salto la creazione del token."
+elif [[ $CKAN__PLUGINS == *"xloader"* ]]; then
   echo "[init] Configuro ckanext.xloader"
   ckan config-tool "$CKAN_INI" "ckanext.xloader.api_token=$(ckan -c "$CKAN_INI" user token add "${CKAN_SYSADMIN_NAME:-ckan_admin}" xloader | tail -n 1 | tr -d '\t')"
   ckan config-tool "$CKAN_INI" "ckanext.xloader.jobs_db.uri=${CKAN_SQLALCHEMY_URL}"
