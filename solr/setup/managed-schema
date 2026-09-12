@@ -25,7 +25,7 @@
 schema. We used to use the `version` attribute for this but this is an internal
 attribute that should not be used so starting from CKAN 2.10 we use the `name`
 attribute with the form `ckan-X.Y` -->
-<schema name="ckan-2.10" version="1.6">
+<schema name="ckan-2.12" version="1.6">
 
 <types>
     <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true"/>
@@ -167,6 +167,11 @@ attribute with the form `ckan-X.Y` -->
 
     <field name="_version_" type="string" indexed="true" stored="true"/>
 
+        <!-- ===== ckan-docker-ita: campi custom per dcatapit / multilang ===== -->
+    <field name="dcat_theme" type="string" indexed="true" stored="false" multiValued="true"/>
+    <field name="dcat_subtheme" type="string" indexed="true" stored="false" multiValued="true"/>
+    <field name="resource_license" type="string" indexed="true" stored="false" multiValued="true"/>
+
     <dynamicField name="*_date" type="date" indexed="true" stored="true" multiValued="false"/>
 
     <dynamicField name="extras_*" type="text" indexed="true" stored="true" multiValued="false"/>
@@ -174,12 +179,10 @@ attribute with the form `ckan-X.Y` -->
     <dynamicField name="vocab_*" type="string" indexed="true" stored="true" multiValued="true"/>
     <dynamicField name="*" type="string" indexed="true"  stored="false"/>
 
- <field name="dcat_theme" type="string" indexed="true" stored="false" multiValued="true"/>
- <field name="dcat_subtheme" type="string" indexed="true" stored="false" multiValued="true"/>
- <dynamicField name="dcat_subtheme_*" type="string" indexed="true" stored="false" multiValued="true"/>
- <dynamicField name="organization_region_*" type="string" indexed="true" stored="false" multiValued="true"/>
- <dynamicField name="resource_license_*" type="string" indexed="true" stored="false" multiValued="true"/>
- <field name="resource_license" type="string" indexed="true" stored="false" multiValued="true"/>
+    <!-- ===== ckan-docker-ita: dynamicField custom per dcatapit / multilang ===== -->
+    <dynamicField name="dcat_subtheme_*" type="string" indexed="true" stored="false" multiValued="true"/>
+    <dynamicField name="organization_region_*" type="string" indexed="true" stored="false" multiValued="true"/>
+    <dynamicField name="resource_license_*" type="string" indexed="true" stored="false" multiValued="true"/>
     <dynamicField name="package_multilang_localized_*" type="text" indexed="true" stored="true" multiValued="false"/>
 </fields>
 
@@ -208,5 +211,7 @@ attribute with the form `ckan-X.Y` -->
 <copyField source="maintainer" dest="text"/>
 <copyField source="author" dest="text"/>
 
- <copyField source="package_multilang_localized_*" dest="text"/>
+    <!-- ===== ckan-docker-ita: copyField custom multilang ===== -->
+    <copyField source="package_multilang_localized_*" dest="text"/>
+
 </schema>

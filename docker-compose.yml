@@ -1,4 +1,6 @@
-# CKAN Docker per l'Italia — stack demo (CKAN 2.10.9 + Postgres16 + Solr9 + Redis + NGINX)
+# CKAN Docker per l'Italia — stack (CKAN 2.12 + Postgres16 + Solr9 + Redis + NGINX)
+# I worker in background (jobs/xloader, harvest) girano nel servizio `ckan-worker`
+# con la stessa immagine di `ckan`: l'immagine base 2.12 non include supervisord.
 # Compose v2: la chiave "version" non e' piu' necessaria.
 
 volumes:
@@ -26,6 +28,7 @@ services:
 
   ckan:
     container_name: ${CKAN_CONTAINER_NAME}
+    image: ${CKAN_CONTAINER_NAME}-image
     build:
       context: ckan/
       dockerfile: Dockerfile
@@ -55,13 +58,32 @@ services:
       - ckan_storage:/var/lib/ckan
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5000"]
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:5000/api/3/action/status_show"]
       interval: 30s
       timeout: 10s
       retries: 5
       # Primo avvio lungo (init DB + caricamento vocabolari DCAT-AP_IT):
       # non marcare unhealthy prima di 5 minuti.
       start_period: 300s
+
+  ckan-worker:
+    container_name: ${WORKER_CONTAINER_NAME}
+    image: ${CKAN_CONTAINER_NAME}-image
+    networks:
+      - ckannet
+      - dbnet
+      - solrnet
+      - redisnet
+    env_file:
+      - .env
+    depends_on:
+      ckan:
+        condition: service_healthy
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: unless-stopped
+    # Job worker (xloader ecc.). I consumer harvest vengono aggiunti nella FASE 2.
+    command: ["ckan", "-c", "/srv/app/ckan.ini", "jobs", "worker"]
 
   db:
     container_name: ${POSTGRESQL_CONTAINER_NAME}

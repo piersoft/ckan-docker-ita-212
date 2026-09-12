@@ -1,114 +1,73 @@
-FROM ckan/ckan-base:2.10.10-py3.10 AS ckan
+# =====================================================================
+#  CKAN Docker per l'Italia — immagine CKAN 2.12
+#  Base ufficiale: python 3.14 slim, utente non-root `ckan` (uid 503).
+#  Le estensioni vengono abilitate una fase alla volta (vedi CHANGELOG):
+#    FASE 1  core + xloader                         <- QUESTA
+#    FASE 2  ckanext-harvest (senza pylons)
+#    FASE 3  ckanext-dcat 2.4.x (DCAT-AP 3) + patch
+#    FASE 4  ckanext-dcatapit su 2.12 / DCAT-AP 3
+#    FASE 5  ckanext-multilang, oai-pmh-server, dcat-ap-edp-mqa
+# =====================================================================
+FROM ckan/ckan-base:2.12.0-py3.14
 
 USER root
 
-# Install any extensions needed by your CKAN instance
-# See Dockerfile.dev for more details and examples
-### Harvester ###
-#RUN pip3 install -e 'git+https://github.com/ckan/ckanext-harvest.git@master#egg=ckanext-harvest' && \
-COPY patches/ckanext-harvest ${APP_DIR}/src/ckanext-harvest
-RUN    pip3 install -e ${APP_DIR}/src/ckanext-harvest/
-RUN    pip3 install -r ${APP_DIR}/src/ckanext-harvest/requirements.txt
-# will also require gather_consumer and fetch_consumer processes running (please see https://github.com/ckan/ckanext-harvest)
+# Strumenti di base: `patch` serve al loop delle patch, nano/curl per il debug.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git patch nano curl \
+    && rm -rf /var/lib/apt/lists/*
 
-### Scheming ###
-#RUN  pip3 install -e 'git+https://github.com/ckan/ckanext-scheming.git@master#egg=ckanext-scheming'
+# ---------------------------------------------------------------------
+#  FASE 1 — Xloader (DataStore)
+# ---------------------------------------------------------------------
+RUN pip3 install --no-cache-dir ckanext-xloader==2.5.0
 
-### Pages ###
-#RUN  pip3 install -e git+https://github.com/ckan/ckanext-pages.git#egg=ckanext-pages
+# ---------------------------------------------------------------------
+#  FASE 2 — Harvest  (disattivato: da portare su 2.12 senza pylons)
+# ---------------------------------------------------------------------
+# COPY patches/ckanext-harvest ${SRC_DIR}/ckanext-harvest
+# RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-harvest \
+#     && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-harvest/requirements.txt
 
-RUN pip3 install pylons
-RUN pip3 install routes
+# ---------------------------------------------------------------------
+#  FASE 3 — ckanext-dcat 2.4.x  (disattivato)
+# ---------------------------------------------------------------------
+# RUN pip3 install --no-cache-dir ckanext-dcat==2.4.4
 
-# Install ckanext-dcat HVD
-#RUN  pip3 install -e git+https://github.com/ckan/ckanext-dcat.git@56-tmp#egg=ckanext-dcat && \
-COPY patches/ckanext-dcat ${APP_DIR}/src/ckanext-dcat
-RUN     pip3 install -e ${APP_DIR}/src/ckanext-dcat/
-RUN     pip3 install -r ${APP_DIR}/src/ckanext-dcat/requirements.txt
+# ---------------------------------------------------------------------
+#  FASE 4 — ckanext-dcatapit  (disattivato)
+# ---------------------------------------------------------------------
+# COPY patches/ckanext-dcatapit ${SRC_DIR}/ckanext-dcatapit
+# RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcatapit
+# COPY patches/theme_to_group.ini patches/topics.json patches/regions.rdf ${APP_DIR}/patches/
+# COPY patches/groups ${APP_DIR}/patches/groups
 
-# Install ckanext-dcatapit
-COPY patches/ckanext-dcatapit ${APP_DIR}/src/ckanext-dcatapit
-RUN     pip3 install -e ${APP_DIR}/src/ckanext-dcatapit/
+# ---------------------------------------------------------------------
+#  FASE 5 — multilang, oai-pmh-server, dcat-ap-edp-mqa  (disattivato)
+# ---------------------------------------------------------------------
 
-# X-Loader
-RUN pip3 install --no-cache-dir \
-    git+https://github.com/ckan/ckanext-xloader.git@2.2.0#egg=ckanext-xloader \
-    && pip3 install --no-cache-dir \
-    -r https://raw.githubusercontent.com/ckan/ckanext-xloader/2.2.0/requirements.txt
+# ---------------------------------------------------------------------
+#  Patch a CKAN core (riattivare una per una dopo verifica su 2.12)
+# ---------------------------------------------------------------------
+# COPY patches/language_selector.html ${SRC_DIR}/ckan/ckan/templates/snippets/language_selector.html
+# COPY patches/util.py                ${SRC_DIR}/ckan/ckan/views/util.py
+# COPY patches/validators.py          ${SRC_DIR}/ckan/ckan/logic/validators.py
+# COPY patches/__init__.py            ${SRC_DIR}/ckan/ckan/logic/__init__.py
+# COPY patches/model_dictize.py       ${SRC_DIR}/ckan/ckan/lib/dictization/model_dictize.py
+COPY patches/ckan_logo_col.png patches/sprite-resource-icons.png ${SRC_DIR}/ckan/ckan/public/base/images/
 
-# Install ckanext-multilang
-RUN  pip3 install -e git+https://github.com/geosolutions-it/ckanext-multilang.git@master#egg=ckanext-multilang  && \
-     pip3 install -e ${APP_DIR}/src/ckanext-multilang/
-
-# DCATAPIT theme to group mapping file
-COPY patches/theme_to_group.ini "${APP_DIR}/patches/theme_to_group.ini"
-RUN chmod 666 "${APP_DIR}/patches/theme_to_group.ini"
-
-# OPENAIRE ESTENSIONI
-COPY patches/ckanext-dcat-ap-edp-mqa ${APP_DIR}/src/ckanext-dcat-ap-edp-mqa
-RUN     pip3 install -e ${APP_DIR}/src/ckanext-dcat-ap-edp-mqa
-RUN     pip3 install -r ${APP_DIR}/src/ckanext-dcat-ap-edp-mqa/requirements.txt
-COPY patches/ckanext-oai-pmh-server ${APP_DIR}/src/ckanext-oai-pmh-server
-RUN     pip3 install -e ${APP_DIR}/src/ckanext-oai-pmh-server
-RUN     pip3 install -r ${APP_DIR}/src/ckanext-oai-pmh-server/requirements.txt
-
-# CKAN group to DCATAPIT theme mapping file
-COPY patches/topics.json "${APP_DIR}/patches/topics.json"
-RUN chmod 666 "${APP_DIR}/patches/topics.json"
-
-# DCATAPIT regions vocabulary file
-COPY patches/regions.rdf "${APP_DIR}/patches/regions.rdf"
-RUN chmod 666 "${APP_DIR}/patches/regions.rdf"
-
-COPY patches/model_dictize.py ${APP_DIR}/src/ckan/ckan/lib/dictization/model_dictize.pyà
-COPY patches/base.py ${APP_DIR}/src/ckan/ckan/lib/base.py
-
-COPY patches/xmlrpc.py /usr/local/lib/python3.10/site-packages/pylons/controllers/xmlrpc.py
-COPY patches/jsonrpc.py /usr/local/lib/python3.10/site-packages/pylons/controllers/jsonrpc.py
-COPY patches/core.py /usr/local/lib/python3.10/site-packages/pylons/controllers/core.py
-COPY patches/supervisord.conf /etc/supervisord.conf
-COPY patches/sprite-resource-icons.png "${APP_DIR}/src/ckan/ckan/public/base/images"
-COPY patches/ckan_logo_col.png "${APP_DIR}/src/ckan/ckan/public/base/images"
-# patch per user not auth to show in harvesting
-COPY patches/__init__.py ${APP_DIR}/src/ckan/ckan/logic/__init__.py
-# patch per avere il rating dal portale europeo dei dati aperti. Decommentare se si vuole il punteggio
-#COPY patches/read.html "${APP_DIR}/src/ckan/ckan/templates/package/read.html"
-# fix origin con landingpage e non /edit/
-COPY patches/language_selector.html ${APP_DIR}/src/ckan/ckan/templates/snippets/language_selector.html
-COPY patches/util.py ${APP_DIR}/src/ckan/ckan/views/util.py
-
-#FIX per XLOADER per il comando ckan xloader status. Consigliato:
-COPY patches/command.py /usr/local/lib/python3.10/site-packages/ckanext/xloader/command.py
-
-# Min length resource = 5
-COPY patches/validators.py ${APP_DIR}/src/ckan/ckan/logic/validators.py
-
-# Copy custom initialization scripts
-COPY docker-entrypoint.d/* /docker-entrypoint.d/
-
-COPY patches/groups ${APP_DIR}/patches/groups
-
-# Apply any patches needed to CKAN core or any of the built extensions (not the
-# runtime mounted ones)
-COPY patches ${APP_DIR}/patches
-
-RUN for d in $APP_DIR/patches/*; do \
-        if [ -d $d ]; then \
-            for f in `ls $d/*.patch | sort -g`; do \
-                cd $SRC_DIR/`basename "$d"` && echo "$0: Applying patch $f to $SRC_DIR/`basename $d`"; patch -p1 < "$f" ; \
-            done ; \
-        fi ; \
-    done
-
+# Script di inizializzazione (eseguiti da start_ckan.sh a ogni avvio)
+COPY docker-entrypoint.d/*.sh /docker-entrypoint.d/
+RUN chmod 755 /docker-entrypoint.d/*.sh
 
 # Script manuale per il setup iniziale dei gruppi tematici (vedi README)
 COPY setup_groups.sh ${APP_DIR}/setup_groups.sh
 RUN chmod +x ${APP_DIR}/setup_groups.sh
 
-# Utilita' di base (un solo layer, non interattivo)
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends nano curl \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN pip3 install setuptools==80
+# CA bundle aggiornato (harvest verso host con catena Sectigo R46 ecc.)
 RUN pip3 install --no-cache-dir -U certifi
+
+# Permessi: tutto cio' che e' stato aggiunto deve essere leggibile da `ckan`
+RUN chown -R ckan:ckan-sys ${SRC_DIR} ${APP_DIR}/setup_groups.sh
+
+USER ckan
