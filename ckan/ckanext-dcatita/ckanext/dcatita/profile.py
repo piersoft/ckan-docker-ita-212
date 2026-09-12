@@ -161,9 +161,17 @@ class DCATItaProfile(RDFProfile):
                     g.add((dist, DCAT.mediaType, URIRef(mt)))
                     g.add((URIRef(mt), RDF.type, DCT.MediaType))
 
-        # byteSize: MQA vuole un valore; storico = 1024 se sconosciuto
+        # byteSize: MQA vuole un valore; storico = 1024 se sconosciuto.
+        # DCAT-AP 3 lo vuole xsd:nonNegativeInteger (il profilo EU ricasta con int()
+        # tutti i byteSize del grafo: un decimal qui rompe il catalogo).
+        for obj in list(g.objects(dist, DCAT.byteSize)):
+            try:
+                g.remove((dist, DCAT.byteSize, obj))
+                g.add((dist, DCAT.byteSize, Literal(int(float(str(obj))), datatype=XSD.nonNegativeInteger)))
+            except (ValueError, TypeError):
+                pass
         if not any(g.objects(dist, DCAT.byteSize)):
-            g.add((dist, DCAT.byteSize, Literal(1024.0, datatype=XSD.decimal)))
+            g.add((dist, DCAT.byteSize, Literal(1024, datatype=XSD.nonNegativeInteger)))
 
         # checksum: Emilia-Romagna espone hash non validi -> si toglie; altrimenti algoritmo default sha1
         for cs in list(g.objects(dist, SPDX.checksum)):
