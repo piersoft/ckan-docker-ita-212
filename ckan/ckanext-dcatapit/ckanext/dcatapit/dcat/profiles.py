@@ -971,25 +971,25 @@ class ItalianDCATAPProfile(RDFProfile):
         # replace periodicity
         self._remove_node(dataset_dict, dataset_ref, ('frequency', DCT.accrualPeriodicity, None, Literal))
         if dataset_dict.get('frequency'):
-          if 'continuo' in dataset_dict.get('frequency'):
+          if 'continuo' in (dataset_dict.get('frequency') or ''):
             dataset_dict['frequency']='OTHER'
-          if 'Dato non disponibile' in dataset_dict.get('frequency'):
+          if 'Dato non disponibile' in (dataset_dict.get('frequency') or ''):
             dataset_dict['frequency']='OTHER'
-          if 'mai' in dataset_dict.get('frequency'):
+          if 'mai' in (dataset_dict.get('frequency') or ''):
             dataset_dict['frequency']='NEVER'
-          if 'Annuale' in dataset_dict.get('frequency'):
+          if 'Annuale' in (dataset_dict.get('frequency') or ''):
             dataset_dict['frequency']='ANNUAL'
-          if 'Giornaliera' in dataset_dict.get('frequency'):
+          if 'Giornaliera' in (dataset_dict.get('frequency') or ''):
             dataset_dict['frequency']='DAILY'
-          if 'Sconosciuta' in dataset_dict.get('frequency'):
+          if 'Sconosciuta' in (dataset_dict.get('frequency') or ''):
             dataset_dict['frequency']='UNKNOWN'
-          if 'Settimanale' in dataset_dict.get('frequency'):
+          if 'Settimanale' in (dataset_dict.get('frequency') or ''):
             dataset_dict['frequency']='WEEKLY'
-          if 'annually' in dataset_dict.get('frequency'):
+          if 'annually' in (dataset_dict.get('frequency') or ''):
             dataset_dict['frequency']='ANNUAL'
-          if 'irregolare' in dataset_dict.get('frequency'):
+          if 'irregolare' in (dataset_dict.get('frequency') or ''):
             dataset_dict['frequency']='IRREG'
-          if 'mensile' in dataset_dict.get('frequency'):
+          if 'mensile' in (dataset_dict.get('frequency') or ''):
             dataset_dict['frequency']='MONTHLY'
         else:
             dataset_dict['frequency']='UNKNOWN'
