@@ -59,16 +59,19 @@ class TagLocalization(DomainObject):
     @classmethod
     def persist(cls, tag, label, lang):
         session = meta.Session
+        # CKAN >= 2.12: savepoint locale, cosi' un errore non chiude la transazione
+        # dell'action chiamante (che fa il commit vero)
+        _sp = session.begin_nested()
         try:
             tl = TagLocalization(tag_id=tag.id, tag_name=tag.name, lang=lang, text=label)
-            tl.save()
-            session.flush()  # CKAN >= 2.12: commit dell'action/comando chiamante
+            session.add(tl)  # non tl.save(): committerebbe
+            _sp.commit()
             return tl
         except Exception as err:
-            # on rollback, the same closure of state
-            # as that of commit proceeds.
-            session.rollback()
-
+            try:
+                _sp.rollback()
+            except Exception:
+                pass
             log.error('Exception occurred while persisting DB objects: %s', err)
             raise
 

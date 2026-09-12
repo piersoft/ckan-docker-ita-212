@@ -2,6 +2,7 @@
 
 ## `2026-09-13` — Fix: commit negli hook (ResourceClosedError su package_update)
 - CKAN 2.12 esegue gli hook `after_dataset_*`/`after_resource_*` dentro un SAVEPOINT di `package_update`; multilang (`PackageMultilang/GroupMultilang/ResourceMultilang.persist`) e la localizzazione tag di dcatapit facevano `Session.commit()` nell'hook, chiudendo la transazione esterna: `sqlalchemy.exc.ResourceClosedError: This transaction is closed` su qualunque salvataggio successivo nella stessa action (bulk privato/elimina dell'organizzazione, harvest, API). Ora fanno `flush()`; il commit resta all'action o al comando CLI chiamante (`ckan dcatapit load` committa gia' da solo).
+- Stessa causa, altra forma: `DomainObject.save()`/`purge()` di CKAN fanno **commit**; dcatapit (`interfaces.py`) e multilang (`plugin.py`, `logic/package.py`, `logic/resource.py`) li usavano negli hook quando un campo localizzato cambiava. Sostituiti con `add/delete + flush`; i persist di multilang e `TagLocalization.persist` lavorano in un savepoint locale, cosi' un errore (es. chiave duplicata) annulla solo quello e non il salvataggio del dataset. Gli harvester multilang, che girano fuori dalle action, restano invariati.
 
 ## `2026-09-12` — Pulizia dei residui 2.10
 - Rimossi dalla repo `ckan/Dockerfile.legacy-2.10` e i file di `ckan/patches` non piu' usati (copie intere di moduli CKAN/Pylons: `base.py`, `core.py`, `xmlrpc.py`, `jsonrpc.py`, `supervisord.conf`, `command.py`, `model_dictize.py`, `validators.py`, `util.py`, template ecc.). Restano nella history.

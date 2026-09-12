@@ -224,7 +224,7 @@ class MultilangPlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
                     # check if the group identifier name has been changed
                     if result.name != group.get('name'):
                         result.name = group.get('name')
-                        result.save()
+                        model.Session.add(result); model.Session.flush()  # non save(): committerebbe nell'hook
 
                 if lang not in available_db_lang:
                     create_new = True
@@ -232,7 +232,7 @@ class MultilangPlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm):
                     for result in q_results:
                         if result.lang == lang:
                             result.text = group.get(result.field)
-                            result.save()
+                            model.Session.add(result); model.Session.flush()  # non save(): committerebbe nell'hook
             else:
                 create_new = True
 
