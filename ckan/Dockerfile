@@ -63,6 +63,10 @@ RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcatapit \
 COPY patches/theme_to_group.ini patches/topics.json patches/regions.rdf ${APP_DIR}/patches/
 COPY patches/groups ${APP_DIR}/patches/groups
 RUN chmod 666 ${APP_DIR}/patches/theme_to_group.ini ${APP_DIR}/patches/topics.json
+# ckanext-multilang (geosolutions-it, master 2026-05) vendorizzato in ckan/ckanext-multilang
+# e portato a SQLAlchemy 2.0: dcatapit lo richiede a runtime (campi localizzati, holder).
+COPY ckanext-multilang ${SRC_DIR}/ckanext-multilang
+RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-multilang
 
 # ---------------------------------------------------------------------
 #  FASE 5 — multilang, oai-pmh-server, dcat-ap-edp-mqa  (disattivato)
