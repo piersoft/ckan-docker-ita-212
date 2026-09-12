@@ -1,5 +1,12 @@
 # Changelog
 
+## `2026-09-12` — Fase 4: ckanext-dcatapit e ckanext-multilang su CKAN 2.12
+- `ckan/ckanext-dcatapit` (fork con le fix DGA/licenze in `profiles.py`) adeguato a CKAN 2.12 / Python 3.14 / SQLAlchemy 2: extras JSONB al posto di `PackageExtra`/`GroupExtra`, `IGroupForm` con `create/update/show_group_schema()`, CSRF nel form thesaurus, import senza Pylons/routes, `map_imperatively` e `has_table` nei modelli, `ConfigParser.read_file`, regex raw, migrazione Alembic tollerante all'ordine con `initdb`, guardie su `holder_identifier`/`frequency`/multilang assenti.
+- Autocomplete dei vocabolari (`/api/2/util/vocabulary/autocomplete`) riscritto come blueprint Flask: sul 2.10 la rotta Pylons era gia' morta.
+- `ckan/ckanext-multilang` vendorizzato da geosolutions-it (master 2026-05) e portato a SQLAlchemy 2; va caricato **prima** di `dcatapit_pkg`.
+- Init una tantum (vocabolari, tabelle) protetto da un marker nel volume `ckan_storage` invece che in `ckan.ini`.
+- NGINX: `resolver` Docker dinamico per l'upstream (niente 502 dopo un rebuild di ckan) e timeout 600s.
+
 ## `2026-09-12` — Fase 3: ckanext-dcat 2.4.4 (DCAT-AP 3) + ckanext-dcatita
 - `ckanext-dcat` upstream **v2.4.4** (DCAT-AP 3, CKAN 2.12, Python 3.14) al posto della copia patchata basata su un master 2024. Profilo di default `euro_dcat_ap_3` (funziona senza ckanext-scheming: il ramo scheming si autodisattiva).
 - Le ~1.400 righe di patch storiche sono state riscritte come estensione **`ckan/ckanext-dcatita`** che usa le interfacce ufficiali (`IDCATRDFHarvester`, `IDCATURIGenerator`, `ckan.rdf.profiles`): plugin `dcatita_harvest`, `dcatita_uri`, profilo `dcat_ita`. Le mappe per ente (URI dei subcatalog, publisher, licenze, formati, media type) stanno in `subcatalogs.json`.
