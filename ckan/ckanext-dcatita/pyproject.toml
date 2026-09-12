@@ -23,4 +23,4 @@ dcat_ita = "ckanext.dcatita.profile:DCATItaProfile"
 include = ["ckanext*"]
 
 [tool.setuptools.package-data]
-"ckanext.dcatita" = ["*.json"]
+"ckanext.dcatita" = ["*.json", "*.yaml"]

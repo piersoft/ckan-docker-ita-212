@@ -1,0 +1,43 @@
+# Dichiarazione delle opzioni di configurazione (CKAN >= 2.10): evita i warning
+# "Option ... is not declared" e documenta i default. Caricata dal plugin
+# dcatapit_config tramite toolkit.blanket.config_declarations.
+version: 1
+groups:
+  - annotation: ckanext-dcatapit
+    options:
+      - key: ckanext.dcatapit_configpublisher_name
+        default: ""
+        description: Nome del publisher del catalogo (dcat:Catalog dct:publisher)
+      - key: ckanext.dcatapit_configpublisher_code_identifier
+        default: ""
+        description: Codice IPA del publisher del catalogo
+      - key: ckanext.dcatapit_config.catalog_issued
+        default: ""
+        description: Data di pubblicazione del catalogo (dct:issued)
+      - key: ckan.dcatapit.subthemes.langs
+        default: "it en"
+        description: Lingue dei sottotemi Eurovoc
+      - key: ckan.dcatapit.eurovoc_location
+        default: ""
+        description: Percorso del file Eurovoc
+      - key: ckanext.dcatapit.form_tabs
+        type: bool
+        default: true
+        description: Form dataset a schede
+      - key: ckanext.dcatapit.localized_resources
+        type: bool
+        default: false
+        description: Campi delle risorse localizzati (richiede ckanext-multilang)
+      - key: ckanext.dcatapit.nonconformant_themes_mapping.file
+        default: ""
+        description: File JSON di mapping dei temi non conformi
+      - key: ckanext.dcatapit.theme_group_mapping.file
+        default: ""
+        description: File INI di mapping tema -> gruppo
+      - key: ckanext.dcatapit.theme_group_mapping.add_new_groups
+        type: bool
+        default: false
+        description: Crea i gruppi mancanti durante il mapping tema -> gruppo
+      - key: geonames.username
+        default: demo
+        description: Username GeoNames per il geocoding
