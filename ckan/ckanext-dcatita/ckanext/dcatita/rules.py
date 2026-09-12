@@ -323,3 +323,51 @@ def clean_tag(name):
     name = re.sub(r"[^\w\-. ]", "", name or "").strip().lower()
     name = re.sub(r"\s+", " ", name)
     return name[:100]
+
+
+# ---------------------------------------------------------------------------
+# dcat:landingPage (usata dal profilo it_dcat_ap di dcatapit)
+# ---------------------------------------------------------------------------
+def landing_page(dataset_dict, site_base, dataset_uri_value, cfg=None):
+    """Ritorna l'URI di dcat:landingPage secondo la voce `landing` di
+    subcatalogs.json (oppure il default <site>/dataset/<name>/#).
+
+    site_base: ckanext.dcat.base_uri senza slash finale
+    dataset_uri_value: ckanext.dcat.utils.dataset_uri(dataset_dict)
+    """
+    cfg = cfg or load_config()
+    entry = match_subcatalog(dataset_dict, cfg) or {}
+    land = entry.get("landing") or {}
+    mode = land.get("mode", "name")
+    name = dataset_dict.get("name")
+    base = (land.get("base") or "").rstrip("/")
+
+    if mode == "url":
+        uri = dataset_dict.get("url") or ""
+    elif mode == "fixed":
+        uri = land.get("value") or ""
+    elif mode == "uri":
+        uri = str(dataset_uri_value or "")
+        if base and uri.startswith(site_base):
+            uri = base + uri[len(site_base):]
+    else:  # name
+        uri = f"{site_base}/dataset/{name}" if name else str(dataset_uri_value or "")
+        if base and uri.startswith(site_base):
+            uri = base + uri[len(site_base):]
+    for s in land.get("strip", []):
+        uri = uri.replace(s, "")
+
+    # override esplicito dalla sorgente
+    override = _get_extra(dataset_dict, "landingpage")
+    if override:
+        uri = override
+    uri = uri.replace("documento:pubblico", "documento_pubblico")
+    if not uri or "http" not in uri:
+        return None
+
+    uri = uri.rstrip("/")
+    if land.get("slash", True) and not override:
+        uri += "/"
+    if not uri.endswith("#"):
+        uri += "#"
+    return re.sub(r"(?<!:)/{2,}", "/", uri)

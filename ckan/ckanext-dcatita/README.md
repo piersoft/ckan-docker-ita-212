@@ -37,3 +37,11 @@ Aggiungere un ente = aggiungere una riga, non codice.
   dichiarato dalla sorgente (DGA) non viene piu' sovrascritto.
 - gli errori di validazione in creazione restano errori dell'harvest object
   (non vengono piu' nascosti con `return True`).
+
+## `dcat:landingPage` (usato da dcatapit)
+
+`rules.landing_page()` calcola la landing page dei dataset in base alla chiave
+`landing` della voce in `subcatalogs.json` (`mode`: `name`, `uri`, `url`, `fixed`;
+`base`; `slash`; `strip`). Il profilo `it_dcat_ap` di ckanext-dcatapit la chiama al
+posto delle ~200 righe di `if holder_identifier` che aveva nel 2.10: dcatapit dipende
+quindi da ckanext-dcatita a runtime.

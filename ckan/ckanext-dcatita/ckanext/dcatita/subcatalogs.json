@@ -8,7 +8,8 @@
     "language / modified_from_extra: dct:language e dct:modified del subcatalog",
     "replace:   sostituzioni aggiuntive nelle URI (lista di coppie [da, a])",
     "access_url_from_download: true = dcat:accessURL = downloadURL invece della pagina risorsa CKAN",
-    "Le voci sono in ordine: vince la prima che matcha."
+    "Le voci sono in ordine: vince la prima che matcha.",
+    "landing: dcat:landingPage dei dataset dell'ente. mode: 'name' = <base>/dataset/<name>; 'uri' = URI del dataset (base sostituita se 'base' e' data); 'url' = campo url del dataset; 'fixed' = 'value'. slash: aggiunge '/' prima di '#' (default true). strip: sottostringhe da rimuovere."
   ],
   "match_field": "holder_identifier",
   "subcatalogs": [
@@ -40,6 +41,10 @@
         "name": "Regione Emilia-Romagna",
         "url": "https://dati.emilia-romagna.it/",
         "type": "http://purl.org/adms/publishertype/RegionalAuthority"
+      },
+      "landing": {
+        "mode": "name",
+        "base": "https://dati.emilia-romagna.it/"
       }
     },
     {
@@ -51,6 +56,10 @@
         "name": "Regione Marche",
         "url": "https://dati.regione.marche.it/",
         "type": "http://purl.org/adms/publishertype/RegionalAuthority"
+      },
+      "landing": {
+        "mode": "name",
+        "base": "https://dati.regione.marche.it/"
       }
     },
     {
@@ -62,6 +71,10 @@
         "name": "Regione Toscana",
         "url": "https://dati.toscana.it/",
         "type": "http://purl.org/adms/publishertype/RegionalAuthority"
+      },
+      "landing": {
+        "mode": "name",
+        "base": "https://dati.toscana.it/"
       }
     },
     {
@@ -74,6 +87,10 @@
         "name": "Regione Basilicata",
         "url": "https://dati.regione.basilicata.it/",
         "type": "http://purl.org/adms/publishertype/RegionalAuthority"
+      },
+      "landing": {
+        "mode": "uri",
+        "base": "https://dati.regione.basilicata.it/catalog/"
       }
     },
     {
@@ -82,7 +99,11 @@
       ],
       "base_uri": "http://dati.lazio.it/catalog/",
       "homepage": "http://dati.regione.lazio.it",
-      "frequency_unknown": true
+      "frequency_unknown": true,
+      "landing": {
+        "mode": "uri",
+        "base": "http://dati.lazio.it/catalog/"
+      }
     },
     {
       "match": [
@@ -96,6 +117,10 @@
         "name": "OpenData Aci",
         "url": "http://lod.aci.it/",
         "type": "http://purl.org/adms/publishertype/NationalAuthority"
+      },
+      "landing": {
+        "mode": "name",
+        "base": "http://lod.aci.it/"
       }
     },
     {
@@ -108,6 +133,10 @@
         "name": "Comune di Torino",
         "url": "http://aperto.comune.torino.it/",
         "type": "http://purl.org/adms/publishertype/LocalAuthority"
+      },
+      "landing": {
+        "mode": "name",
+        "base": "http://aperto.comune.torino.it/"
       }
     },
     {
@@ -119,6 +148,17 @@
         "name": "Consiglio Regionale della Campania",
         "url": "http://opendata-crc.di.unisa.it/",
         "type": "http://purl.org/adms/publishertype/RegionalAuthority"
+      },
+      "landing": {
+        "mode": "name",
+        "base": "http://opendata-crc.di.unisa.it/",
+        "slash": false,
+        "strip": [
+          "CONSIGLIO%20REGIONE%20CAMPANIA",
+          "CONSIGLIO REGIONE CAMPANIA",
+          "Consiglio%20Regionale%20Campania",
+          "Consiglio Regionale Campania"
+        ]
       }
     },
     {
@@ -130,6 +170,11 @@
         "name": "Comune di Rimini",
         "url": "https://opendata.comune.rimini.it/",
         "type": "http://purl.org/adms/publishertype/LocalAuthority"
+      },
+      "landing": {
+        "mode": "uri",
+        "base": "https://opendata.comune.rimini.it/",
+        "slash": false
       }
     },
     {
@@ -141,6 +186,11 @@
         "name": "OpenData Aquila",
         "url": "https://ckan.opendatalaquila.it/",
         "type": "http://purl.org/adms/publishertype/LocalAuthority"
+      },
+      "landing": {
+        "mode": "uri",
+        "base": "https://ckan.opendatalaquila.it",
+        "slash": false
       }
     },
     {
@@ -177,7 +227,11 @@
         "cmna"
       ],
       "base_uri": "https://dati.cittametropolitana.na.it/",
-      "distribution_only": true
+      "distribution_only": true,
+      "landing": {
+        "mode": "name",
+        "base": "https://dati.cittametropolitana.na.it/"
+      }
     },
     {
       "match": [
@@ -190,26 +244,41 @@
       "match": [
         "c_e506"
       ],
-      "base_uri": "http://dati.comune.lecce.it/"
+      "base_uri": "http://dati.comune.lecce.it/",
+      "landing": {
+        "mode": "uri"
+      }
     },
     {
       "match": [
         "uni_ba"
       ],
-      "homepage": "http://opendata.uniba.it/"
+      "homepage": "http://opendata.uniba.it/",
+      "landing": {
+        "mode": "uri",
+        "base": "https://opendata.uniba.it",
+        "slash": false
+      }
     },
     {
       "match": [
         "cciaan"
       ],
-      "homepage": "https://opendata.marche.camcom.it"
+      "homepage": "https://opendata.marche.camcom.it",
+      "landing": {
+        "mode": "url"
+      }
     },
     {
       "match": [
         "c_g273",
         "inps"
       ],
-      "access_url_from_download": true
+      "access_url_from_download": true,
+      "landing": {
+        "mode": "uri",
+        "base": "https://opendata.comune.palermo.it"
+      }
     },
     {
       "match": [
@@ -221,6 +290,228 @@
         "name": "OpenData BDAP",
         "url": "https://bdap-opendata.rgs.mef.gov.it/",
         "type": "http://purl.org/adms/publishertype/NationalAuthority"
+      },
+      "landing": {
+        "mode": "uri",
+        "slash": false
+      }
+    },
+    {
+      "match": [
+        "KH5RHFCV"
+      ],
+      "landing": {
+        "mode": "name",
+        "base": "https://dati-ustat.mur.gov.it/"
+      }
+    },
+    {
+      "match": [
+        "c_a944"
+      ],
+      "landing": {
+        "mode": "uri"
+      }
+    },
+    {
+      "match": [
+        "r_friuve"
+      ],
+      "landing": {
+        "mode": "uri"
+      }
+    },
+    {
+      "match": [
+        "regcal"
+      ],
+      "landing": {
+        "mode": "uri"
+      }
+    },
+    {
+      "match": [
+        "p_bz"
+      ],
+      "landing": {
+        "mode": "uri"
+      }
+    },
+    {
+      "match": [
+        "cvtiap"
+      ],
+      "landing": {
+        "mode": "uri"
+      }
+    },
+    {
+      "match": [
+        "04155080270"
+      ],
+      "landing": {
+        "mode": "uri"
+      }
+    },
+    {
+      "match": [
+        "c_d969"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "https://dati.comune.genova.it"
+      }
+    },
+    {
+      "match": [
+        "p_TN"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "http://dati.trentino.it"
+      }
+    },
+    {
+      "match": [
+        "r_veneto"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "https://dati.veneto.it"
+      }
+    },
+    {
+      "match": [
+        "anac"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "https://dati.anticorruzione.it/opendata"
+      }
+    },
+    {
+      "match": [
+        "c_f052"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "http://dati.comune.matera.it"
+      }
+    },
+    {
+      "match": [
+        "c_f158"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "https://opendata.comune.messina.it"
+      }
+    },
+    {
+      "match": [
+        "c_f205"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "https://dati.comune.milano.it"
+      }
+    },
+    {
+      "match": [
+        "m_bac"
+      ],
+      "landing": {
+        "mode": "fixed",
+        "value": "http://dati.san.beniculturali.it/dataset"
+      }
+    },
+    {
+      "match": [
+        "M_ef"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "https://sparql-noipa.mef.gov.it",
+        "slash": false
+      }
+    },
+    {
+      "match": [
+        "m_pi"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "http://dati.istruzione.it",
+        "slash": false
+      }
+    },
+    {
+      "match": [
+        "r_campan"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "https://dati.regione.campania.it"
+      }
+    },
+    {
+      "match": [
+        "uni_bo"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "https://dati.unibo.it",
+        "slash": false
+      }
+    },
+    {
+      "match": [
+        "r_sicili"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "https://dati.regione.sicilia.it",
+        "slash": false
+      }
+    },
+    {
+      "match": [
+        "c_h501"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "https://dati.comune.roma.it",
+        "slash": false
+      }
+    },
+    {
+      "match": [
+        "m_sa"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "http://www.dati.salute.gov.it",
+        "slash": false
+      }
+    },
+    {
+      "match": [
+        "cci"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "https://www.mistralportal.it",
+        "slash": false
+      }
+    },
+    {
+      "match": [
+        "agid"
+      ],
+      "landing": {
+        "mode": "uri",
+        "base": "https://indicepa.gov.it",
+        "slash": false
       }
     }
   ],

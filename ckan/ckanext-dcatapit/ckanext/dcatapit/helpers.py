@@ -360,6 +360,36 @@ def get_org_context():
     return DEFAULT_ORG_CTX.copy()
 
 
+# ---------------------------------------------------------------------------
+# ckan-docker-ita: cache di organization_show. Il catalogo (catalog.ttl,
+# package_search) chiama organization_show per OGNI dataset; le organizzazioni
+# sono poche e cambiano di rado, quindi si tiene una cache per processo con TTL.
+# ---------------------------------------------------------------------------
+import time as _time
+
+_ORG_CACHE = {}
+_ORG_CACHE_TTL = 120  # secondi
+
+
+def organization_show_cached(context, org_id, **params):
+    key = (org_id, tuple(sorted(params.items())), bool(context.get('for_view')))
+    now = _time.monotonic()
+    hit = _ORG_CACHE.get(key)
+    if hit and hit[0] > now:
+        return hit[1]
+    data = dict(params)
+    data['id'] = org_id
+    org = toolkit.get_action('organization_show')(context, data)
+    if len(_ORG_CACHE) > 2000:
+        _ORG_CACHE.clear()
+    _ORG_CACHE[key] = (now + _ORG_CACHE_TTL, org)
+    return org
+
+
+def organization_cache_clear():
+    _ORG_CACHE.clear()
+
+
 def get_icustomschema_fields():
     out = []
     for plugin in PluginImplementations(interfaces.ICustomSchema):

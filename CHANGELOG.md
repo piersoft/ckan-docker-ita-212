@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-09-12` — Post-switch: landingPage in subcatalogs.json, cache organizzazioni, log
+- Le ~200 righe di mapping `holder_identifier -> landingPage` di `dcatapit/dcat/profiles.py` (e la riscrittura per ente delle URI delle distribuzioni, ormai doppia) sono sostituite da `rules.landing_page()` di ckanext-dcatita, guidata dalla chiave `landing` di `subcatalogs.json` (45 voci). Unico posto per le regole per ente.
+- `organization_show` in dcatapit (indicizzazione, `package_search`, profilo RDF) passa da una cache per processo con TTL 120 s, invalidata alla modifica di un'organizzazione: `catalog.ttl` non interroga piu' il DB per l'organizzazione di ogni dataset.
+- Log delle estensioni a INFO (`CKAN_LOG_LEVEL_EXTENSIONS`, default INFO): multilang a DEBUG scriveva centinaia di righe per pagina di catalogo.
+
 ## `2026-09-12` — Fase 6: migrazione del catalogo reale e switch in produzione
 - Restore del DB del 2.10 (10.437 dataset, 8 harvest source, 204k risorse, 314k extras, 44k righe multilang) nel nuovo stack: `ckan db upgrade` porta lo schema a `9445ce34fc23` (2.12), converte gli extras in JSONB e rimuove `package_extra`; le migrazioni Alembic di harvest/dcatapit/multilang sono compatibili (solo `DROP ... IF EXISTS`).
 - Reindex Solr di 10.437 dataset senza errori (~1,6 dataset/s con dcatapit + multilang).
