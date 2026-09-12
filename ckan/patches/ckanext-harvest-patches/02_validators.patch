@@ -1,0 +1,14 @@
+--- a/ckanext/harvest/logic/validators.py	2026-09-12 13:40:55.657960942 +0000
++++ b/ckanext/harvest/logic/validators.py	2026-09-12 13:08:05.819445534 +0000
+@@ -103,8 +103,9 @@
+             conf = None
+ 
+         if url == new_url and conf == new_config:
+-            raise Invalid('There already is a Harvest Source for this URL (& '
+-                          'config): url=%s config=%s' % (new_url, new_config))
++#            raise Invalid('There already is a Harvest Source for this URL (& '
++ #                         'config): url=%s config=%s' % (new_url, new_config))
++             log.debug('There already is a Harvest Source for this URL')
+ 
+     return data[key]
+ 

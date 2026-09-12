@@ -1,5 +1,20 @@
 # Changelog
 
+## `2026-09-12` — Fase 2: ckanext-harvest 1.6.3
+- `ckanext-harvest` upstream **v1.6.3** (supporto ufficiale CKAN 2.12) installato in editable + 2 patch locali in `ckan/patches/ckanext-harvest-patches/` (normalizzazione cataloghi federati in `ckanharvester.py`; harvest source con URL duplicato non bloccante). La copia vendorizzata e' stata rimossa: gli upgrade futuri sono `@vX.Y.Z` nel Dockerfile + riapplicazione patch.
+- Consumer `gather` e `fetch` come servizi Compose (`ckan-gather`, `ckan-fetch`) al posto di supervisord.
+
+## `2026-09-12` — Fase 1: CKAN 2.12.0 su Python 3.14
+- Nuova repo `ckan-docker-ita-212`: base `ckan/ckan-base:2.12.0-py3.14`, solo core + `ckanext-xloader` 2.5.0 (editable sotto `/srv/app/src`, altrimenti il namespace `ckanext` non lo vede).
+- Solr `ckan/ckan-solr:2.12-solr9` con `managed-schema` = schema ufficiale 2.12.0 + campi custom dcatapit/multilang (`dcat_theme`, `dcat_subtheme`, `resource_license`, dynamicField `dcat_subtheme_*`, `organization_region_*`, `resource_license_*`, `package_multilang_localized_*`).
+- `SECRET_KEY` al posto di `beaker.session.secret`; `recline_view` rimosso (non esiste da 2.11); worker `ckan jobs worker` come servizio Compose; `EXTRA_UWSGI_OPTS` gestito nativamente dall'immagine base (patch `04_patch_uwsgi.sh` rimossa).
+- `.env.example` con `COMPOSE_PROJECT_NAME=ckan212`, nomi container `*212` e porte `8090/8453` per convivere con uno stack 2.10 sulla stessa macchina.
+- Pylons/routes e `patches/base.py` non sono piu' installabili su Python 3.14: le estensioni che li usavano (dcatapit, oai-pmh, edp-mqa) verranno riportate su `ckan.plugins.toolkit` nelle fasi 3-5.
+
+---
+## Storico della repo di origine (ckan-docker-ita, CKAN 2.10)
+
+
 ## `2026-06-01`
 Pulizia e robustezza del setup Docker (versione demo):
 - **Nessun dominio hardcoded**: `ckan.oaipmh.base_url` e `ckanext.dcat.base_uri` sono derivati da `CKAN_SITE_URL`; aggiunta variabile opzionale `CKAN_OAIPMH_BASE_URL`. GeoNames parametrizzato via `GEONAMES_USERNAME`.
