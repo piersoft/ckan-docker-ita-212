@@ -38,6 +38,7 @@ def _cfg():
 # ---------------------------------------------------------------------------
 # Harvest
 # ---------------------------------------------------------------------------
+@tk.blanket.config_declarations
 class DCATItaHarvestPlugin(p.SingletonPlugin):
     p.implements(IDCATRDFHarvester, inherit=True)
 

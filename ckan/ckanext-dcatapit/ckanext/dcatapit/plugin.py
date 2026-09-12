@@ -741,6 +741,7 @@ class DCATAPITOrganizationPlugin(plugins.SingletonPlugin, toolkit.DefaultOrganiz
         return schema
 
 
+@toolkit.blanket.config_declarations
 class DCATAPITConfigurerPlugin(plugins.SingletonPlugin):
 
     # IConfigurer

@@ -14,7 +14,7 @@ class DcatApEdpMqaPlugin(plugins.SingletonPlugin):
     def update_config(self, config_):
         toolkit.add_template_directory(config_, "templates")
         toolkit.add_public_directory(config_, "public")
-        toolkit.add_resource("fanstatic", "dcat_ap_edp_mqa")
+        # (cartella fanstatic vuota: nessun asset da registrare)
 
         # Inherit license from the dataset as fallback in distribution
         # From ckanext-dcat -> profiles.py
