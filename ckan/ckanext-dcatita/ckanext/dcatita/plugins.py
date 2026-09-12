@@ -38,9 +38,31 @@ def _cfg():
 # ---------------------------------------------------------------------------
 # Harvest
 # ---------------------------------------------------------------------------
+# "Firma" del progetto: la frase sta nel sorgente solo in base64 e viene
+# decodificata a runtime dall'helper; il template base.html la scrive nel
+# <head> di ogni pagina (commento HTML + meta), visibile nel sorgente della home.
+_SIGNATURE_B64 = "UHJvZ2V0dG8gb3JpZ2luYXJpbyBkaSBQaWVyc29mdCAoRnJhbmNlc2NvIFBpZXJvIFBhb2xpY2VsbGkpIC0gY2thbi1kb2NrZXItaXRhLTIxMiAtIEFHUEwtMy4wLW9yLWxhdGVyIC0gaHR0cHM6Ly9naXRodWIuY29tL3BpZXJzb2Z0L2NrYW4tZG9ja2VyLWl0YS0yMTI="
+
+
+def dcatita_signature():
+    import base64
+    try:
+        return base64.b64decode(_SIGNATURE_B64).decode("utf-8")
+    except Exception:  # pragma: no cover
+        return ""
+
+
 @tk.blanket.config_declarations
 class DCATItaHarvestPlugin(p.SingletonPlugin):
     p.implements(IDCATRDFHarvester, inherit=True)
+    p.implements(p.IConfigurer)
+    p.implements(p.ITemplateHelpers)
+
+    def update_config(self, config_):
+        tk.add_template_directory(config_, "templates")
+
+    def get_helpers(self):
+        return {"dcatita_signature": dcatita_signature}
 
     # --- sessione HTTP: i cataloghi PA con catene TLS rotte ------------------
     def update_session(self, session):
