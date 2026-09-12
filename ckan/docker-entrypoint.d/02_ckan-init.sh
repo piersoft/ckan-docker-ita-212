@@ -7,6 +7,24 @@
 # a ogni rebuild, e ricaricare i vocabolari dcatapit produce IntegrityError.
 INIT_MARKER="${CKAN_STORAGE_PATH:-/var/lib/ckan}/.ckan-docker-ita.init-done"
 
+# Controllo sul DB (indipendente da marker e rebuild): true se la tabella esiste ed ha righe
+table_has_rows() {
+  python3 - "$1" <<'PY'
+import os, sys, psycopg2
+t = sys.argv[1]
+try:
+    c = psycopg2.connect(os.environ["CKAN_SQLALCHEMY_URL"])
+    cur = c.cursor()
+    cur.execute("select to_regclass(%s)", (t,))
+    if cur.fetchone()[0] is None:
+        sys.exit(1)
+    cur.execute(f'select 1 from "{t}" limit 1')
+    sys.exit(0 if cur.fetchone() else 1)
+except Exception:
+    sys.exit(1)
+PY
+}
+
 if [ -f "$INIT_MARKER" ]; then
   echo "[init] Init estensioni gia' eseguita, salto."
 else
@@ -16,11 +34,13 @@ else
     ckan db upgrade -p harvest
   fi
 
-  if [[ $CKAN__PLUGINS == *"multilang"* ]]; then
-    ckan multilang initdb
+  if [[ $CKAN__PLUGINS == *"multilang"* ]] && ! table_has_rows package_multilang; then
+    ckan multilang initdb || true
   fi
 
-  if [[ $CKAN__PLUGINS == *"dcatapit_pkg"* ]]; then
+  if [[ $CKAN__PLUGINS == *"dcatapit_pkg"* ]] && table_has_rows dcatapit_vocabulary; then
+    echo "[init] Vocabolari DCAT-AP_IT gia' presenti nel DB, salto initdb/load."
+  elif [[ $CKAN__PLUGINS == *"dcatapit_pkg"* ]]; then
     VOC="${SRC_DIR}/ckanext-dcatapit/vocabularies"
     ckan dcatapit initdb
     for v in languages-filtered data-theme-filtered places-filtered frequencies-filtered filetypes-filtered; do

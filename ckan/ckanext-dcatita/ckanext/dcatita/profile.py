@@ -98,6 +98,22 @@ class DCATItaProfile(RDFProfile):
             r = resources.get(str(dist), {})
             self._fix_distribution(dataset_dict, dataset_ref, dist, r, entry, site_url, cfg)
 
+        self._prune_orphan_license_nodes()
+
+    def _prune_orphan_license_nodes(self):
+        """ckanext-dcat 2.4.x aggiunge `dct:type adms:licencetype/*` al nodo della
+        licenza derivata da license_id; quando it_dcat_ap sostituisce dct:license
+        con il proprio LicenseDocument quel nodo resta nel grafo senza che nessuna
+        tripla lo referenzi. Si rimuovono i nodi-licenza non piu' referenziati."""
+        g = self.g
+        licence_type_ns = "http://purl.org/adms/licencetype/"
+        candidates = {s for s, o in g.subject_objects(DCT.type)
+                      if isinstance(s, URIRef) and str(o).startswith(licence_type_ns)}
+        candidates |= set(g.subjects(RDF.type, DCT.LicenseDocument))
+        for node in candidates:
+            if not any(g.subjects(None, node)):
+                g.remove((node, None, None))
+
     # ------------------------------------------------------------------ helpers
     def _fix_distribution(self, dataset_dict, dataset_ref, dist, r, entry, site_url, cfg):
         g = self.g
