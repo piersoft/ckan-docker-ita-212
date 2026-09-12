@@ -9,13 +9,25 @@
 
 ## Cosa include
 
-- **DCAT-AP_IT** — estensione `ckanext-dcatapit` (Geosolutions) adeguata a CKAN 2.10.9.
-- **OAI-PMH** — `ckanext-oai-pmh-server` (con supporto DataCite/OpenAIRE).
-- **Harvesting** — `ckanext-harvest` + harvester CKAN, RDF e DCAT-JSON.
-- **Linked Open Data / RDF** — `ckanext-dcat` (profili `euro_dcat_ap_2`, `it_dcat_ap`)
-  con export `catalog.rdf` / `catalog.ttl` e `/dataset/{id}.rdf`.
-- **MQA / data.europa.eu** — `ckanext-dcat-ap-edp-mqa` (disattivabile, vedi sotto).
-- **Multilingua** (`ckanext-multilang`) e **Xloader** per il DataStore.
+- **CKAN 2.12.0** (Python 3.14, SQLAlchemy 2) sull'immagine ufficiale `ckan/ckan-base`.
+- **DCAT-AP_IT** — `ckan/ckanext-dcatapit` (fork Geosolutions, adeguato a 2.12): form,
+  vocabolari, profilo RDF `it_dcat_ap`.
+- **Linked Open Data / DCAT-AP 3** — `ckanext-dcat` **2.4.4** upstream (4 patch minime in
+  `ckan/patches/ckanext-dcat-patches/`) con export `catalog.rdf` / `catalog.ttl`,
+  `/dataset/{id}.rdf|.ttl|.jsonld`.
+- **`ckan/ckanext-dcatita`** — regole dati.gov.it (normalizzazione dei cataloghi federati,
+  URI dei subcatalog, rifinitura del grafo) via interfacce ufficiali di ckanext-dcat;
+  mappe per ente in `subcatalogs.json`.
+- **Harvesting** — `ckanext-harvest` **1.6.3** upstream + 2 patch (`ckan/patches/ckanext-harvest-patches/`).
+- **OAI-PMH** — `ckan/ckanext-oai-pmh-server` (DataCite/OpenAIRE).
+- **MQA / data.europa.eu** — `ckan/ckanext-dcat-ap-edp-mqa` (facoltativo).
+- **Multilingua** (`ckan/ckanext-multilang`) e **Xloader 2.5** per il DataStore.
+
+Catena dei profili RDF: `dcat_ap_edp_mqa it_dcat_ap dcat_ita` (o `euro_dcat_ap_3 it_dcat_ap dcat_ita`
+senza MQA). `dcat_ita` va sempre per ultimo.
+
+I worker (jobs/xloader, harvest gather e fetch) girano come servizi Compose separati
+(`ckan-worker`, `ckan-gather`, `ckan-fetch`) con la stessa immagine di `ckan`.
 
 ## Prerequisiti
 
@@ -45,8 +57,8 @@ Variabili chiave:
 
 Basta impostare `CKAN_SITE_URL` 
 
-- HTTP locale: `CKAN_SITE_URL=http://localhost:8080`
-- HTTPS locale: `CKAN_SITE_URL=https://localhost:8443`
+- HTTP locale: `CKAN_SITE_URL=http://localhost:8090`
+- HTTPS locale: `CKAN_SITE_URL=https://localhost:8453`
 - IP privato: `CKAN_SITE_URL=http://192.168.1.50:8080`
 - Produzione: `CKAN_SITE_URL=https://dati.miocomune.it`
 
@@ -54,8 +66,8 @@ Basta impostare `CKAN_SITE_URL`
 
 NGINX espone **entrambi** gli accessi contemporaneamente:
 
-- non-SSL → `http://<host>:${NGINX_PORT_HOST}` (default `8080`)
-- SSL → `https://<host>:${NGINX_SSLPORT_HOST}` (default `8443`, certificato
+- non-SSL → `http://<host>:${NGINX_PORT_HOST}` (default `8090`)
+- SSL → `https://<host>:${NGINX_SSLPORT_HOST}` (default `8453`, certificato
   self-signed generato in automatico al primo avvio).
 
 Si usa quello che si preferisce; `CKAN_SITE_URL` deve coerentemente puntare
@@ -71,8 +83,8 @@ Eseguire i comandi **in ordine**, aspettando il completamento di ciascuno.
 1. Clonare e preparare il `.env`:
 
    ```sh
-   git clone https://github.com/piersoft/ckan-docker-ita.git
-   cd ckan-docker
+   git clone https://github.com/piersoft/ckan-docker-ita-212.git
+   cd ckan-docker-ita-212
    cp .env.example .env
    ```
 
@@ -104,17 +116,13 @@ Eseguire i comandi **in ordine**, aspettando il completamento di ciascuno.
    docker compose exec ckan bash /srv/app/setup_groups.sh
    ```
 
-7. Riavviare CKAN per applicare i marker di completamento:
-
-   ```sh
-   docker compose restart ckan
-   ```
-
 Il portale è ora raggiungibile all'indirizzo impostato in `CKAN_SITE_URL`.
 
 > [!NOTE]
-> Il passo 6 va ripetuto solo dopo un nuovo `docker compose build` (immagine
-> ricostruita), **non** a ogni `restart`.
+> L'init una tantum (tabelle e vocabolari DCAT-AP_IT) è protetto da un marker nel
+> volume `ckan_storage` e da un controllo sul DB: un `docker compose build` o
+> `up --build` successivo **non** lo riesegue. `ckan.ini` vive nel container e viene
+> rigenerato a ogni rebuild dagli script in `ckan/docker-entrypoint.d/`.
 
 ---
 
@@ -133,13 +141,17 @@ Il portale è ora raggiungibile all'indirizzo impostato in `CKAN_SITE_URL`.
   docker compose down          # ferma e rimuove i container (i volumi restano)
   ```
 
-- **CKAN in stato `unhealthy`** — riavviare CKAN, attendere 2-3 minuti, poi
-  riavviare NGINX:
+- **Rebuild dopo una modifica al codice** (le estensioni sono nella cartella `ckan/`):
 
   ```sh
-  docker compose restart ckan
-  sleep 180
-  docker compose restart nginx
+  docker compose up -d --build ckan && docker compose up -d
+  ```
+  (il secondo `up` riavvia anche i worker; NGINX ri-risolve l'upstream da solo)
+
+- **Reindex Solr** (es. dopo un restore del DB):
+
+  ```sh
+  docker compose exec ckan ckan search-index rebuild -e
   ```
 
 - **Setup iniziale dei gruppi** (vedi passo 6):
@@ -173,29 +185,35 @@ Il portale è ora raggiungibile all'indirizzo impostato in `CKAN_SITE_URL`.
 
 ---
 
-## Note sulle patch (harvesting cataloghi federati)
+## Migrare da ckan-docker-ita (CKAN 2.10)
 
-Le patch nei file `processors.py`, `rdf.py`, `profiles.py` (dentro `ckan/patches`
-e nelle estensioni `ckanext-dcat` / `ckanext-dcatapit` incluse) nascono
-dall'analisi degli harvesting dei cataloghi nazionali, regionali e comunali su
-[dati.gov.it](https://dati.gov.it). Servono a "neutralizzare" metadati
-incompleti o non conformi dei cataloghi remoti, così che l'export finale in
-Linked Open Data resti corretto. Per un'installazione **stand-alone** (senza
-harvesting di cataloghi terzi) la maggior parte di queste patch non incide.
+1. `pg_dump -Fc` di `ckandb` e `datastore` dal vecchio stack; restore nel nuovo `db`
+   con `pg_restore --no-owner --role=ckandbuser` (vedi CHANGELOG, Fase 6).
+2. `docker compose up -d`: `prerun.py` esegue `ckan db upgrade` (extras → JSONB,
+   migrazioni dei plugin), poi `ckan search-index rebuild -e`.
+3. Copiare il contenuto del volume `ckan_storage` vecchio (`storage/`) nel nuovo.
 
-Dettagli ed esempi nel [CHANGELOG](CHANGELOG.md).
+## Note sulle regole per l'harvesting dei cataloghi federati
+
+Le regole nate dall'analisi degli harvesting dei cataloghi nazionali, regionali e
+comunali su [dati.gov.it](https://dati.gov.it) (metadati incompleti o non conformi
+dei cataloghi remoti) non sono più patch a `ckanext-dcat` ma vivono in
+[`ckan/ckanext-dcatita`](ckan/ckanext-dcatita/README.md): plugin `dcatita_harvest`
+(normalizzazione), `dcatita_uri` (URI dei subcatalog) e profilo `dcat_ita`. Le
+mappe per ente stanno in `subcatalogs.json`. Per un'installazione **stand-alone**
+(senza harvesting di cataloghi terzi) si possono lasciare attivi: non incidono.
 
 ## Disattivare l'integrazione OpenAIRE / MQA
 
-Se non serve l'integrazione con OpenAIRE/`data.europa.eu`:
-
-1. rimuovere `dcat_ap_edp_mqa` dalla variabile `CKAN__PLUGINS` nel `.env`;
-2. rimuovere `dcat_ap_edp_mqa` da `ckanext.dcat.rdf.profiles` in
-   `ckan/docker-entrypoint.d/02_ckan-init.sh`.
+1. rimuovere `dcat_ap_edp_mqa` e/o `oai_pmh_server` da `CKAN__PLUGINS` nel `.env`;
+2. impostare `CKANEXT__DCAT__RDF__PROFILES=euro_dcat_ap_3 it_dcat_ap dcat_ita`.
 
 ## Crediti
 
 - Estensione DCAT-AP_IT: [Geosolutions — ckanext-dcatapit](https://github.com/geosolutions-it/ckanext-dcatapit)
+- Multilingua: [Geosolutions — ckanext-multilang](https://github.com/geosolutions-it/ckanext-multilang)
+- DCAT: [ckan/ckanext-dcat](https://github.com/ckan/ckanext-dcat), harvest: [ckan/ckanext-harvest](https://github.com/ckan/ckanext-harvest)
+- MQA: [tlmat-unican — ckanext-dcat-ap-edp-mqa](https://github.com/tlmat-unican/ckanext-dcat-ap-edp-mqa)
 - OAI-PMH: [tlmat-unican — ckanext-oai-pmh-server](https://github.com/tlmat-unican/ckanext-oai-pmh-server)
 - Immagini base CKAN: [ckan/ckan-docker-base](https://github.com/ckan/ckan-docker-base)
 
