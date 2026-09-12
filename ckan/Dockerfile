@@ -31,8 +31,8 @@ RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-xloader.g
 #  patch locali in patches/ckanext-harvest-patches/*.patch
 #  (normalizzazione dei cataloghi federati, harvest source con URL duplicato)
 # ---------------------------------------------------------------------
-RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-harvest.git@v1.6.3#egg=ckanext-harvest \
-    && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-harvest/requirements.txt
+# (dalla 1.6.3 le dipendenze stanno nel pyproject.toml: niente requirements.txt)
+RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-harvest.git@v1.6.3#egg=ckanext-harvest
 COPY patches/ckanext-harvest-patches ${APP_DIR}/patches/ckanext-harvest-patches
 RUN cd ${SRC_DIR}/ckanext-harvest && for f in ${APP_DIR}/patches/ckanext-harvest-patches/*.patch; do \
         echo "Applying $f"; patch -p1 < "$f"; done
