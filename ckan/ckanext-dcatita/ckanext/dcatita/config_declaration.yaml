@@ -13,3 +13,7 @@ groups:
         type: bool
         default: true
         description: Imposta l'ELI del regolamento HVD in creazione se assente
+      - key: ckanext.dcatita.mqa_badge
+        type: bool
+        default: false
+        description: Mostra nella pagina dataset il punteggio MQA letto da data.europa.eu
