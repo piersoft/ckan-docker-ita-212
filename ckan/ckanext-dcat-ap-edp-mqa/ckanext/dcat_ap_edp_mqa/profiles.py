@@ -1,7 +1,7 @@
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, RDFS, DCTERMS, SKOS
 
-from ckanext.dcat.profiles import EuropeanDCATAP2Profile
+from ckanext.dcat.profiles import EuropeanDCATAP3Profile
 from ckanext.dcat.profiles import DCAT, DCT, LOCN
 
 from rdflib.term import Literal as RDFLiteral
@@ -12,7 +12,10 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class MqaEuropeanDCATAP2Profile(EuropeanDCATAP2Profile):
+class MqaEuropeanDCATAP2Profile(EuropeanDCATAP3Profile):
+    # ckan-docker-ita: su ckanext-dcat 2.4.x eredita dal profilo DCAT-AP 3, cosi'
+    # in ckanext.dcat.rdf.profiles va usato AL POSTO di euro_dcat_ap_3 e non in
+    # aggiunta (chain: dcat_ap_edp_mqa it_dcat_ap dcat_ita).
     """
     An RDF profile for the MQA EDP DCAT-AP recommendation for data portals
     It requires the European DCAT-AP profile (`euro_dcat_ap`)

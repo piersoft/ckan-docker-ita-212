@@ -62,7 +62,7 @@ class CKANServer(ResumptionOAIPMH):
         try:
             json_data = json.loads(js)
             json_titles = list()
-            for key, value in json_data.iteritems():
+            for key, value in json_data.items():
                 json_titles.append(value)
             return json_titles
         except:

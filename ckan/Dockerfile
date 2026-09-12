@@ -5,8 +5,8 @@
 #    FASE 1  core + xloader                         (fatta)
 #    FASE 2  ckanext-harvest 1.6.3 + patch                (fatta)
 #    FASE 3  ckanext-dcat 2.4.4 (DCAT-AP 3) + patch + ckanext-dcatita  (fatta)
-#    FASE 4  ckanext-dcatapit adeguata a CKAN 2.12          <- QUESTA
-#    FASE 5  ckanext-multilang, oai-pmh-server, dcat-ap-edp-mqa
+#    FASE 4  ckanext-dcatapit + multilang adeguate a 2.12   (fatta)
+#    FASE 5  oai-pmh-server (OpenAIRE), dcat-ap-edp-mqa (MQA)  <- QUESTA
 # =====================================================================
 FROM ckan/ckan-base:2.12.0-py3.14
 
@@ -69,8 +69,16 @@ COPY ckanext-multilang ${SRC_DIR}/ckanext-multilang
 RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-multilang
 
 # ---------------------------------------------------------------------
-#  FASE 5 — multilang, oai-pmh-server, dcat-ap-edp-mqa  (disattivato)
+#  FASE 5 — OAI-PMH server (OpenAIRE/DataCite) e profilo MQA data.europa.eu
+#  Entrambe facoltative: attivare/disattivare via CKAN__PLUGINS e
+#  CKANEXT__DCAT__RDF__PROFILES nel .env (vedi .env.example).
 # ---------------------------------------------------------------------
+COPY ckanext-oai-pmh-server ${SRC_DIR}/ckanext-oai-pmh-server
+RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-oai-pmh-server \
+    && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-oai-pmh-server/requirements.txt
+COPY ckanext-dcat-ap-edp-mqa ${SRC_DIR}/ckanext-dcat-ap-edp-mqa
+RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcat-ap-edp-mqa \
+    && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-dcat-ap-edp-mqa/requirements.txt
 
 # ---------------------------------------------------------------------
 #  Patch a CKAN core (riattivare una per una dopo verifica su 2.12)
