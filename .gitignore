@@ -16,3 +16,7 @@ local/*
 # certificati generati a runtime
 nginx/certs/
 *.pem
+
+# configurazione nginx di produzione (dominio/certificati reali)
+nginx/prod/default.conf
+nginx/certs/
