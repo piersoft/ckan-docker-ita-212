@@ -69,6 +69,9 @@ if [[ $CKAN__PLUGINS == *"dcat"* ]]; then
   ckan config-tool "$CKAN_INI" "solr_timeout=500"
 fi
 
+# log delle estensioni a INFO: il livello DEBUG di default (multilang, dcatapit)
+# scrive centinaia di righe per pagina di catalogo
+ckan config-tool "$CKAN_INI" -s logger_ckanext "level = ${CKAN_LOG_LEVEL_EXTENSIONS:-INFO}"
 ckan config-tool "$CKAN_INI" "ckan.locale_default=${CKAN_LOCALE_DEFAULT:-it}"
 ckan config-tool "$CKAN_INI" "ckan.locales_offered=it en"
 ckan config-tool "$CKAN_INI" "ckan.auth.create_user_via_web=false"

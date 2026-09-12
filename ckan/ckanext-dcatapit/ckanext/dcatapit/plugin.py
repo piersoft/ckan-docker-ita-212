@@ -386,16 +386,14 @@ class DCATAPITPackagePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm,
         dataset_dict['resource_license'] = _licenses
         ##log.warning('licenza ricercata %s ', _licenses)
         org_id = dataset_dict['owner_org']
-        organization_show = plugins.toolkit.get_action('organization_show')
         if org_id:
-            org = organization_show(get_org_context(), {'id': org_id,
-                                                        'include_tags': False,
-                                                        'include_users': False,
-                                                        'include_groups': False,
-                                                        'include_extras': True,
-                                                        'include_followers': False,
-                                                        'include_datasets': False,
-                                                        })
+            org = helpers.organization_show_cached(get_org_context(), org_id,
+                                                   include_tags=False,
+                                                   include_users=False,
+                                                   include_groups=False,
+                                                   include_extras=True,
+                                                   include_followers=False,
+                                                   include_datasets=False)
         else:
             org = {}
         if org.get('region'):
@@ -627,14 +625,14 @@ class DCATAPITPackagePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm,
                 # force multilang use
                 ctx['for_view'] = True
                 try:
-                    org = get_org(ctx, {'id': pkg_dict['owner_org'],
-                                        'include_tags': False,
-                                        'include_users': False,
-                                        'include_groups': False,
-                                        'include_extras': True,
-                                        'include_followers': False,
-                                        'include_datasets': False,
-                                        })
+                    org = helpers.organization_show_cached(ctx, pkg_dict['owner_org'],
+                                        include_tags=False,
+                                        include_users=False,
+                                        include_groups=False,
+                                        include_extras=True,
+                                        include_followers=False,
+                                        include_datasets=False,
+                                        )
                 except toolkit.ObjectNotFound:
                     # ckan-docker-ita: dataset con organizzazione mancante (es. indice
                     # Solr non allineato): non far fallire la ricerca
@@ -683,6 +681,14 @@ class DCATAPITOrganizationPlugin(plugins.SingletonPlugin, toolkit.DefaultOrganiz
 
     # IGroupForm
     plugins.implements(plugins.IGroupForm, inherit=True)
+    # ckan-docker-ita: invalida la cache di organization_show alle modifiche
+    plugins.implements(plugins.IOrganizationController, inherit=True)
+
+    def edit(self, entity):
+        helpers.organization_cache_clear()
+
+    def delete(self, entity):
+        helpers.organization_cache_clear()
 
     # ------------- IConfigurer ---------------#
 
