@@ -4,6 +4,8 @@
 - Le ~200 righe di mapping `holder_identifier -> landingPage` di `dcatapit/dcat/profiles.py` (e la riscrittura per ente delle URI delle distribuzioni, ormai doppia) sono sostituite da `rules.landing_page()` di ckanext-dcatita, guidata dalla chiave `landing` di `subcatalogs.json` (45 voci). Unico posto per le regole per ente.
 - `organization_show` in dcatapit (indicizzazione, `package_search`, profilo RDF) passa da una cache per processo con TTL 120 s, invalidata alla modifica di un'organizzazione: `catalog.ttl` non interroga piu' il DB per l'organizzazione di ogni dataset.
 - Log delle estensioni a INFO (`CKAN_LOG_LEVEL_EXTENSIONS`, default INFO): multilang a DEBUG scriveva centinaia di righe per pagina di catalogo.
+- Profilo `dcat_ap_edp_mqa`: i cicli su spatial/language/accessRights/theme/format scorrevano l'intero grafo a ogni dataset (O(n²): 44 s su 64 per una pagina di 100 dataset); ora limitati al dataset corrente e alle sue distribuzioni. Cache del vocabolario licenze in dcatapit (2.500+ query per pagina). Risultato: `catalog.ttl` **10-12 s/pagina** contro 25-30 prima e ~18 s del 2.10.
+- certbot: deploy hook in `/etc/letsencrypt/renewal-hooks/deploy/` che ricarica NGINX del nuovo stack; `certbot renew --dry-run` OK per il certificato del catalogo.
 
 ## `2026-09-12` — Fase 6: migrazione del catalogo reale e switch in produzione
 - Restore del DB del 2.10 (10.437 dataset, 8 harvest source, 204k risorse, 314k extras, 44k righe multilang) nel nuovo stack: `ckan db upgrade` porta lo schema a `9445ce34fc23` (2.12), converte gli extras in JSONB e rimuove `package_extra`; le migrazioni Alembic di harvest/dcatapit/multilang sono compatibili (solo `DROP ... IF EXISTS`).
