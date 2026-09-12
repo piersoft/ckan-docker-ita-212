@@ -1,0 +1,26 @@
+--- a/ckanext/dcat/utils.py	2026-09-12 13:49:18.169267900 +0000
++++ b/ckanext/dcat/utils.py	2026-09-12 13:58:15.589484618 +0000
+@@ -431,11 +431,22 @@
+     if _profiles:
+         _profiles = _profiles.split(',')
+ 
++    # ckan-docker-ita: piu' parametri fq (es. ?fq=-organization:x&fq=+res_format:CSV)
++    # e, quando si esclude l'organizzazione geodati (harvest EDP), esclusione
++    # automatica dei dataset RESTRICTED se non e' gia' presente un filtro su access_rights
++    fq_list = [fq.replace('-organization=', '-organization:')
++               for fq in toolkit.request.args.getlist('fq') if fq]
++    has_access_filter = any('access_rights' in fq for fq in fq_list)
++    has_org_geodati = any(fq.replace(' ', '').startswith('-organization')
++                          and 'geodati-gov-it-rndt' in fq for fq in fq_list)
++    if has_org_geodati and not has_access_filter:
++        fq_list.append('-access_rights:*RESTRICTED*')
++
+     data_dict = {
+         'page': toolkit.request.args.get('page'),
+         'modified_since': toolkit.request.args.get('modified_since'),
+         'q': toolkit.request.args.get('q'),
+-        'fq': toolkit.request.args.get('fq'),
++        'fq': fq_list or None,
+         'format': _format,
+         'profiles': _profiles,
+     }

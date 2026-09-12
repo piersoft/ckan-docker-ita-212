@@ -1,0 +1,139 @@
+--- a/ckanext/dcat/processors.py	2026-09-12 13:49:18.152064807 +0000
++++ b/ckanext/dcat/processors.py	2026-09-12 13:58:40.854592490 +0000
+@@ -9,16 +9,21 @@
+ import rdflib
+ import rdflib.parser
+ from rdflib import URIRef, BNode, Literal
+-from rdflib.namespace import Namespace, RDF
++from rdflib.namespace import Namespace, RDF, XSD
+ 
+ import ckan.plugins as p
+ 
+ from ckanext.dcat.utils import catalog_uri, dataset_uri, url_to_rdflib_format, DCAT_EXPOSE_SUBCATALOGS
+-from ckanext.dcat.profiles import DCAT, DCT, FOAF
++from ckanext.dcat.profiles import DCAT, DCT, FOAF, VCARD
++
++# ckan-docker-ita
++DCATAPIT = Namespace("http://dati.gov.it/onto/dcatapit#")
+ from ckanext.dcat.exceptions import RDFProfileException, RDFParserException
+ 
+ HYDRA = Namespace('http://www.w3.org/ns/hydra/core#')
+ DCAT = Namespace("http://www.w3.org/ns/dcat#")
++DCATAPIT = Namespace("http://dati.gov.it/onto/dcatapit#")
++VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
+ 
+ RDF_PROFILES_ENTRY_POINT_GROUP = 'ckan.rdf.profiles'
+ RDF_PROFILES_CONFIG_OPTION = 'ckanext.dcat.rdf.profiles'
+@@ -368,7 +373,14 @@
+ 
+                 cat_ref = self._add_source_catalog(catalog_ref, dataset_dict, dataset_ref)
+                 if not cat_ref:
+-                    self.g.add((catalog_ref, DCAT.dataset, dataset_ref))
++                    # ckan-docker-ita: se l'organizzazione ha un proprio "site"
++                    # (campo dcatapit) il dataset va nel suo subcatalog, non nel root
++                    cat_ref = self._org_subcatalog_ref(catalog_ref, dataset_dict) or catalog_ref
++                    self.g.add((cat_ref, DCAT.dataset, dataset_ref))
++                # ckan-docker-ita: Catalog -> dcat:service per i DataService delle distribuzioni
++                for dist in self.g.objects(dataset_ref, DCAT.distribution):
++                    for svc in self.g.objects(dist, DCAT.accessService):
++                        self.g.add((cat_ref, DCAT.service, svc))
+ 
+         if pagination_info:
+             self._add_pagination_triples(pagination_info)
+@@ -380,6 +392,18 @@
+ 
+         return output
+ 
++    def _org_subcatalog_ref(self, root_catalog_ref, dataset_dict):
++        """ckan-docker-ita: URI del subcatalog dell'organizzazione = suo campo `site`
++        (esposto da dcatapit come vcard:hasURL sul nodo organization)."""
++        org = dataset_dict.get('organization') or {}
++        org_id = org.get('id') or org.get('name') or dataset_dict.get('owner_org')
++        if not org_id:
++            return None
++        org_node = URIRef(str(root_catalog_ref).rstrip('/') + '/organization/' + str(org_id))
++        for site in self.g.objects(org_node, VCARD.hasURL):
++            return site
++        return None
++
+     def _add_source_catalog(self, root_catalog_ref, dataset_dict, dataset_ref):
+         if not p.toolkit.asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):
+             return
+@@ -392,6 +416,9 @@
+         source_uri = _get_from_extra('source_catalog_homepage')
+         if not source_uri:
+             return
++        # ckan-docker-ita: homepage del subcatalog normalizzata con "/"
++        if not source_uri.endswith('/') and not source_uri.endswith('#'):
++            source_uri = source_uri + '/'
+ 
+         g = self.g
+         catalog_ref = URIRef(source_uri)
+@@ -401,6 +428,15 @@
+ 
+             g.add((root_catalog_ref, DCT.hasPart, catalog_ref))
+             g.add((catalog_ref, RDF.type, DCAT.Catalog))
++            # ckan-docker-ita: classe DCAT-AP_IT, dct:issued dalla data di creazione
++            # dell'organizzazione, tassonomia dei temi (obbligatori in DCAT-AP_IT)
++            g.add((catalog_ref, RDF.type, DCATAPIT.Catalog))
++            org_created = (dataset_dict.get('organization') or {}).get('created')
++            if org_created:
++                g.add((catalog_ref, DCT.issued,
++                       Literal(org_created.split('.')[0], datatype=XSD.dateTime)))
++            g.add((catalog_ref, DCAT.themeTaxonomy,
++                   URIRef('http://publications.europa.eu/resource/authority/data-theme')))
+             g.add((catalog_ref, DCAT.dataset, dataset_ref))
+ 
+             sources = (('source_catalog_title', DCT.title, Literal,),
+@@ -413,24 +449,49 @@
+             for item in sources:
+                 key, predicate, _type = item
+                 value = _get_from_extra(key)
++                if key == 'source_catalog_homepage':
++                    value = source_uri
+                 if value:
+-                    g.add((catalog_ref, predicate, _type(value)))
++                    if key == 'source_catalog_modified':
++                        # ckan-docker-ita: dct:modified tipizzato xsd:dateTime
++                        g.add((catalog_ref, predicate, Literal(value, datatype=XSD.dateTime)))
++                    else:
++                        g.add((catalog_ref, predicate, _type(value)))
+ 
+             publisher_sources = (
+                                  ('name', Literal, FOAF.name, True,),
+                                  ('email', Literal, FOAF.mbox, False,),
+                                  ('url', URIRef, FOAF.homepage,False,),
+-                                 ('type', Literal, DCT.type, False,),
++                                 ('type', URIRef, DCT.type, False,),
+                                  ('identifier', URIRef, DCT.identifier, False,))
+ 
+             _pub = _get_from_extra('source_catalog_publisher')
++            if not _pub:
++                # ckan-docker-ita: publisher minimo dall'organizzazione, cosi'
++                # foaf:name (obbligatorio) c'e' sempre
++                org = dataset_dict.get('organization') or {}
++                _pub = json.dumps({
++                    'uri': '',
++                    'name': org.get('title') or org.get('name') or dataset_dict.get('holder_name') or 'Publisher',
++                    'email': '',
++                    'url': source_uri,
++                    'type': 'http://purl.org/adms/publishertype/LocalAuthority',
++                })
+             if _pub:
+                 pub = json.loads(_pub)
++                if not pub.get('name'):
++                    org = dataset_dict.get('organization') or {}
++                    pub['name'] = dataset_dict.get('holder_name') or org.get('title') or org.get('name') or 'Publisher'
++                if pub.get('url') and not str(pub['url']).endswith('/'):
++                    pub['url'] = str(pub['url']).replace('#', '') + '/'
+ 
+                 #pub_uri = URIRef(pub.get('uri'))
+ 
+                 agent = BNode()
+                 g.add((agent, RDF.type, FOAF.Agent))
++                g.add((agent, RDF.type, DCATAPIT.Agent))
++                if dataset_dict.get('holder_identifier'):
++                    g.add((agent, DCT.identifier, Literal(dataset_dict['holder_identifier'])))
+                 g.add((catalog_ref, DCT.publisher, agent))
+ 
+                 for src_key, _type, predicate, required in publisher_sources:
