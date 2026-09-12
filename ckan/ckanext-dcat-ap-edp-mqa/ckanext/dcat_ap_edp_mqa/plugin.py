@@ -3,7 +3,7 @@ import ckan.plugins.toolkit as toolkit
 
 # from ckan.common import config
 
-from ckanext.dcat.profiles import DISTRIBUTION_LICENSE_FALLBACK_CONFIG
+from ckanext.dcat.profiles.euro_dcat_ap_base import DISTRIBUTION_LICENSE_FALLBACK_CONFIG
 
 
 class DcatApEdpMqaPlugin(plugins.SingletonPlugin):
