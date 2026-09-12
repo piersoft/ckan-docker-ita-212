@@ -1,5 +1,7 @@
 import logging
 
+import ckan.model as model
+
 import ckanext.multilang.helpers as helpers
 from ckanext.multilang.model import PackageMultilang, TagMultilang, GroupMultilang, ResourceMultilang
 
@@ -72,7 +74,7 @@ def after_update_dataset(context, pkg_dict, lang):
                 log.debug(f'Updating localized PACKAGE field {field_name} lang:{lang} NEW:{pkg_dict.get(field_name)}')
                 processed_fields.append(field_name)
                 result.text = pkg_dict.get(field_name)
-                result.save()
+                model.Session.add(result); model.Session.flush()  # non save(): committerebbe nell'hook
 
         # Check for missing localized fields in DB
         for field_name in PKG_LOCALIZED_FIELDS:
@@ -157,7 +159,7 @@ def _localized_tags_persist(self, extra_tag, pkg_dict, lang):
 
             if localized_tag and localized_tag.text != tag.get('value'):
                 localized_tag.text = tag.get('value')
-                localized_tag.save()
+                model.Session.add(localized_tag); model.Session.flush()  # non save(): committerebbe nell'hook
             elif localized_tag is None:
                 # Find the tag id from the existing tags in dict
                 tag_id = None

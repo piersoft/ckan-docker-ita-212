@@ -29,7 +29,7 @@ def after_update_resource(context, resource, lang):
                 log.debug(f'Updating localized RESOURCE field {field_name} lang:{lang} OLD:{db_item.text}')
                 log.debug(f'Updating localized RESOURCE field {field_name} lang:{lang} NEW:{r.get(field_name)}')
                 db_item.text = r.get(field_name)
-                db_item.save()
+                model.Session.add(db_item); model.Session.flush()  # non save(): committerebbe nell'hook
         else:
             log.info('Localized fields are missing in resource_multilang table, persisting ...')
             ResourceMultilang.persist(r, lang)

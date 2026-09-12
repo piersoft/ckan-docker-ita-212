@@ -15,6 +15,20 @@ from ckanext.dcatapit.model import (
 )
 
 log = logging.getLogger(__name__)
+
+
+# ckan-docker-ita (CKAN >= 2.12): DomainObject.save()/purge() fanno commit; dentro
+# gli hook after_* (eseguiti nel SAVEPOINT di package_update) un commit chiude la
+# transazione dell'action -> ResourceClosedError. Qui si fa solo add/delete + flush:
+# il commit lo fa l'action chiamante.
+def _flush_save(obj):
+    Session.add(obj)
+    Session.flush()
+
+
+def _flush_purge(obj):
+    Session.delete(obj)
+    Session.flush()
 import os #inserimento in xloader
 
 class ICustomSchema(Interface):
@@ -138,10 +152,10 @@ def upsert_package_multilang(pkg_id, field_name, field_type, lang, text):
     if not pml and text:
         PackageMultilang.persist({'id': pkg_id, 'field': field_name, 'text': text}, lang, field_type)
     elif pml and not text:
-        pml.purge()
+        _flush_purge(pml)
     elif pml and not pml.text == text:
         pml.text = text
-        pml.save()
+        _flush_save(pml)
 
 
 def upsert_resource_multilang(res_id, field_name, lang, text):
@@ -155,10 +169,10 @@ def upsert_resource_multilang(res_id, field_name, lang, text):
     if not ml and text:
         ResourceMultilang.persist_resources([ResourceMultilang(res_id, field_name, lang, text)])
     elif ml and not text:
-        ml.purge()
+        _flush_purge(ml)
     elif ml and not ml.text == text:
         ml.text = text
-        ml.save()
+        _flush_save(ml)
 
 
 def update_extra_package_multilang(extra, pkg_id, field, lang, field_type='extra'):
@@ -174,11 +188,11 @@ def update_extra_package_multilang(extra, pkg_id, field, lang, field_type='extra
         f = PackageMultilang.get(pkg_id, field['name'], lang, field_type)
         if f:
             if extra.get('value') == '':
-                f.purge()
+                _flush_purge(f)
             elif f.text != extra.get('value'):
                 # Update the localized field value for the current language
                 f.text = extra.get('value')
-                f.save()
+                _flush_save(f)
 
                 log.info('Localized field updated successfully')
 
@@ -301,13 +315,11 @@ def persist_tag_multilang(tag: model.Tag, lang, label, vocab):
             if label != tag_loc.text:
                 try:
                     tag_loc.text = label
-                    tag_loc.save()
+                    _flush_save(tag_loc)
                     return DBAction.UPDATED, tag_loc.id
                 except Exception as err:
-                    # on rollback, the same closure of state
-                    # as that of commit proceeds.
-                    Session.rollback()
-
+                    # CKAN >= 2.12: niente rollback della sessione dentro gli hook
+                    # (chiuderebbe il SAVEPOINT di package_update)
                     log.error('Exception occurred while persisting DB objects: %s', err)
                     raise
             else:

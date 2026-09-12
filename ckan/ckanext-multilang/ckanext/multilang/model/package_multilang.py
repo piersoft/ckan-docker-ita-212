@@ -116,6 +116,7 @@ class PackageMultilang(DomainObject):
             return
 
         session = meta.Session
+        _sp = session.begin_nested()
         try:
             session.add_all([
                 PackageMultilang(package_id=package.get('id'), field=package.get('field'),
@@ -123,16 +124,17 @@ class PackageMultilang(DomainObject):
             ])
 
             # CKAN >= 2.12: i persist girano dentro gli hook after_*, eseguiti in un
-            # SAVEPOINT di package_update: un commit qui chiude la transazione esterna
-            # (ResourceClosedError). Si fa flush; il commit lo fa l'action.
-            session.flush()
+            # SAVEPOINT di package_update: commit o rollback qui chiuderebbero la
+            # transazione esterna (ResourceClosedError). Si chiude solo il savepoint
+            # locale aperto sopra; il commit vero lo fa l'action chiamante.
+            _sp.commit()
         except Exception as e:
-            # on rollback, the same closure of state
-            # as that of commit proceeds.
-            session.rollback()
-
-            log.error('Exception occurred while persisting DB objects:', exc_info=e)
-            raise
+            # annulla solo il savepoint locale: la transazione del dataset resta valida
+            try:
+                _sp.rollback()
+            except Exception:
+                pass
+            log.error('Exception occurred while persisting multilang objects (ignored):', exc_info=e)
 
 
 # SQLAlchemy 2.0: orm.mapper() rimosso, mapping imperativo
@@ -175,6 +177,7 @@ class GroupMultilang(DomainObject):
     @classmethod
     def persist(cls, group, lang):
         session = meta.Session
+        _sp = session.begin_nested()
         try:
             session.add_all([
                 cls(group_id=group.get('id'), name=group.get('name'), field='title', lang=lang, text=group.get('title')),
@@ -182,16 +185,17 @@ class GroupMultilang(DomainObject):
             ])
 
             # CKAN >= 2.12: i persist girano dentro gli hook after_*, eseguiti in un
-            # SAVEPOINT di package_update: un commit qui chiude la transazione esterna
-            # (ResourceClosedError). Si fa flush; il commit lo fa l'action.
-            session.flush()
+            # SAVEPOINT di package_update: commit o rollback qui chiuderebbero la
+            # transazione esterna (ResourceClosedError). Si chiude solo il savepoint
+            # locale aperto sopra; il commit vero lo fa l'action chiamante.
+            _sp.commit()
         except Exception as e:
-            # on rollback, the same closure of state
-            # as that of commit proceeds.
-            session.rollback()
-
-            log.error('Exception occurred while persisting DB objects:', exc_info=e)
-            raise
+            # annulla solo il savepoint locale: la transazione del dataset resta valida
+            try:
+                _sp.rollback()
+            except Exception:
+                pass
+            log.error('Exception occurred while persisting multilang objects (ignored):', exc_info=e)
 
 
 _mapper_registry.map_imperatively(GroupMultilang, group_multilang_table)
@@ -231,6 +235,7 @@ class ResourceMultilang(DomainObject):
     @classmethod
     def persist(self, resource, lang):
         session = meta.Session
+        _sp = session.begin_nested()
         try:
             name = resource.get('name')
             desc = resource.get('description') or ''
@@ -240,33 +245,36 @@ class ResourceMultilang(DomainObject):
             ])
 
             # CKAN >= 2.12: i persist girano dentro gli hook after_*, eseguiti in un
-            # SAVEPOINT di package_update: un commit qui chiude la transazione esterna
-            # (ResourceClosedError). Si fa flush; il commit lo fa l'action.
-            session.flush()
+            # SAVEPOINT di package_update: commit o rollback qui chiuderebbero la
+            # transazione esterna (ResourceClosedError). Si chiude solo il savepoint
+            # locale aperto sopra; il commit vero lo fa l'action chiamante.
+            _sp.commit()
         except Exception as e:
-            # on rollback, the same closure of state
-            # as that of commit proceeds.
-            session.rollback()
-
-            log.error('Exception occurred while persisting DB objects:', exc_info=e)
-            raise
+            # annulla solo il savepoint locale: la transazione del dataset resta valida
+            try:
+                _sp.rollback()
+            except Exception:
+                pass
+            log.error('Exception occurred while persisting multilang objects (ignored):', exc_info=e)
 
     @classmethod
     def persist_resources(self, resources_list):
         session = meta.Session
+        _sp = session.begin_nested()
         try:
             session.add_all(resources_list)
             # CKAN >= 2.12: i persist girano dentro gli hook after_*, eseguiti in un
-            # SAVEPOINT di package_update: un commit qui chiude la transazione esterna
-            # (ResourceClosedError). Si fa flush; il commit lo fa l'action.
-            session.flush()
+            # SAVEPOINT di package_update: commit o rollback qui chiuderebbero la
+            # transazione esterna (ResourceClosedError). Si chiude solo il savepoint
+            # locale aperto sopra; il commit vero lo fa l'action chiamante.
+            _sp.commit()
         except Exception as e:
-            # on rollback, the same closure of state
-            # as that of commit proceeds.
-            session.rollback()
-
-            log.error('Exception occurred while persisting DB objects:', exc_info=e)
-            raise
+            # annulla solo il savepoint locale: la transazione del dataset resta valida
+            try:
+                _sp.rollback()
+            except Exception:
+                pass
+            log.error('Exception occurred while persisting multilang objects (ignored):', exc_info=e)
 
 
 _mapper_registry.map_imperatively(ResourceMultilang, resource_multilang_table)
@@ -321,26 +329,29 @@ class TagMultilang(DomainObject):
     @classmethod
     def persist(self, tag, lang):
         session = meta.Session
+        _sp = session.begin_nested()
         try:
             session.add(
                 TagMultilang(tag_id=tag.get('id'), tag_name=tag.get('name'), lang=lang, text=tag.get('text')),
             )
 
             # CKAN >= 2.12: i persist girano dentro gli hook after_*, eseguiti in un
-            # SAVEPOINT di package_update: un commit qui chiude la transazione esterna
-            # (ResourceClosedError). Si fa flush; il commit lo fa l'action.
-            session.flush()
+            # SAVEPOINT di package_update: commit o rollback qui chiuderebbero la
+            # transazione esterna (ResourceClosedError). Si chiude solo il savepoint
+            # locale aperto sopra; il commit vero lo fa l'action chiamante.
+            _sp.commit()
         except Exception as e:
-            # on rollback, the same closure of state
-            # as that of commit proceeds.
-            session.rollback()
-
-            log.error('Exception occurred while persisting DB objects:', exc_info=e)
-            raise
+            # annulla solo il savepoint locale: la transazione del dataset resta valida
+            try:
+                _sp.rollback()
+            except Exception:
+                pass
+            log.error('Exception occurred while persisting multilang objects (ignored):', exc_info=e)
 
     @classmethod
     def save_tags(cls, *tags):
         session = meta.Session
+        _sp = session.begin_nested()
         try:
             session.add_all([
                 TagMultilang(
@@ -352,16 +363,17 @@ class TagMultilang(DomainObject):
             ])
 
             # CKAN >= 2.12: i persist girano dentro gli hook after_*, eseguiti in un
-            # SAVEPOINT di package_update: un commit qui chiude la transazione esterna
-            # (ResourceClosedError). Si fa flush; il commit lo fa l'action.
-            session.flush()
+            # SAVEPOINT di package_update: commit o rollback qui chiuderebbero la
+            # transazione esterna (ResourceClosedError). Si chiude solo il savepoint
+            # locale aperto sopra; il commit vero lo fa l'action chiamante.
+            _sp.commit()
         except Exception as e:
-            # on rollback, the same closure of state
-            # as that of commit proceeds.
-            session.rollback()
-
-            log.error('Exception occurred while persisting DB objects:', exc_info=e)
-            raise
+            # annulla solo il savepoint locale: la transazione del dataset resta valida
+            try:
+                _sp.rollback()
+            except Exception:
+                pass
+            log.error('Exception occurred while persisting multilang objects (ignored):', exc_info=e)
 
 
 _mapper_registry.map_imperatively(TagMultilang, tag_multilang_table)
