@@ -146,9 +146,9 @@ def _group_or_org_list(context, data_dict, is_org=False):
 
     query = model.Session.query(model.Group)
 
-    if include_extras:
-        # this does an eager load of the extras, avoiding an sql query every
-        # time group_list_dictize accesses a group's extra.
+    # CKAN >= 2.12: gli extras sono una colonna JSONB di Group, non una
+    # relazione da precaricare (Group._extras non esiste piu').
+    if include_extras and hasattr(model.Group, '_extras'):
         query = query.options(sqlalchemy.orm.joinedload(model.Group._extras))
 
     query = query.filter(model.Group.state == 'active')
