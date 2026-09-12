@@ -38,7 +38,7 @@ def load_config(path=None):
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
     # rimuovo le chiavi di documentazione
-    for k in ("publisher_type_by_ipa_prefix", "license_map", "mimetype_by_format"):
+    for k in ("publisher_type_by_ipa_prefix", "license_map", "license_map_graph", "mimetype_by_format"):
         data.setdefault(k, {}).pop("_doc", None)
     data.pop("_doc", None)
     _CONFIG = data
@@ -173,13 +173,22 @@ def clean_resource_url(value):
 # ---------------------------------------------------------------------------
 # Licenze
 # ---------------------------------------------------------------------------
-def normalize_license(value, cfg=None):
+def normalize_license(value, cfg=None, side="parse"):
+    """Mapping esatto delle URI di licenza, seguito a catena (max 3 passi)
+    cosi' il risultato non dipende dall'ordine delle voci.
+    side="parse": voci di license_map (dati harvestati, cio' che dcatapit
+    riconosce dal document URI); side="graph": solo license_map_graph
+    (rifinitura del TTL)."""
     if not value or not isinstance(value, str):
         return value
     cfg = cfg or load_config()
-    value = value.replace("deed.it", "")
-    for src, dst in cfg.get("license_map", {}).items():
-        value = value.replace(src, dst)
+    table = cfg.get("license_map_graph" if side == "graph" else "license_map", {})
+    value = value.replace("deed.it", "").strip()
+    for _ in range(3):
+        new = table.get(value)
+        if not new or new == value:
+            break
+        value = new
     return value
 
 

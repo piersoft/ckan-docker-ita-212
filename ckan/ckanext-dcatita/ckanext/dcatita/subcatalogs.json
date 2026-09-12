@@ -12,41 +12,217 @@
   ],
   "match_field": "holder_identifier",
   "subcatalogs": [
-    {"match": ["m_lps"], "base_uri": "http://dati.lavoro.gov.it/",
-     "publisher": {"name": "Ministero del Lavoro", "url": "http://dati.lavoro.gov.it/", "type": "http://purl.org/adms/publishertype/NationalAuthority"}},
-    {"match": ["r_emiro"], "base_uri": "https://dati.emilia-romagna.it/", "homepage": "https://dati.emilia-romagna.it",
-     "replace": [["dati.comune.fe.it", "https://dati.comune.fe.it"]], "skip_checksum": true,
-     "publisher": {"name": "Regione Emilia-Romagna", "url": "https://dati.emilia-romagna.it/", "type": "http://purl.org/adms/publishertype/RegionalAuthority"}},
-    {"match": ["r_marche"], "base_uri": "https://dati.regione.marche.it/",
-     "publisher": {"name": "Regione Marche", "url": "https://dati.regione.marche.it/", "type": "http://purl.org/adms/publishertype/RegionalAuthority"}},
-    {"match": ["r_toscan"], "base_uri": "https://dati.toscana.it/",
-     "publisher": {"name": "Regione Toscana", "url": "https://dati.toscana.it/", "type": "http://purl.org/adms/publishertype/RegionalAuthority"}},
-    {"match": ["r_basili"], "base_uri": "https://dati.regione.basilicata.it/catalog/", "homepage": "https://dati.regione.basilicata.it",
-     "publisher": {"name": "Regione Basilicata", "url": "https://dati.regione.basilicata.it/", "type": "http://purl.org/adms/publishertype/RegionalAuthority"}},
-    {"match": ["r_lazio"], "base_uri": "http://dati.lazio.it/catalog/", "homepage": "http://dati.regione.lazio.it", "frequency_unknown": true},
-    {"match": ["aci"], "base_uri": "http://lod.aci.it/", "homepage": "http://lod.aci.it/", "language": "ITA", "modified_from_extra": "dcat_modified",
-     "publisher": {"name": "OpenData Aci", "url": "http://lod.aci.it/", "type": "http://purl.org/adms/publishertype/NationalAuthority"}},
-    {"match": ["c_l219", "00514490010"], "base_uri": "http://aperto.comune.torino.it/",
-     "publisher": {"name": "Comune di Torino", "url": "http://aperto.comune.torino.it/", "type": "http://purl.org/adms/publishertype/LocalAuthority"}},
-    {"match": ["cr_campa"], "base_uri": "http://opendata-crc.di.unisa.it/",
-     "publisher": {"name": "Consiglio Regionale della Campania", "url": "http://opendata-crc.di.unisa.it/", "type": "http://purl.org/adms/publishertype/RegionalAuthority"}},
-    {"match": ["00304260409"], "base_uri": "https://opendata.comune.rimini.it/",
-     "publisher": {"name": "Comune di Rimini", "url": "https://opendata.comune.rimini.it/", "type": "http://purl.org/adms/publishertype/LocalAuthority"}},
-    {"match": ["c_a345"], "base_uri": "https://ckan.opendatalaquila.it/",
-     "publisher": {"name": "OpenData Aquila", "url": "https://ckan.opendatalaquila.it/", "type": "http://purl.org/adms/publishertype/LocalAuthority"}},
-    {"match": ["uds_ca"], "base_uri": "https://data.tdm-project.it/",
-     "publisher": {"name": "Universit\u00e0 di Cagliari - Dataset relativi al progetto TDM", "url": "https://data.tdm-project.it/", "type": "http://purl.org/adms/publishertype/RegionalAuthority"}},
-    {"match": ["m_it"], "base_uri": "https://www.interno.gov.it/",
-     "publisher": {"name": "Ministero degli Interni", "url": "https://www.interno.gov.it/", "type": "http://purl.org/adms/publishertype/NationalAuthority"}},
-    {"match": ["m_inf"], "base_uri": "https://dati.mit.gov.it/", "distribution_only": true},
-    {"match": ["cmna"], "base_uri": "https://dati.cittametropolitana.na.it/", "distribution_only": true},
-    {"match": ["piersoft"], "base_uri": "https://www.piersoft.it/", "dataset_only": true},
-    {"match": ["c_e506"], "base_uri": "http://dati.comune.lecce.it/"},
-    {"match": ["uni_ba"], "homepage": "http://opendata.uniba.it/"},
-    {"match": ["cciaan"], "homepage": "https://opendata.marche.camcom.it"},
-    {"match": ["c_g273", "inps"], "access_url_from_download": true},
-    {"match": ["BDAP"], "match_field": "holder_name", "frequency_unknown": true,
-     "publisher": {"name": "OpenData BDAP", "url": "https://bdap-opendata.rgs.mef.gov.it/", "type": "http://purl.org/adms/publishertype/NationalAuthority"}}
+    {
+      "match": [
+        "m_lps"
+      ],
+      "base_uri": "http://dati.lavoro.gov.it/",
+      "publisher": {
+        "name": "Ministero del Lavoro",
+        "url": "http://dati.lavoro.gov.it/",
+        "type": "http://purl.org/adms/publishertype/NationalAuthority"
+      }
+    },
+    {
+      "match": [
+        "r_emiro"
+      ],
+      "base_uri": "https://dati.emilia-romagna.it/",
+      "homepage": "https://dati.emilia-romagna.it",
+      "replace": [
+        [
+          "dati.comune.fe.it",
+          "https://dati.comune.fe.it"
+        ]
+      ],
+      "skip_checksum": true,
+      "publisher": {
+        "name": "Regione Emilia-Romagna",
+        "url": "https://dati.emilia-romagna.it/",
+        "type": "http://purl.org/adms/publishertype/RegionalAuthority"
+      }
+    },
+    {
+      "match": [
+        "r_marche"
+      ],
+      "base_uri": "https://dati.regione.marche.it/",
+      "publisher": {
+        "name": "Regione Marche",
+        "url": "https://dati.regione.marche.it/",
+        "type": "http://purl.org/adms/publishertype/RegionalAuthority"
+      }
+    },
+    {
+      "match": [
+        "r_toscan"
+      ],
+      "base_uri": "https://dati.toscana.it/",
+      "publisher": {
+        "name": "Regione Toscana",
+        "url": "https://dati.toscana.it/",
+        "type": "http://purl.org/adms/publishertype/RegionalAuthority"
+      }
+    },
+    {
+      "match": [
+        "r_basili"
+      ],
+      "base_uri": "https://dati.regione.basilicata.it/catalog/",
+      "homepage": "https://dati.regione.basilicata.it",
+      "publisher": {
+        "name": "Regione Basilicata",
+        "url": "https://dati.regione.basilicata.it/",
+        "type": "http://purl.org/adms/publishertype/RegionalAuthority"
+      }
+    },
+    {
+      "match": [
+        "r_lazio"
+      ],
+      "base_uri": "http://dati.lazio.it/catalog/",
+      "homepage": "http://dati.regione.lazio.it",
+      "frequency_unknown": true
+    },
+    {
+      "match": [
+        "aci"
+      ],
+      "base_uri": "http://lod.aci.it/",
+      "homepage": "http://lod.aci.it/",
+      "language": "ITA",
+      "modified_from_extra": "dcat_modified",
+      "publisher": {
+        "name": "OpenData Aci",
+        "url": "http://lod.aci.it/",
+        "type": "http://purl.org/adms/publishertype/NationalAuthority"
+      }
+    },
+    {
+      "match": [
+        "c_l219",
+        "00514490010"
+      ],
+      "base_uri": "http://aperto.comune.torino.it/",
+      "publisher": {
+        "name": "Comune di Torino",
+        "url": "http://aperto.comune.torino.it/",
+        "type": "http://purl.org/adms/publishertype/LocalAuthority"
+      }
+    },
+    {
+      "match": [
+        "cr_campa"
+      ],
+      "base_uri": "http://opendata-crc.di.unisa.it/",
+      "publisher": {
+        "name": "Consiglio Regionale della Campania",
+        "url": "http://opendata-crc.di.unisa.it/",
+        "type": "http://purl.org/adms/publishertype/RegionalAuthority"
+      }
+    },
+    {
+      "match": [
+        "00304260409"
+      ],
+      "base_uri": "https://opendata.comune.rimini.it/",
+      "publisher": {
+        "name": "Comune di Rimini",
+        "url": "https://opendata.comune.rimini.it/",
+        "type": "http://purl.org/adms/publishertype/LocalAuthority"
+      }
+    },
+    {
+      "match": [
+        "c_a345"
+      ],
+      "base_uri": "https://ckan.opendatalaquila.it/",
+      "publisher": {
+        "name": "OpenData Aquila",
+        "url": "https://ckan.opendatalaquila.it/",
+        "type": "http://purl.org/adms/publishertype/LocalAuthority"
+      }
+    },
+    {
+      "match": [
+        "uds_ca"
+      ],
+      "base_uri": "https://data.tdm-project.it/",
+      "publisher": {
+        "name": "Università di Cagliari - Dataset relativi al progetto TDM",
+        "url": "https://data.tdm-project.it/",
+        "type": "http://purl.org/adms/publishertype/RegionalAuthority"
+      }
+    },
+    {
+      "match": [
+        "m_it"
+      ],
+      "base_uri": "https://www.interno.gov.it/",
+      "publisher": {
+        "name": "Ministero degli Interni",
+        "url": "https://www.interno.gov.it/",
+        "type": "http://purl.org/adms/publishertype/NationalAuthority"
+      }
+    },
+    {
+      "match": [
+        "m_inf"
+      ],
+      "base_uri": "https://dati.mit.gov.it/",
+      "distribution_only": true
+    },
+    {
+      "match": [
+        "cmna"
+      ],
+      "base_uri": "https://dati.cittametropolitana.na.it/",
+      "distribution_only": true
+    },
+    {
+      "match": [
+        "piersoft"
+      ],
+      "base_uri": "https://www.piersoft.it/",
+      "dataset_only": true
+    },
+    {
+      "match": [
+        "c_e506"
+      ],
+      "base_uri": "http://dati.comune.lecce.it/"
+    },
+    {
+      "match": [
+        "uni_ba"
+      ],
+      "homepage": "http://opendata.uniba.it/"
+    },
+    {
+      "match": [
+        "cciaan"
+      ],
+      "homepage": "https://opendata.marche.camcom.it"
+    },
+    {
+      "match": [
+        "c_g273",
+        "inps"
+      ],
+      "access_url_from_download": true
+    },
+    {
+      "match": [
+        "BDAP"
+      ],
+      "match_field": "holder_name",
+      "frequency_unknown": true,
+      "publisher": {
+        "name": "OpenData BDAP",
+        "url": "https://bdap-opendata.rgs.mef.gov.it/",
+        "type": "http://purl.org/adms/publishertype/NationalAuthority"
+      }
+    }
   ],
   "publisher_type_by_ipa_prefix": {
     "_doc": "dct:type del publisher del subcatalog in base al prefisso del codice IPA (holder_identifier)",
@@ -62,7 +238,7 @@
     "pcm": "http://purl.org/adms/publishertype/NationalAuthority"
   },
   "license_map": {
-    "_doc": "Normalizzazione delle URI di licenza incontrate nei cataloghi harvestati (chiave -> valore)",
+    "_doc": "Lato parse/harvest: URI di licenza -> URI canonica (chiave esatta; le catene vengono seguite)",
     "https://w3id.org/italia/controlled-vocabulary/licences/A21:CCBY40": "https://w3id.org/italia/controlled-vocabulary/licences/A21_CCBY40",
     "https://w3id.org/italia/controlled-vocabulary/licences/A11:CCO10": "https://w3id.org/italia/controlled-vocabulary/licences/A11_CCO10",
     "https://w3id.org/italia/controlled-vocabulary/licences/A21_CCBY40": "https://creativecommons.org/licenses/by/4.0/",
@@ -75,14 +251,34 @@
     "http://www.opendefinition.org/licenses/cc-by": "https://w3id.org/italia/controlled-vocabulary/licences/A21_CCBY40",
     "http://www.opendefinition.org/licenses/odc-odbl": "https://w3id.org/italia/controlled-vocabulary/licences/A310_ODBL"
   },
+  "license_map_graph": {
+    "_doc": "Lato TTL: sostituzioni applicate a dct:license delle distribuzioni",
+    "https://w3id.org/italia/controlled-vocabulary/licences/C1_Unknown": "http://creativecommons.org/licenses/by/4.0/",
+    "https://w3id.org/italia/controlled-vocabulary/licences/B11_CCBYNC40": "http://creativecommons.org/licenses/by/4.0/"
+  },
   "mimetype_by_format": {
     "_doc": "dcat:mediaType (IANA) derivato dal formato normalizzato; le chiavi sono cercate come sottostringa, in ordine",
-    "RDF_TURTLE": "text/turtle", "GEOJSON": "application/geo+json", "SPARQL": "application/sparql-query",
-    "CSV": "text/csv", "JSON": "application/json", "ZIP": "application/zip", "XML": "text/xml",
-    "RDF": "application/rdf+xml", "XLS": "application/vnd.ms-excel", "PARQUET": "application/vnd.apache.parquet",
-    "SHP": "application/zip", "KML": "application/vnd.google-earth.kml+xml", "GPX": "application/vnd.gpxsee.map+xml",
-    "N3": "text/n3", "BIN": "text/csv", "TSV": "text/tab-separated-values", "HTML": "text/html",
-    "ODS": "application/vnd.oasis.opendocument.spreadsheet", "PDF": "application/pdf",
-    "GPKG": "application/vnd.gentoo.gpkg", "GRIB": "application/grib", "BUFR": "application/bufr"
+    "RDF_TURTLE": "text/turtle",
+    "GEOJSON": "application/geo+json",
+    "SPARQL": "application/sparql-query",
+    "CSV": "text/csv",
+    "JSON": "application/json",
+    "ZIP": "application/zip",
+    "XML": "text/xml",
+    "RDF": "application/rdf+xml",
+    "XLS": "application/vnd.ms-excel",
+    "PARQUET": "application/vnd.apache.parquet",
+    "SHP": "application/zip",
+    "KML": "application/vnd.google-earth.kml+xml",
+    "GPX": "application/vnd.gpxsee.map+xml",
+    "N3": "text/n3",
+    "BIN": "text/csv",
+    "TSV": "text/tab-separated-values",
+    "HTML": "text/html",
+    "ODS": "application/vnd.oasis.opendocument.spreadsheet",
+    "PDF": "application/pdf",
+    "GPKG": "application/vnd.gentoo.gpkg",
+    "GRIB": "application/grib",
+    "BUFR": "application/bufr"
   }
 }
