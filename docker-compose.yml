@@ -82,8 +82,35 @@ services:
     volumes:
       - ckan_storage:/var/lib/ckan
     restart: unless-stopped
-    # Job worker (xloader ecc.). I consumer harvest vengono aggiunti nella FASE 2.
+    # Job worker (xloader, scheduler).
     command: ["ckan", "-c", "/srv/app/ckan.ini", "jobs", "worker"]
+
+  # Consumer harvest: sostituiscono i [program:*] del vecchio supervisord.conf.
+  ckan-gather:
+    container_name: ${WORKER_CONTAINER_NAME}-gather
+    image: ${CKAN_CONTAINER_NAME}-image
+    networks: [ckannet, dbnet, solrnet, redisnet]
+    env_file: [.env]
+    depends_on:
+      ckan:
+        condition: service_healthy
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: unless-stopped
+    command: ["ckan", "-c", "/srv/app/ckan.ini", "harvester", "gather-consumer"]
+
+  ckan-fetch:
+    container_name: ${WORKER_CONTAINER_NAME}-fetch
+    image: ${CKAN_CONTAINER_NAME}-image
+    networks: [ckannet, dbnet, solrnet, redisnet]
+    env_file: [.env]
+    depends_on:
+      ckan:
+        condition: service_healthy
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: unless-stopped
+    command: ["ckan", "-c", "/srv/app/ckan.ini", "harvester", "fetch-consumer"]
 
   db:
     container_name: ${POSTGRESQL_CONTAINER_NAME}

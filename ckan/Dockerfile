@@ -2,8 +2,8 @@
 #  CKAN Docker per l'Italia — immagine CKAN 2.12
 #  Base ufficiale: python 3.14 slim, utente non-root `ckan` (uid 503).
 #  Le estensioni vengono abilitate una fase alla volta (vedi CHANGELOG):
-#    FASE 1  core + xloader                         <- QUESTA
-#    FASE 2  ckanext-harvest (senza pylons)
+#    FASE 1  core + xloader                         (fatta)
+#    FASE 2  ckanext-harvest 1.6.3 + patch                <- QUESTA
 #    FASE 3  ckanext-dcat 2.4.x (DCAT-AP 3) + patch
 #    FASE 4  ckanext-dcatapit su 2.12 / DCAT-AP 3
 #    FASE 5  ckanext-multilang, oai-pmh-server, dcat-ap-edp-mqa
@@ -27,11 +27,15 @@ RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-xloader.g
     && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-xloader/requirements.txt
 
 # ---------------------------------------------------------------------
-#  FASE 2 — Harvest  (disattivato: da portare su 2.12 senza pylons)
+#  FASE 2 — Harvest: upstream 1.6.3 (supporto ufficiale CKAN 2.12) +
+#  patch locali in patches/ckanext-harvest-patches/*.patch
+#  (normalizzazione dei cataloghi federati, harvest source con URL duplicato)
 # ---------------------------------------------------------------------
-# COPY patches/ckanext-harvest ${SRC_DIR}/ckanext-harvest
-# RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-harvest \
-#     && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-harvest/requirements.txt
+RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-harvest.git@v1.6.3#egg=ckanext-harvest \
+    && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-harvest/requirements.txt
+COPY patches/ckanext-harvest-patches ${APP_DIR}/patches/ckanext-harvest-patches
+RUN cd ${SRC_DIR}/ckanext-harvest && for f in ${APP_DIR}/patches/ckanext-harvest-patches/*.patch; do \
+        echo "Applying $f"; patch -p1 < "$f"; done
 
 # ---------------------------------------------------------------------
 #  FASE 3 — ckanext-dcat 2.4.x  (disattivato)
