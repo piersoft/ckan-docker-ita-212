@@ -80,4 +80,7 @@ class TagLocalization(DomainObject):
         return tags
 
 
-meta.mapper(TagLocalization, dcatapit_vocabulary_table)
+# SQLAlchemy 2.0 (CKAN >= 2.12): orm.mapper() e' stato rimosso, mapping imperativo via registry
+from sqlalchemy.orm import registry as _sa_registry
+_mapper_registry = _sa_registry(metadata=meta.metadata)
+_mapper_registry.map_imperatively(TagLocalization, dcatapit_vocabulary_table)

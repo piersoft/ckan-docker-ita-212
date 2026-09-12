@@ -8,7 +8,7 @@ from ckan.model import Tag, Vocabulary, meta, DomainObject
 
 from sqlalchemy import Column, ForeignKey, Index, and_, or_, orm, types
 from sqlalchemy.exc import SQLAlchemyError as SAError, IntegrityError
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy.orm import declarative_base, declared_attr
 
 from ckanext.dcat.profiles.base import DCT
 
