@@ -1,0 +1,18 @@
+# generic
+.DS_Store
+.vagrant
+
+# python
+__pycache__/
+*.pyc
+
+# code & config
+_service-provider/*
+_solr/schema.xml
+_src/*
+local/*
+.env
+
+# certificati generati a runtime
+nginx/certs/
+*.pem

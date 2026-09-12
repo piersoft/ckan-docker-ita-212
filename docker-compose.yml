@@ -1,0 +1,127 @@
+# CKAN Docker per l'Italia — stack demo (CKAN 2.10.9 + Postgres16 + Solr9 + Redis + NGINX)
+# Compose v2: la chiave "version" non e' piu' necessaria.
+
+volumes:
+  ckan_storage:
+  pg_data:
+  solr_data:
+
+services:
+
+  nginx:
+    container_name: ${NGINX_CONTAINER_NAME}
+    build:
+      context: nginx/
+      dockerfile: Dockerfile
+    networks:
+      - webnet
+      - ckannet
+    depends_on:
+      - ckan
+    restart: unless-stopped
+    ports:
+      # Accesso NON-SSL e SSL: l'utente sceglie quale usare.
+      - "0.0.0.0:${NGINX_PORT_HOST}:${NGINX_PORT}"
+      - "0.0.0.0:${NGINX_SSLPORT_HOST}:${NGINX_SSLPORT}"
+
+  ckan:
+    container_name: ${CKAN_CONTAINER_NAME}
+    build:
+      context: ckan/
+      dockerfile: Dockerfile
+      args:
+        - TZ=${TZ}
+    networks:
+      - ckannet
+      - dbnet
+      - solrnet
+      - redisnet
+    # Sorgente UNICA di configurazione: il file .env.
+    # (rimossi gli override "environment:" che divergevano sul ?sslmode)
+    env_file:
+      - .env
+    # Per il debug si puo' raggiungere CKAN senza passare da NGINX
+    # decommentando la riga seguente (http://localhost:${CKAN_PORT_HOST}).
+    # ports:
+    #   - "0.0.0.0:${CKAN_PORT_HOST}:${CKAN_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
+      solr:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      # Primo avvio lungo (init DB + caricamento vocabolari DCAT-AP_IT):
+      # non marcare unhealthy prima di 5 minuti.
+      start_period: 300s
+
+  db:
+    container_name: ${POSTGRESQL_CONTAINER_NAME}
+    build:
+      context: postgresql/
+    networks:
+      - dbnet
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - CKAN_DB_USER
+      - CKAN_DB_PASSWORD
+      - CKAN_DB
+      - DATASTORE_READONLY_USER
+      - DATASTORE_READONLY_PASSWORD
+      - DATASTORE_DB
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  solr:
+    container_name: ${SOLR_CONTAINER_NAME}
+    networks:
+      - solrnet
+    build:
+      context: solr/
+      dockerfile: Dockerfile
+    volumes:
+      - solr_data:/var/solr
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8983/solr/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    container_name: ${REDIS_CONTAINER_NAME}
+    image: redis:${REDIS_VERSION}
+    networks:
+      - redisnet
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-e", "QUIT"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  webnet:
+  ckannet:
+  solrnet:
+    internal: true
+  dbnet:
+    internal: true
+  redisnet:
+    internal: true
