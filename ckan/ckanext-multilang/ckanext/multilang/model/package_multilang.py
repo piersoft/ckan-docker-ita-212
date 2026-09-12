@@ -122,7 +122,10 @@ class PackageMultilang(DomainObject):
                                  field_type=field_type, lang=lang, text=package.get('text')),
             ])
 
-            session.commit()
+            # CKAN >= 2.12: i persist girano dentro gli hook after_*, eseguiti in un
+            # SAVEPOINT di package_update: un commit qui chiude la transazione esterna
+            # (ResourceClosedError). Si fa flush; il commit lo fa l'action.
+            session.flush()
         except Exception as e:
             # on rollback, the same closure of state
             # as that of commit proceeds.
@@ -178,7 +181,10 @@ class GroupMultilang(DomainObject):
                 cls(group_id=group.get('id'), name=group.get('name'), field='description', lang=lang, text=group.get('description')),
             ])
 
-            session.commit()
+            # CKAN >= 2.12: i persist girano dentro gli hook after_*, eseguiti in un
+            # SAVEPOINT di package_update: un commit qui chiude la transazione esterna
+            # (ResourceClosedError). Si fa flush; il commit lo fa l'action.
+            session.flush()
         except Exception as e:
             # on rollback, the same closure of state
             # as that of commit proceeds.
@@ -233,7 +239,10 @@ class ResourceMultilang(DomainObject):
                 self(resource_id=resource.get('id'), field='description', lang=lang, text=desc),
             ])
 
-            session.commit()
+            # CKAN >= 2.12: i persist girano dentro gli hook after_*, eseguiti in un
+            # SAVEPOINT di package_update: un commit qui chiude la transazione esterna
+            # (ResourceClosedError). Si fa flush; il commit lo fa l'action.
+            session.flush()
         except Exception as e:
             # on rollback, the same closure of state
             # as that of commit proceeds.
@@ -247,7 +256,10 @@ class ResourceMultilang(DomainObject):
         session = meta.Session
         try:
             session.add_all(resources_list)
-            session.commit()
+            # CKAN >= 2.12: i persist girano dentro gli hook after_*, eseguiti in un
+            # SAVEPOINT di package_update: un commit qui chiude la transazione esterna
+            # (ResourceClosedError). Si fa flush; il commit lo fa l'action.
+            session.flush()
         except Exception as e:
             # on rollback, the same closure of state
             # as that of commit proceeds.
@@ -314,7 +326,10 @@ class TagMultilang(DomainObject):
                 TagMultilang(tag_id=tag.get('id'), tag_name=tag.get('name'), lang=lang, text=tag.get('text')),
             )
 
-            session.commit()
+            # CKAN >= 2.12: i persist girano dentro gli hook after_*, eseguiti in un
+            # SAVEPOINT di package_update: un commit qui chiude la transazione esterna
+            # (ResourceClosedError). Si fa flush; il commit lo fa l'action.
+            session.flush()
         except Exception as e:
             # on rollback, the same closure of state
             # as that of commit proceeds.
@@ -336,7 +351,10 @@ class TagMultilang(DomainObject):
                 for tag in tags
             ])
 
-            session.commit()
+            # CKAN >= 2.12: i persist girano dentro gli hook after_*, eseguiti in un
+            # SAVEPOINT di package_update: un commit qui chiude la transazione esterna
+            # (ResourceClosedError). Si fa flush; il commit lo fa l'action.
+            session.flush()
         except Exception as e:
             # on rollback, the same closure of state
             # as that of commit proceeds.

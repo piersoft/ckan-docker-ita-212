@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-09-13` — Fix: commit negli hook (ResourceClosedError su package_update)
+- CKAN 2.12 esegue gli hook `after_dataset_*`/`after_resource_*` dentro un SAVEPOINT di `package_update`; multilang (`PackageMultilang/GroupMultilang/ResourceMultilang.persist`) e la localizzazione tag di dcatapit facevano `Session.commit()` nell'hook, chiudendo la transazione esterna: `sqlalchemy.exc.ResourceClosedError: This transaction is closed` su qualunque salvataggio successivo nella stessa action (bulk privato/elimina dell'organizzazione, harvest, API). Ora fanno `flush()`; il commit resta all'action o al comando CLI chiamante (`ckan dcatapit load` committa gia' da solo).
+
 ## `2026-09-12` — Pulizia dei residui 2.10
 - Rimossi dalla repo `ckan/Dockerfile.legacy-2.10` e i file di `ckan/patches` non piu' usati (copie intere di moduli CKAN/Pylons: `base.py`, `core.py`, `xmlrpc.py`, `jsonrpc.py`, `supervisord.conf`, `command.py`, `model_dictize.py`, `validators.py`, `util.py`, template ecc.). Restano nella history.
 - Le due patch core ancora necessarie sono riportate come `.patch` contro CKAN 2.12.0 in `ckan/patches/ckan-core-patches/`: selettore lingua con campo `redirect_url` (un campo `url` nel form dataset sovrascriveva l'extra `landingpage`). La patch `resource_id_validator` min 5 non serve piu': il validator non esiste in 2.12.

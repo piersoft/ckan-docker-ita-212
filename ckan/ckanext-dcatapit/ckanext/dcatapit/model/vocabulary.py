@@ -62,7 +62,7 @@ class TagLocalization(DomainObject):
         try:
             tl = TagLocalization(tag_id=tag.id, tag_name=tag.name, lang=lang, text=label)
             tl.save()
-            session.commit()
+            session.flush()  # CKAN >= 2.12: commit dell'action/comando chiamante
             return tl
         except Exception as err:
             # on rollback, the same closure of state
