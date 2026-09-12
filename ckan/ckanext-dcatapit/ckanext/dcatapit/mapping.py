@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from configparser import SafeConfigParser as ConfigParser
+from configparser import ConfigParser
 
 from ckan.common import config
 from ckan.model import Session
@@ -117,7 +117,7 @@ def _map_themes_json(fdesc):
 
 def _map_themes_ini(fdesc):
     c = ConfigParser()
-    c.readfp(fdesc)
+    c.read_file(fdesc)
     out = {}
     section_name = 'dcatapit:{}'.format(DCATAPIT_THEMES_MAP_SECTION)
     for theme_in, themes_out in c.items(section_name, raw=True):
