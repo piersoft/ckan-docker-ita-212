@@ -52,6 +52,12 @@ def dcatita_signature():
         return ""
 
 
+def dcatita_mqa_badge_enabled():
+    """Badge MQA di data.europa.eu nella pagina dataset (ha senso solo se il
+    catalogo e' harvestato dal portale europeo)."""
+    return tk.asbool(tk.config.get("ckanext.dcatita.mqa_badge", False))
+
+
 @tk.blanket.config_declarations
 class DCATItaHarvestPlugin(p.SingletonPlugin):
     p.implements(IDCATRDFHarvester, inherit=True)
@@ -62,7 +68,8 @@ class DCATItaHarvestPlugin(p.SingletonPlugin):
         tk.add_template_directory(config_, "templates")
 
     def get_helpers(self):
-        return {"dcatita_signature": dcatita_signature}
+        return {"dcatita_signature": dcatita_signature,
+                "dcatita_mqa_badge_enabled": dcatita_mqa_badge_enabled}
 
     # --- sessione HTTP: i cataloghi PA con catene TLS rotte ------------------
     def update_session(self, session):
