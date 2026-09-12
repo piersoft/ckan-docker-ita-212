@@ -257,6 +257,14 @@ mappe per ente stanno in `subcatalogs.json`. Per un'installazione **stand-alone*
 1. rimuovere `dcat_ap_edp_mqa` e/o `oai_pmh_server` da `CKAN__PLUGINS` nel `.env`;
 2. impostare `CKANEXT__DCAT__RDF__PROFILES=euro_dcat_ap_3 it_dcat_ap dcat_ita`.
 
+## Licenza
+
+Il repository e `ckan/ckanext-dcatita` sono rilasciati sotto **GNU AGPL-3.0-or-later**
+(la stessa di CKAN, ckanext-dcat, ckanext-harvest, ckanext-dcatapit e ckanext-multilang,
+di cui questo repository contiene fork che ne conservano la licenza).
+`ckan/ckanext-oai-pmh-server` e `ckan/ckanext-dcat-ap-edp-mqa` restano LGPL-3.0
+(vedi i rispettivi `LICENSE`).
+
 ## Crediti
 
 - Estensione DCAT-AP_IT: [Geosolutions — ckanext-dcatapit](https://github.com/geosolutions-it/ckanext-dcatapit)
