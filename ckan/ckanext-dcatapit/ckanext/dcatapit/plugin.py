@@ -626,14 +626,21 @@ class DCATAPITPackagePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm,
                 ctx = get_org_context()
                 # force multilang use
                 ctx['for_view'] = True
-                org = get_org(ctx, {'id': pkg_dict['owner_org'],
-                                    'include_tags': False,
-                                    'include_users': False,
-                                    'include_groups': False,
-                                    'include_extras': True,
-                                    'include_followers': False,
-                                    'include_datasets': False,
-                                    })
+                try:
+                    org = get_org(ctx, {'id': pkg_dict['owner_org'],
+                                        'include_tags': False,
+                                        'include_users': False,
+                                        'include_groups': False,
+                                        'include_extras': True,
+                                        'include_followers': False,
+                                        'include_datasets': False,
+                                        })
+                except toolkit.ObjectNotFound:
+                    # ckan-docker-ita: dataset con organizzazione mancante (es. indice
+                    # Solr non allineato): non far fallire la ricerca
+                    log.warning('Organizzazione %s non trovata per il dataset %s',
+                                pkg_dict.get('owner_org'), pkg_dict.get('id'))
+                    return pkg_dict
             pkg_dict['holder_name'] = org['title']
             pkg_dict['holder_identifier'] = org.get('identifier') or None
         return pkg_dict
