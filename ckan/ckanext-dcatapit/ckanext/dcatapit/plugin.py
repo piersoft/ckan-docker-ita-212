@@ -7,7 +7,6 @@ import ckan.plugins.toolkit as toolkit
 from ckan import lib, logic
 from ckan.common import config
 from flask import Blueprint
-from routes.mapper import SubMapper
 
 import ckanext.dcatapit.helpers as helpers
 import ckanext.dcatapit.interfaces as interfaces
@@ -54,6 +53,12 @@ class DCATAPITPackagePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm,
     plugins.implements(plugins.IPackageController, inherit=True)
     plugins.implements(plugins.IFacets, inherit=True)
     plugins.implements(plugins.ITranslation, inherit=True)
+    plugins.implements(plugins.IBlueprint, inherit=True)
+
+    # ------------- IBlueprint ---------------#
+    def get_blueprint(self):
+        from ckanext.dcatapit.controllers.api import get_blueprint
+        return [get_blueprint()]
 
     # IClick
 
@@ -65,17 +70,8 @@ class DCATAPITPackagePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm,
     def i18n_domain(self):
         return 'ckanext-dcatapit'
 
-    # ------------- IRoutes ---------------#
-    def before_map(self, map):
-        GET = dict(method=['GET'])
-
-        # /api/util ver 1, 2 or none
-        with SubMapper(map, controller='ckanext.dcatapit.controllers.api:DCATAPITApiController', path_prefix='/api{ver:/1|/2}',
-                       ver='/2') as m:
-            m.connect('/util/vocabulary/autocomplete', action='vocabulary_autocomplete',
-                      conditions=GET)
-        #log.warning('Before_map %s ', map)
-        return map
+    # (IRoutes/before_map rimosso: Pylons non esiste piu'; l'autocomplete dei
+    #  vocabolari e' servito dal blueprint Flask in controllers/api.py)
 
     # ------------- IConfigurer ---------------#
 

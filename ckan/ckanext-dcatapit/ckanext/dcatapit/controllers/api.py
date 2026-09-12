@@ -1,44 +1,46 @@
+"""
+Autocomplete dei vocabolari DCAT-AP_IT (regioni, temi EU, luoghi, lingue) usato
+dai campi del form dataset (vedi `data_module_source` in schema.py):
 
+    /api/2/util/vocabulary/autocomplete?vocabulary_id=<voc>&incomplete=<q>
+
+Riscritto per Flask/CKAN 2.12: la vecchia versione usava request.str_params,
+urllib.unquote e la rotta Pylons (IRoutes) che non esiste piu'.
+"""
 import logging
-import urllib
+from urllib.parse import unquote
 
-import ckan.logic as logic
+from flask import Blueprint, jsonify
+
 import ckan.model as model
-from ckan.common import c, request
-from ckan.views.api import _finish
-from flask.views import MethodView
+import ckan.plugins.toolkit as tk
 
-log = logging.getLogger(__file__)
-
-# shortcuts
-get_action = logic.get_action
+log = logging.getLogger(__name__)
 
 
-class DCATAPITApiController(MethodView):
-    methods = ['GET', ]
+def vocabulary_autocomplete():
+    q = unquote(tk.request.args.get('incomplete', '') or '')
+    vocab = tk.request.args.get('vocabulary_id')
+    limit = tk.request.args.get('limit', 10)
 
-    def get(self):
-        q = request.str_params.get('incomplete', '')
-        q = urllib.unquote(q)
+    tag_names = []
+    if q and vocab:
+        context = {'model': model, 'session': model.Session,
+                   'user': tk.g.user, 'auth_user_obj': tk.g.userobj}
+        data_dict = {'q': q, 'limit': limit, 'vocabulary_id': vocab}
+        try:
+            tag_names = tk.get_action('tag_autocomplete')(context, data_dict)
+        except tk.ObjectNotFound:
+            log.warning('Vocabolario %s non trovato', vocab)
 
-        vocab = request.params.get('vocabulary_id', None)
+    return jsonify({'ResultSet': {'Result': [{'Name': t} for t in tag_names]}})
 
-        vocab = str(vocab)
 
-        log.debug('Looking for Vocab %r', vocab)
-
-        limit = request.params.get('limit', 10)
-
-        tag_names = []
-        if q:
-            context = {'model': model, 'session': model.Session, 'user': c.user, 'auth_user_obj': c.userobj}
-            data_dict = {'q': q, 'limit': limit, 'vocabulary_id': vocab}
-            tag_names = get_action('tag_autocomplete')(context, data_dict)
-
-        resultSet = {
-            'ResultSet': {
-                'Result': [{'Name': tag} for tag in tag_names]
-            }
-        }
-
-        return _finish(200, resultSet, 'json')
+def get_blueprint():
+    bp = Blueprint('dcatapit_api', __name__)
+    for rule in ('/api/util/vocabulary/autocomplete',
+                 '/api/1/util/vocabulary/autocomplete',
+                 '/api/2/util/vocabulary/autocomplete',
+                 '/api/3/util/vocabulary/autocomplete'):
+        bp.add_url_rule(rule, view_func=vocabulary_autocomplete, methods=['GET'])
+    return bp
