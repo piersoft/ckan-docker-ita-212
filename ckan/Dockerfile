@@ -1,13 +1,15 @@
 # =====================================================================
 #  CKAN Docker per l'Italia — immagine CKAN 2.12
-#  Base ufficiale: python 3.14 slim, utente non-root `ckan` (uid 503).
-#  Le estensioni vengono abilitate una fase alla volta (vedi CHANGELOG):
-#    FASE 1  core + xloader                         (fatta)
-#    FASE 2  ckanext-harvest 1.6.3 + patch                (fatta)
-#    FASE 3  ckanext-dcat 2.4.4 (DCAT-AP 3) + patch + ckanext-dcatita  (fatta)
-#    FASE 4  ckanext-dcatapit + multilang adeguate a 2.12   (fatta)
-#    FASE 5  oai-pmh-server (OpenAIRE), dcat-ap-edp-mqa (MQA)  (fatta)
-#    FASE 6  migrazione DB reale e switch in produzione       (fatta)
+#  Base ufficiale ckan/ckan-base (Python 3.14, utente non-root `ckan`, uid 503).
+#
+#  Estensioni, nell'ordine di installazione:
+#    upstream (pip, tag fissato) : ckanext-xloader, ckanext-harvest, ckanext-dcat
+#    patch minime a upstream     : patches/ckanext-harvest-patches, patches/ckanext-dcat-patches
+#    fork nel repo (cartella ckan/): ckanext-dcatita, ckanext-dcatapit, ckanext-multilang,
+#                                  ckanext-oai-pmh-server, ckanext-dcat-ap-edp-mqa
+#    patch al core               : patches/ckan-core-patches
+#  Per aggiornare un'estensione upstream: cambiare il tag qui e riapplicare le patch.
+#  Storia della migrazione da 2.10: CHANGELOG.md
 # =====================================================================
 FROM ckan/ckan-base:2.12.0-py3.14
 
@@ -19,7 +21,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # ---------------------------------------------------------------------
-#  FASE 1 — Xloader (DataStore)
+#  ckanext-xloader (DataStore)
 # ---------------------------------------------------------------------
 # NB: le estensioni vanno installate in modalita' editable sotto ${SRC_DIR}
 # (PIP_SRC), altrimenti il namespace `ckanext` di /srv/app/src/ckan oscura
@@ -28,9 +30,9 @@ RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-xloader.g
     && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-xloader/requirements.txt
 
 # ---------------------------------------------------------------------
-#  FASE 2 — Harvest: upstream 1.6.3 (supporto ufficiale CKAN 2.12) +
-#  patch locali in patches/ckanext-harvest-patches/*.patch
-#  (normalizzazione dei cataloghi federati, harvest source con URL duplicato)
+#  ckanext-harvest upstream + patch locali (patches/ckanext-harvest-patches:
+#  normalizzazione dei cataloghi CKAN federati, id risorsa non-UUID,
+#  harvest source con URL duplicato)
 # ---------------------------------------------------------------------
 # (dalla 1.6.3 le dipendenze stanno nel pyproject.toml: niente requirements.txt)
 RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-harvest.git@v1.6.3#egg=ckanext-harvest
@@ -39,10 +41,10 @@ RUN cd ${SRC_DIR}/ckanext-harvest && for f in ${APP_DIR}/patches/ckanext-harvest
         echo "Applying $f"; patch -p1 < "$f"; done
 
 # ---------------------------------------------------------------------
-#  FASE 3 — ckanext-dcat 2.4.4 upstream + 4 patch minime
-#  (patches/ckanext-dcat-patches/: subcatalog per organizzazione, fq multipli
-#  sul catalog.ttl, file-type nel JSON harvester) + ckanext-dcatita (regole
-#  italiane via interfacce ufficiali, vedi ckanext-dcatita/README.md)
+#  ckanext-dcat upstream (DCAT-AP 3) + 4 patch minime (patches/ckanext-dcat-patches:
+#  subcatalog per organizzazione, fq multipli sul catalog.ttl, file-type nel
+#  JSON harvester) + ckanext-dcatita (regole dati.gov.it via interfacce
+#  ufficiali di ckanext-dcat, vedi ckanext-dcatita/README.md)
 # ---------------------------------------------------------------------
 RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-dcat.git@v2.4.4#egg=ckanext-dcat \
     && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-dcat/requirements.txt
@@ -53,9 +55,8 @@ COPY ckanext-dcatita ${SRC_DIR}/ckanext-dcatita
 RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcatita
 
 # ---------------------------------------------------------------------
-#  FASE 4 — ckanext-dcatapit (fork in ckan/ckanext-dcatapit, adeguato a 2.12:
-#  extras JSONB, IGroupForm create/update/show_group_schema, CSRF, niente
-#  Pylons). Fornisce form/vocabolari DCAT-AP_IT e il profilo RDF it_dcat_ap.
+#  ckanext-dcatapit (fork adeguato a CKAN 2.12): form e vocabolari DCAT-AP_IT,
+#  profilo RDF it_dcat_ap. Richiede ckanext-multilang e ckanext-dcatita a runtime.
 # ---------------------------------------------------------------------
 COPY ckanext-dcatapit ${SRC_DIR}/ckanext-dcatapit
 RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcatapit \
@@ -66,14 +67,13 @@ COPY patches/theme_to_group.ini patches/topics.json patches/regions.rdf \
      ${APP_DIR}/patches/
 COPY patches/groups ${APP_DIR}/patches/groups
 RUN chmod 666 ${APP_DIR}/patches/theme_to_group.ini ${APP_DIR}/patches/topics.json
-# ckanext-multilang (geosolutions-it, master 2026-05) vendorizzato in ckan/ckanext-multilang
-# e portato a SQLAlchemy 2.0: dcatapit lo richiede a runtime (campi localizzati, holder).
+# ckanext-multilang (fork geosolutions-it, master 2026-05, portato a SQLAlchemy 2)
 COPY ckanext-multilang ${SRC_DIR}/ckanext-multilang
 RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-multilang
 
 # ---------------------------------------------------------------------
-#  FASE 5 — OAI-PMH server (OpenAIRE/DataCite) e profilo MQA data.europa.eu
-#  Entrambe facoltative: attivare/disattivare via CKAN__PLUGINS e
+#  OAI-PMH server (OpenAIRE/DataCite) e profilo MQA data.europa.eu.
+#  Entrambe facoltative: si attivano/disattivano via CKAN__PLUGINS e
 #  CKANEXT__DCAT__RDF__PROFILES nel .env (vedi .env.example).
 # ---------------------------------------------------------------------
 COPY ckanext-oai-pmh-server ${SRC_DIR}/ckanext-oai-pmh-server
