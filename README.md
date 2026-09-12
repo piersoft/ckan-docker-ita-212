@@ -185,13 +185,62 @@ Il portale è ora raggiungibile all'indirizzo impostato in `CKAN_SITE_URL`.
 
 ---
 
+## Produzione (dominio reale + Let's Encrypt)
+
+Il certificato resta gestito da certbot **sull'host** (`/etc/letsencrypt`); NGINX lo
+monta in sola lettura tramite l'override `docker-compose.prod.yml`:
+
+```sh
+cp nginx/prod/default.conf.example nginx/prod/default.conf
+sed -i 's/DOMINIO/dati.miocomune.it/g' nginx/prod/default.conf
+# nel .env:
+#   CKAN_SITE_URL=https://dati.miocomune.it
+#   CKANEXT__DCAT__BASE__URI=https://dati.miocomune.it
+#   NGINX_PORT_HOST=80   NGINX_SSLPORT_HOST=443
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml
+docker compose up -d
+```
+
+La porta 80 fa solo redirect a HTTPS (le challenge ACME non servono se certbot usa
+un authenticator DNS). Dopo ogni rinnovo del certificato:
+`docker compose exec nginx nginx -s reload` (es. come `--deploy-hook` di certbot).
+
 ## Migrare da ckan-docker-ita (CKAN 2.10)
 
-1. `pg_dump -Fc` di `ckandb` e `datastore` dal vecchio stack; restore nel nuovo `db`
-   con `pg_restore --no-owner --role=ckandbuser` (vedi CHANGELOG, Fase 6).
-2. `docker compose up -d`: `prerun.py` esegue `ckan db upgrade` (extras → JSONB,
-   migrazioni dei plugin), poi `ckan search-index rebuild -e`.
-3. Copiare il contenuto del volume `ckan_storage` vecchio (`storage/`) nel nuovo.
+Procedura collaudata su un catalogo reale (10.437 dataset, 314k extras, 930 MB), con i
+due stack che convivono sulla stessa macchina (`COMPOSE_PROJECT_NAME`, nomi container e
+porte diversi). Il vecchio stack **non viene modificato**: solo `pg_dump` in lettura.
+
+1. Avviare il nuovo stack vuoto (init: tabelle e vocabolari) e verificarlo.
+2. Dump dal vecchio DB e restore nel nuovo (il restore parallelo vuole un file, non stdin):
+
+   ```sh
+   docker exec db pg_dump -U postgres -Fc ckandb > ckandb.dump
+   docker exec db pg_dump -U postgres -Fc datastore > datastore.dump
+   docker compose stop ckan ckan-worker ckan-gather ckan-fetch
+   docker compose exec -T db psql -U postgres -c "DROP DATABASE ckandb" -c "CREATE DATABASE ckandb OWNER ckandbuser" \
+       -c "DROP DATABASE datastore" -c "CREATE DATABASE datastore OWNER ckandbuser"
+   docker cp ckandb.dump db212:/tmp/ && docker cp datastore.dump db212:/tmp/
+   docker compose exec -T db pg_restore -U postgres -d ckandb --no-owner --role=ckandbuser --no-privileges -j 4 /tmp/ckandb.dump
+   docker compose exec -T db pg_restore -U postgres -d datastore --no-owner --role=ckandbuser --no-privileges -j 4 /tmp/datastore.dump
+   ```
+
+3. `docker compose up -d`: `prerun.py` esegue `ckan db upgrade` (schema 2.10 → 2.12:
+   extras in JSONB, `package_extra` rimossa, migrazioni dei plugin), poi
+   `ckan datastore set-permissions`. Verifica: `select version_num from alembic_version`
+   → `9445ce34fc23`.
+4. Reindex Solr (~1,5 ore per 10k dataset, in background):
+
+   ```sh
+   docker compose exec -d ckan sh -c "ckan search-index rebuild -e > /var/lib/ckan/reindex.log 2>&1"
+   ```
+
+5. Copiare i file caricati dal vecchio volume `ckan_storage` (`storage/`) nel nuovo,
+   con owner `503:502` (utente `ckan`).
+6. Confrontare `dataset.ttl` e `catalog.ttl` fra i due stack (stessi predicati, stesse URI).
+7. Switch: `docker compose stop` sul vecchio stack, `.env` di produzione (sezione sopra),
+   `docker compose up -d --force-recreate ckan ckan-worker ckan-gather ckan-fetch nginx`.
+   Rollback: fermare nginx/ckan nuovi e `docker compose start` sul vecchio.
 
 ## Note sulle regole per l'harvesting dei cataloghi federati
 
