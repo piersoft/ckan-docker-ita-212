@@ -10,7 +10,7 @@ p = os.path.join(os.path.dirname(oaipmh.__file__), 'common.py')
 s = open(p).read()
 s = s.replace("import pkg_resources\n", "")
 s = re.sub(r"req = pkg_resources\.Requirement\.parse\('pyoai'\)\n\s*egg = pkg_resources\.working_set\.find\(req\)",
-           "egg = None  # ckan-docker-ita: pkg_resources non disponibile", s)
+           "egg = None  # ckan-docker-ita: patch, vedi patch_pyoai.py", s)
 open(p, 'w').write(s)
 assert 'pkg_resources' not in s, 'patch pyoai fallita'
 print('pyoai patched OK:', p)
