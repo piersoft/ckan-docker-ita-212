@@ -20,7 +20,11 @@ RUN apt-get update \
 # ---------------------------------------------------------------------
 #  FASE 1 — Xloader (DataStore)
 # ---------------------------------------------------------------------
-RUN pip3 install --no-cache-dir ckanext-xloader==2.5.0
+# NB: le estensioni vanno installate in modalita' editable sotto ${SRC_DIR}
+# (PIP_SRC), altrimenti il namespace `ckanext` di /srv/app/src/ckan oscura
+# quello di site-packages e il plugin non viene trovato.
+RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-xloader.git@2.5.0#egg=ckanext-xloader \
+    && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-xloader/requirements.txt
 
 # ---------------------------------------------------------------------
 #  FASE 2 — Harvest  (disattivato: da portare su 2.12 senza pylons)
@@ -32,7 +36,8 @@ RUN pip3 install --no-cache-dir ckanext-xloader==2.5.0
 # ---------------------------------------------------------------------
 #  FASE 3 — ckanext-dcat 2.4.x  (disattivato)
 # ---------------------------------------------------------------------
-# RUN pip3 install --no-cache-dir ckanext-dcat==2.4.4
+# RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-dcat.git@v2.4.4#egg=ckanext-dcat \
+#     && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-dcat/requirements.txt
 
 # ---------------------------------------------------------------------
 #  FASE 4 — ckanext-dcatapit  (disattivato)
