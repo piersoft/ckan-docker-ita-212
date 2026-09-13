@@ -5,6 +5,7 @@
 #   scripts/maintenance.sh daily           ogni notte: log harvest, job in limbo, log xloader, immagini dangling
 #   scripts/maintenance.sh weekly          ogni domenica: build cache Docker, container fermi
 #   scripts/maintenance.sh xloader-refresh (facoltativo) ricarica nel DataStore le risorse gia' caricate (i file remoti cambiano)
+#   scripts/maintenance.sh xloader-cleanup job xloader appesi (pending/running) e job di risorse cancellate — incluso in `daily`
 # Log: /var/log/ckan212-maintenance.log (ruotato da logrotate, vedi scripts/logrotate.conf)
 set -u
 export TZ=Europe/Rome   # timestamp del log in ora italiana (come quelli di CKAN)
@@ -32,6 +33,7 @@ case "${1:-}" in
       "delete from logs where job_id in (select job_id from jobs where finished_timestamp < now() - interval '30 days');
        delete from metadata where job_id in (select job_id from jobs where finished_timestamp < now() - interval '30 days');
        delete from jobs where finished_timestamp < now() - interval '30 days';" >> "$LOG" 2>&1
+    "$0" xloader-cleanup
     docker image prune -f >> "$LOG" 2>&1                              # immagini dangling dei rebuild
     run daily "--- fine"
     ;;
@@ -42,6 +44,18 @@ case "${1:-}" in
     docker system df >> "$LOG" 2>&1
     run weekly "--- fine"
     ;;
+  xloader-cleanup)
+    # Un job xloader interrotto (container riavviato, worker ucciso) resta "pending"
+    # o "running" per sempre e blocca i submit successivi sulla stessa risorsa:
+    # dopo 6 ore lo si marca "error" (i log restano, la risorsa torna risottomettibile).
+    run xloader-cleanup "job appesi e orfani"
+    docker compose exec -T db psql -U postgres -d ckandb -qAtc \
+      "update jobs set status='error',
+              error='{\"message\": \"Job interrotto: marcato da maintenance.sh\"}',
+              finished_timestamp = now()
+         where status in ('pending','running')
+           and requested_timestamp < now() - interval '6 hours';" >> "$LOG" 2>&1
+    ;;
   xloader-refresh)
     # le risorse nuove/modificate le carica xloader da solo (hook after_resource_*);
     # `all-existing` ricarica quelle gia' nel DataStore, `all` avrebbe il limite di 1000 dataset
@@ -49,6 +63,6 @@ case "${1:-}" in
     ckan xloader submit all-existing -y >> "$LOG" 2>&1
     ;;
   *)
-    echo "uso: $0 {harvest-run|harvest-all|daily|weekly|xloader-refresh}" >&2; exit 2
+    echo "uso: $0 {harvest-run|harvest-all|daily|weekly|xloader-cleanup|xloader-refresh}" >&2; exit 2
     ;;
 esac

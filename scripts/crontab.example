@@ -10,3 +10,4 @@ DIR=/home/ubuntu/ckan-docker-ita-212
 # facoltativo: ricarica nel DataStore le risorse gia' caricate (pesante: riscarica i CSV remoti);
 # le risorse nuove/modificate le carica xloader da solo
 # 0 2 1 * *   $DIR/scripts/maintenance.sh xloader-refresh
+# (la pulizia dei job xloader appesi e' gia' dentro `daily`, non serve una riga a parte)
