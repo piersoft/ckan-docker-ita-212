@@ -7,6 +7,7 @@
 #   scripts/maintenance.sh xloader-all     (facoltativo) risottomette TUTTE le risorse al DataStore
 # Log: /var/log/ckan212-maintenance.log (ruotato da logrotate, vedi scripts/logrotate.conf)
 set -u
+export TZ=Europe/Rome   # timestamp del log in ora italiana (come quelli di CKAN)
 cd "$(dirname "$0")/.." || exit 1
 LOG=/var/log/ckan212-maintenance.log
 ts() { date '+%F %T'; }
