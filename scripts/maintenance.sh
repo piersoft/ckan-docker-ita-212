@@ -22,9 +22,9 @@ case "${1:-}" in
     ckan harvester clean-harvest-log >> "$LOG" 2>&1                  # log harvest piu' vecchi di ckan.harvest.log_timeframe (default 10 gg)
     # log e job di xloader piu' vecchi di 30 giorni (tabelle jobs_db in ckandb)
     docker compose exec -T db psql -U postgres -d ckandb -qAtc \
-      "delete from logs where job_id in (select job_id from jobs where finished < now() - interval '30 days');
-       delete from metadata where job_id in (select job_id from jobs where finished < now() - interval '30 days');
-       delete from jobs where finished < now() - interval '30 days';" >> "$LOG" 2>&1
+      "delete from logs where job_id in (select job_id from jobs where finished_timestamp < now() - interval '30 days');
+       delete from metadata where job_id in (select job_id from jobs where finished_timestamp < now() - interval '30 days');
+       delete from jobs where finished_timestamp < now() - interval '30 days';" >> "$LOG" 2>&1
     docker image prune -f >> "$LOG" 2>&1                              # immagini dangling dei rebuild
     run daily "--- fine"
     ;;
