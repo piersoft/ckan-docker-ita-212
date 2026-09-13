@@ -73,7 +73,7 @@ case "${1:-}" in
     docker compose exec -T db psql -U postgres -d ckandb -tAqc \
       "select r.id from resource r
          where r.state='active'
-           and (r.extras->>'datastore_active') = 'true'
+           and r.extras like '%\"datastore_active\": true%'
          order by r.last_modified nulls last
          limit $LIMIT;" | tr -d ' \r' | while read -r rid; do
         [ -z "$rid" ] && continue
