@@ -9,6 +9,13 @@
 #                                          persistente ma il contenuto del file cambia (l'harvest
 #                                          non tocca i metadati -> gli hook xloader non scattano
 #                                          -> l'anteprima DataStore resta obsoleta)
+#   scripts/maintenance.sh xloader-retype [N]  UNA TANTUM: elimina la tabella DataStore e
+#                                          ricarica le risorse gia' caricate, cosi' xloader
+#                                          ne indovina i tipi (use_type_guessing agisce solo
+#                                          alla creazione: un semplice `submit` NON ritipizza).
+#                                          N = quante risorse per esecuzione (default 50).
+#                                          Durante la ricarica l'anteprima e la Data API della
+#                                          risorsa non rispondono: non farlo in orario di punta.
 #   scripts/maintenance.sh xloader-cleanup job xloader appesi (pending/running) e job di risorse cancellate — incluso in `daily`
 # Log: /var/log/ckan212-maintenance.log (ruotato da logrotate, vedi scripts/logrotate.conf)
 set -u
@@ -60,6 +67,31 @@ case "${1:-}" in
          where status in ('pending','running')
            and requested_timestamp < now() - interval '6 hours';" >> "$LOG" 2>&1
     ;;
+  xloader-retype)
+    LIMIT="${2:-50}"
+    run xloader-retype "ritipizzazione di max $LIMIT risorse"
+    docker compose exec -T db psql -U postgres -d ckandb -tAqc \
+      "select r.id from resource r
+         where r.state='active'
+           and (r.extras->>'datastore_active') = 'true'
+         order by r.last_modified nulls last
+         limit $LIMIT;" | tr -d ' \r' | while read -r rid; do
+        [ -z "$rid" ] && continue
+        pkg=$(docker compose exec -T db psql -U postgres -d ckandb -tAqc \
+              "select package_id from resource where id='$rid'" | tr -d ' \r')
+        echo "$(ts) [xloader-retype] $rid (dataset $pkg)" >> "$LOG"
+        # datastore_delete via API interna (il token e' quello gia' in ckan.ini per xloader)
+        docker compose exec -T ckan sh -c \
+          'curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:5000/api/3/action/datastore_delete \
+             -H "Authorization: $(grep "^ckanext.xloader.api_token" /srv/app/ckan.ini | cut -d= -f2-)" \
+             -H "Content-Type: application/json" \
+             -d "{\"resource_id\":\"'"$rid"'\",\"force\":true}"' >> "$LOG" 2>&1
+        echo >> "$LOG"
+        docker compose exec -T ckan ckan xloader submit "$pkg" -y >> "$LOG" 2>&1
+        sleep 2
+      done
+    run xloader-retype "fine (rilanciare finche' restano risorse text)"
+    ;;
   xloader-refresh)
     # `all-existing` = tutte le risorse gia' presenti nel DataStore (`all` si ferma a 1000 dataset).
     # Le risorse nuove o con metadati cambiati le carica xloader da solo via hook; questo comando
@@ -68,6 +100,6 @@ case "${1:-}" in
     ckan xloader submit all-existing -y >> "$LOG" 2>&1
     ;;
   *)
-    echo "uso: $0 {harvest-run|harvest-all|daily|weekly|xloader-cleanup|xloader-refresh}" >&2; exit 2
+    echo "uso: $0 {harvest-run|harvest-all|daily|weekly|xloader-cleanup|xloader-refresh|xloader-retype [N]}" >&2; exit 2
     ;;
 esac
