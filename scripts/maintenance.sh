@@ -4,7 +4,11 @@
 #   scripts/maintenance.sh harvest-all     crea un job per TUTTE le sorgenti attive (ignora la frequenza) e lo avvia
 #   scripts/maintenance.sh daily           ogni notte: log harvest, job in limbo, log xloader, immagini dangling
 #   scripts/maintenance.sh weekly          ogni domenica: build cache Docker, container fermi
-#   scripts/maintenance.sh xloader-refresh (facoltativo) ricarica nel DataStore le risorse gia' caricate (i file remoti cambiano)
+#   scripts/maintenance.sh xloader-refresh ricarica nel DataStore le risorse gia' caricate: NECESSARIO
+#                                          sui cataloghi harvestati, dove l'URL della risorsa e'
+#                                          persistente ma il contenuto del file cambia (l'harvest
+#                                          non tocca i metadati -> gli hook xloader non scattano
+#                                          -> l'anteprima DataStore resta obsoleta)
 #   scripts/maintenance.sh xloader-cleanup job xloader appesi (pending/running) e job di risorse cancellate — incluso in `daily`
 # Log: /var/log/ckan212-maintenance.log (ruotato da logrotate, vedi scripts/logrotate.conf)
 set -u
@@ -57,8 +61,9 @@ case "${1:-}" in
            and requested_timestamp < now() - interval '6 hours';" >> "$LOG" 2>&1
     ;;
   xloader-refresh)
-    # le risorse nuove/modificate le carica xloader da solo (hook after_resource_*);
-    # `all-existing` ricarica quelle gia' nel DataStore, `all` avrebbe il limite di 1000 dataset
+    # `all-existing` = tutte le risorse gia' presenti nel DataStore (`all` si ferma a 1000 dataset).
+    # Le risorse nuove o con metadati cambiati le carica xloader da solo via hook; questo comando
+    # serve per i contenuti che cambiano a URL invariato.
     run xloader "refresh delle risorse gia' nel DataStore"
     ckan xloader submit all-existing -y >> "$LOG" 2>&1
     ;;
