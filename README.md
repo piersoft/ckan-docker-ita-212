@@ -270,7 +270,7 @@ porte diversi). Il vecchio stack **non viene modificato**: solo `pg_dump` in let
    docker compose exec -d ckan sh -c "ckan search-index rebuild -e > /var/lib/ckan/reindex.log 2>&1"
    ```
 
-5. Copiare i file caricati dal vecchio volume `ckan_storage` (`storage/`) nel nuovo,
+5. Copiare i file caricati dal vecchio volume `ckan_storage` (`storage/ e /resources`) nel nuovo,
    con owner `503:502` (utente `ckan`).
 6. Confrontare `dataset.ttl` e `catalog.ttl` fra i due stack (stessi predicati, stesse URI).
 7. Switch: `docker compose stop` sul vecchio stack, `.env` di produzione (sezione sopra),
