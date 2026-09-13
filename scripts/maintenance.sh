@@ -1,6 +1,7 @@
 #!/bin/bash
 # Manutenzione periodica dello stack (da cron sull'host). Uso:
-#   scripts/maintenance.sh harvest-run     ogni 15 min: avvia i job harvest schedulati e chiude quelli finiti
+#   scripts/maintenance.sh harvest-run     ogni 15 min: avvia i job harvest la cui frequenza e' scaduta e chiude quelli finiti
+#   scripts/maintenance.sh harvest-all     crea un job per TUTTE le sorgenti attive (ignora la frequenza) e lo avvia
 #   scripts/maintenance.sh daily           ogni notte: log harvest, job in limbo, log xloader, immagini dangling
 #   scripts/maintenance.sh weekly          ogni domenica: build cache Docker, container fermi
 #   scripts/maintenance.sh xloader-all     (facoltativo) risottomette TUTTE le risorse al DataStore
@@ -14,6 +15,11 @@ ckan() { docker compose exec -T ckan ckan "$@"; }
 
 case "${1:-}" in
   harvest-run)
+    ckan harvester run >> "$LOG" 2>&1
+    ;;
+  harvest-all)
+    run harvest-all "job per tutte le sorgenti attive"
+    ckan harvester job-all >> "$LOG" 2>&1
     ckan harvester run >> "$LOG" 2>&1
     ;;
   daily)
@@ -40,6 +46,6 @@ case "${1:-}" in
     ckan xloader submit all >> "$LOG" 2>&1
     ;;
   *)
-    echo "uso: $0 {harvest-run|daily|weekly|xloader-all}" >&2; exit 2
+    echo "uso: $0 {harvest-run|harvest-all|daily|weekly|xloader-all}" >&2; exit 2
     ;;
 esac

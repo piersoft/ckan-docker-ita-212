@@ -198,7 +198,8 @@ crontab consigliato per root (adattare il percorso):
 
 | quando | comando | cosa fa |
 |---|---|---|
-| ogni 15 min | `harvest-run` | `ckan harvester run`: avvia i job harvest schedulati **e chiude quelli finiti** (senza, restano "Running") |
+| ogni 15 min | `harvest-run` | `ckan harvester run`: avvia i job delle sorgenti la cui frequenza (`DAILY`, `WEEKLY`…) è scaduta **e chiude quelli finiti** (senza, restano "Running"). Con sorgenti `MANUAL` non crea job. |
+| ogni notte | `harvest-all` | `ckan harvester job-all` + `run`: harvest di **tutte** le sorgenti attive, indipendentemente dalla frequenza |
 | ogni notte | `daily` | `abort-failed-jobs` (job harvest in limbo >24h), `clean-harvest-log`, pulizia log/job xloader >30 gg, `docker image prune` |
 | domenica | `weekly` | build cache Docker >7 gg, container fermi, riepilogo `docker system df` |
 | facoltativo | `xloader-all` | `ckan xloader submit all` — pesante su cataloghi harvestati (riscarica i CSV remoti) |
