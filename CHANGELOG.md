@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-09-13` — DataStore con tipi delle colonne
+- Attivato `ckanext.xloader.use_type_guessing` (con `strict_type_guessing=false`: una colonna con celle sporche diventa `text` invece di far fallire l'intero typing) e alzato `ckan.max_resource_size`, da cui dipende `max_type_guessing_length` (default: 1/10). Il Data Dictionary non e' piu' tutto `text`: sul catalogo di collaudo 32 colonne `numeric` e 1 `timestamp` su 70.
+- `use_type_guessing` agisce **solo alla creazione** della tabella DataStore: `xloader submit` su una risorsa gia' caricata non ritipizza. Per il pregresso c'e' `scripts/maintenance.sh xloader-retype [N]` (datastore_delete + submit, a scaglioni).
+- Il percorso con tipi (tabulator) e' molto piu' lento del `COPY` diretto e rifiuta i CSV con righe piu' lunghe dell'intestazione: quelle risorse restano senza anteprima.
+
 ## `2026-09-13` — Fix post-esercizio
 - dcatapit `IGroupForm.create_group_schema`: `default_group_schema` non esiste in 2.12 (`default_create_group_schema`): la creazione di organizzazioni/gruppi dava 500.
 - ckanext-harvest: i consumer gather/fetch morivano ogni ~60 s con `redis.exceptions.TimeoutError: Timeout reading from socket` (BLPOP senza timeout) e venivano rilanciati da Compose. Patch `04_queue_redis_timeout.patch`: attesa a blocchi di 30 s e riconnessione automatica sugli errori di rete.
