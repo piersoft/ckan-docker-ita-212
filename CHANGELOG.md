@@ -1,5 +1,9 @@
 # Changelog
 
+## `2026-09-13` — Fix post-esercizio
+- dcatapit `IGroupForm.create_group_schema`: `default_group_schema` non esiste in 2.12 (`default_create_group_schema`): la creazione di organizzazioni/gruppi dava 500.
+- ckanext-harvest: i consumer gather/fetch morivano ogni ~60 s con `redis.exceptions.TimeoutError: Timeout reading from socket` (BLPOP senza timeout) e venivano rilanciati da Compose. Patch `04_queue_redis_timeout.patch`: attesa a blocchi di 30 s e riconnessione automatica sugli errori di rete.
+
 ## `2026-09-13` — Badge MQA opzionale
 - Il badge "Punteggio qualità dal portale europeo" (nel 2.10 era una copia intera di `package/read.html`) e' ora un override pulito in ckanext-dcatita (`templates/package/read.html`, blocchi `package_notes` e `scripts`), attivabile con `CKANEXT__DCATITA__MQA_BADGE=true`. Sensato solo per cataloghi harvestati da data.europa.eu.
 
