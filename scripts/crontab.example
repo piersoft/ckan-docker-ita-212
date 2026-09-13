@@ -2,6 +2,9 @@
 # adattando il percorso. I log vanno in /var/log/ckan212-maintenance.log.
 DIR=/home/ubuntu/ckan-docker-ita-212
 */15 * * * *  $DIR/scripts/maintenance.sh harvest-run
+# harvest di TUTTE le sorgenti attive ogni notte alle 01:00 (indipendente dalla frequenza
+# impostata su ciascuna); commentare se si preferisce governare tutto con le frequenze
+0 1 * * *     $DIR/scripts/maintenance.sh harvest-all
 10 3 * * *    $DIR/scripts/maintenance.sh daily
 30 4 * * 0    $DIR/scripts/maintenance.sh weekly
 # facoltativo: risottomette tutte le risorse a xloader (pesante: riscarica i CSV remoti)
