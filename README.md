@@ -191,6 +191,22 @@ Il portale è ora raggiungibile all'indirizzo impostato in `CKAN_SITE_URL`.
 
 ---
 
+## Manutenzione periodica (cron)
+
+`scripts/maintenance.sh` raccoglie i lavori ricorrenti; `scripts/crontab.example` è il
+crontab consigliato per root (adattare il percorso):
+
+| quando | comando | cosa fa |
+|---|---|---|
+| ogni 15 min | `harvest-run` | `ckan harvester run`: avvia i job harvest schedulati **e chiude quelli finiti** (senza, restano "Running") |
+| ogni notte | `daily` | `abort-failed-jobs` (job harvest in limbo >24h), `clean-harvest-log`, pulizia log/job xloader >30 gg, `docker image prune` |
+| domenica | `weekly` | build cache Docker >7 gg, container fermi, riepilogo `docker system df` |
+| facoltativo | `xloader-all` | `ckan xloader submit all` — pesante su cataloghi harvestati (riscarica i CSV remoti) |
+
+I log dei container sono ruotati da Docker (`x-logging` in `docker-compose.yml`: 20 MB × 3
+per servizio); il log della manutenzione va in `/var/log/ckan212-maintenance.log`
+(`scripts/logrotate.conf` → `/etc/logrotate.d/`).
+
 ## Verifica delle funzionalità
 
 - Catalogo RDF: `${CKAN_SITE_URL}/catalog.rdf` e `.../catalog.ttl`
