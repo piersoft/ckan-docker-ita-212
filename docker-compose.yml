@@ -8,9 +8,18 @@ volumes:
   pg_data:
   solr_data:
 
+# Rotazione dei log dei container (json-file): 20 MB x 3 file per servizio.
+# Si applica alla (ri)creazione dei container: `docker compose up -d`.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "3"
+
 services:
 
   nginx:
+    logging: *default-logging
     container_name: ${NGINX_CONTAINER_NAME}
     build:
       context: nginx/
@@ -27,6 +36,7 @@ services:
       - "0.0.0.0:${NGINX_SSLPORT_HOST}:${NGINX_SSLPORT}"
 
   ckan:
+    logging: *default-logging
     container_name: ${CKAN_CONTAINER_NAME}
     image: ${CKAN_CONTAINER_NAME}-image
     build:
@@ -67,6 +77,7 @@ services:
       start_period: 300s
 
   ckan-worker:
+    logging: *default-logging
     container_name: ${WORKER_CONTAINER_NAME}
     image: ${CKAN_CONTAINER_NAME}-image
     networks:
@@ -87,6 +98,7 @@ services:
 
   # Consumer harvest: sostituiscono i [program:*] del vecchio supervisord.conf.
   ckan-gather:
+    logging: *default-logging
     container_name: ${WORKER_CONTAINER_NAME}-gather
     image: ${CKAN_CONTAINER_NAME}-image
     networks: [ckannet, dbnet, solrnet, redisnet]
@@ -100,6 +112,7 @@ services:
     command: ["ckan", "-c", "/srv/app/ckan.ini", "harvester", "gather-consumer"]
 
   ckan-fetch:
+    logging: *default-logging
     container_name: ${WORKER_CONTAINER_NAME}-fetch
     image: ${CKAN_CONTAINER_NAME}-image
     networks: [ckannet, dbnet, solrnet, redisnet]
@@ -113,6 +126,7 @@ services:
     command: ["ckan", "-c", "/srv/app/ckan.ini", "harvester", "fetch-consumer"]
 
   db:
+    logging: *default-logging
     container_name: ${POSTGRESQL_CONTAINER_NAME}
     build:
       context: postgresql/
@@ -138,6 +152,7 @@ services:
       retries: 5
 
   solr:
+    logging: *default-logging
     container_name: ${SOLR_CONTAINER_NAME}
     networks:
       - solrnet
@@ -154,6 +169,7 @@ services:
       retries: 5
 
   redis:
+    logging: *default-logging
     container_name: ${REDIS_CONTAINER_NAME}
     image: redis:${REDIS_VERSION}
     networks:

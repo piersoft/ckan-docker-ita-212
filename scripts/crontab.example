@@ -1,0 +1,8 @@
+# Cron dell'host per ckan-docker-ita-212 — da aggiungere con `crontab -e` (root),
+# adattando il percorso. I log vanno in /var/log/ckan212-maintenance.log.
+DIR=/home/ubuntu/ckan-docker-ita-212
+*/15 * * * *  $DIR/scripts/maintenance.sh harvest-run
+10 3 * * *    $DIR/scripts/maintenance.sh daily
+30 4 * * 0    $DIR/scripts/maintenance.sh weekly
+# facoltativo: risottomette tutte le risorse a xloader (pesante: riscarica i CSV remoti)
+# 0 2 * * 6   $DIR/scripts/maintenance.sh xloader-all
