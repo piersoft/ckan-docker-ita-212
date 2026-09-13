@@ -202,7 +202,7 @@ crontab consigliato per root (adattare il percorso):
 | ogni notte | `harvest-all` | `ckan harvester job-all` + `run`: harvest di **tutte** le sorgenti attive, indipendentemente dalla frequenza |
 | ogni notte | `daily` | `abort-failed-jobs` (job harvest in limbo >24h), `clean-harvest-log`, pulizia log/job xloader >30 gg, `docker image prune` |
 | domenica | `weekly` | build cache Docker >7 gg, container fermi, riepilogo `docker system df` |
-| facoltativo | `xloader-all` | `ckan xloader submit all` — pesante su cataloghi harvestati (riscarica i CSV remoti) |
+| facoltativo | `xloader-refresh` | `ckan xloader submit all-existing`: ricarica nel DataStore le risorse già caricate (pesante: riscarica i CSV remoti). Le risorse nuove/modificate le carica xloader da solo tramite hook, anche durante gli harvest. |
 
 I log dei container sono ruotati da Docker (`x-logging` in `docker-compose.yml`: 20 MB × 3
 per servizio); il log della manutenzione va in `/var/log/ckan212-maintenance.log`
