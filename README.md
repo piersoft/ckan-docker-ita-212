@@ -149,12 +149,21 @@ Il portale è ora raggiungibile all'indirizzo impostato in `CKAN_SITE_URL`.
   docker compose down          # ferma e rimuove i container (i volumi restano)
   ```
 
-- **Rebuild dopo una modifica al codice** (le estensioni sono nella cartella `ckan/`):
+- **Dopo una modifica al `.env`** (plugin, profili, `EXTRA_UWSGI_OPTS`, badge MQA…):
+  va ricreato il container, non l'immagine. `restart` non basta (tiene l'ambiente vecchio).
+
+  ```sh
+  docker compose up -d ckan && docker compose up -d
+  ```
+  (il secondo `up` riallinea i worker, che leggono lo stesso `.env`)
+
+- **Dopo una modifica al codice** (estensioni in `ckan/`, patch, script di init, Dockerfile):
+  va ricostruita l'immagine.
 
   ```sh
   docker compose up -d --build ckan && docker compose up -d
   ```
-  (il secondo `up` riavvia anche i worker; NGINX ri-risolve l'upstream da solo)
+  (NGINX ri-risolve l'upstream da solo, non serve riavviarlo)
 
 - **Reindex Solr** (es. dopo un restore del DB):
 
