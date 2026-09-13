@@ -54,6 +54,7 @@ Variabili chiave:
 | `CKAN_OAIPMH_BASE_URL` | (opzionale) forza l'URL base OAI; se vuoto usa `${CKAN_SITE_URL}/oai`. |
 | `CKAN__PLUGINS` | Plugin attivi. Facoltativi: `dcat_ap_edp_mqa` (profilo MQA), `oai_pmh_server` (OpenAIRE). Cambiarli richiede `docker compose up -d ckan` (ricrea il container), non basta `restart`. |
 | `CKANEXT__DCAT__RDF__PROFILES` | Catena dei profili RDF: `dcat_ap_edp_mqa it_dcat_ap dcat_ita` (o `euro_dcat_ap_3 it_dcat_ap dcat_ita` senza MQA). `dcat_ita` sempre per ultimo. |
+| `CKANEXT__XLOADER__USE_TYPE_GUESSING` | `true` fa indovinare a xloader i tipi delle colonne (Data Dictionary con `numeric`/`timestamp`/`bool` invece di tutto `text`). Più lento del `COPY` diretto e attivo solo alla creazione della tabella. Da accompagnare a `CKANEXT__XLOADER__STRICT_TYPE_GUESSING=false` (una colonna con celle sporche diventa `text` invece di far fallire il typing) e, se serve su file grandi, a `CKANEXT__XLOADER__MAX_TYPE_GUESSING_LENGTH`. |
 | `CKANEXT__DCATITA__MQA_BADGE` | `true` mostra nella pagina di ogni dataset il riquadro "Punteggio qualità dal portale europeo" letto via API da data.europa.eu (default `false`). Ha senso solo se il catalogo è harvestato dal portale europeo; per gli altri il riquadro resta senza punteggio. |
 | `CKANEXT__DCATITA__HARVEST_VERIFY_SSL` | `false` (default) non verifica i certificati TLS dei cataloghi harvestati via RDF. |
 | `CKANEXT__OAI_PMH_SERVER__RESUMPTION_TOKEN_BATCH_SIZE` | Record per pagina di `ListRecords` (default `1024`). |
@@ -202,6 +203,7 @@ crontab consigliato per root (adattare il percorso):
 | ogni notte | `harvest-all` | `ckan harvester job-all` + `run`: harvest di **tutte** le sorgenti attive, indipendentemente dalla frequenza |
 | ogni notte | `daily` | `abort-failed-jobs` (job harvest in limbo), `clean-harvest-log`, `xloader-cleanup`, pulizia log/job xloader >30 gg, `docker image prune` |
 | domenica | `weekly` | build cache Docker >7 gg, container fermi, riepilogo `docker system df` |
+| una tantum | `xloader-retype [N]` | ritipizza le colonne delle risorse già nel DataStore: `datastore_delete` + `submit` a scaglioni di N (default 50). Serve perché `ckanext.xloader.use_type_guessing` agisce **solo alla creazione** della tabella: un `submit` su una risorsa già caricata lascia tutto `text`. Durante la ricarica anteprima e Data API di quella risorsa non rispondono. |
 | dentro `daily` | `xloader-cleanup` | marca "error" i job xloader rimasti `pending`/`running` da oltre 6 ore (container riavviato, worker ucciso): senza, quella risorsa non viene più risottomessa |
 | ogni notte (dopo l'harvest) | `xloader-refresh` | `ckan xloader submit all-existing`: ricarica nel DataStore le risorse già caricate. **Serve sui cataloghi harvestati**: se l'URL della risorsa è persistente (un webservice che espone sempre lo stesso `dati.csv`) il contenuto cambia senza che cambino i metadati, quindi l'harvest non tocca il dataset, gli hook di xloader non scattano e l'anteprima del DataStore resta obsoleta. Pesante (riscarica ogni file): settimanale se i dati cambiano di rado. |
 
