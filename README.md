@@ -203,7 +203,7 @@ crontab consigliato per root (adattare il percorso):
 | ogni notte | `daily` | `abort-failed-jobs` (job harvest in limbo), `clean-harvest-log`, `xloader-cleanup`, pulizia log/job xloader >30 gg, `docker image prune` |
 | domenica | `weekly` | build cache Docker >7 gg, container fermi, riepilogo `docker system df` |
 | dentro `daily` | `xloader-cleanup` | marca "error" i job xloader rimasti `pending`/`running` da oltre 6 ore (container riavviato, worker ucciso): senza, quella risorsa non viene più risottomessa |
-| facoltativo | `xloader-refresh` | `ckan xloader submit all-existing`: ricarica nel DataStore le risorse già caricate (pesante: riscarica i CSV remoti). Le risorse nuove/modificate le carica xloader da solo tramite hook, anche durante gli harvest. |
+| ogni notte (dopo l'harvest) | `xloader-refresh` | `ckan xloader submit all-existing`: ricarica nel DataStore le risorse già caricate. **Serve sui cataloghi harvestati**: se l'URL della risorsa è persistente (un webservice che espone sempre lo stesso `dati.csv`) il contenuto cambia senza che cambino i metadati, quindi l'harvest non tocca il dataset, gli hook di xloader non scattano e l'anteprima del DataStore resta obsoleta. Pesante (riscarica ogni file): settimanale se i dati cambiano di rado. |
 
 I log dei container sono ruotati da Docker (`x-logging` in `docker-compose.yml`: 20 MB × 3
 per servizio); il log della manutenzione va in `/var/log/ckan212-maintenance.log`
