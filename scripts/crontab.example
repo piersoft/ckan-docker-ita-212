@@ -7,5 +7,6 @@ DIR=/home/ubuntu/ckan-docker-ita-212
 0 1 * * *     $DIR/scripts/maintenance.sh harvest-all
 10 3 * * *    $DIR/scripts/maintenance.sh daily
 30 4 * * 0    $DIR/scripts/maintenance.sh weekly
-# facoltativo: risottomette tutte le risorse a xloader (pesante: riscarica i CSV remoti)
-# 0 2 * * 6   $DIR/scripts/maintenance.sh xloader-all
+# facoltativo: ricarica nel DataStore le risorse gia' caricate (pesante: riscarica i CSV remoti);
+# le risorse nuove/modificate le carica xloader da solo
+# 0 2 1 * *   $DIR/scripts/maintenance.sh xloader-refresh

@@ -4,7 +4,7 @@
 #   scripts/maintenance.sh harvest-all     crea un job per TUTTE le sorgenti attive (ignora la frequenza) e lo avvia
 #   scripts/maintenance.sh daily           ogni notte: log harvest, job in limbo, log xloader, immagini dangling
 #   scripts/maintenance.sh weekly          ogni domenica: build cache Docker, container fermi
-#   scripts/maintenance.sh xloader-all     (facoltativo) risottomette TUTTE le risorse al DataStore
+#   scripts/maintenance.sh xloader-refresh (facoltativo) ricarica nel DataStore le risorse gia' caricate (i file remoti cambiano)
 # Log: /var/log/ckan212-maintenance.log (ruotato da logrotate, vedi scripts/logrotate.conf)
 set -u
 export TZ=Europe/Rome   # timestamp del log in ora italiana (come quelli di CKAN)
@@ -42,11 +42,13 @@ case "${1:-}" in
     docker system df >> "$LOG" 2>&1
     run weekly "--- fine"
     ;;
-  xloader-all)
-    run xloader "submit di tutte le risorse al DataStore"
-    ckan xloader submit all >> "$LOG" 2>&1
+  xloader-refresh)
+    # le risorse nuove/modificate le carica xloader da solo (hook after_resource_*);
+    # `all-existing` ricarica quelle gia' nel DataStore, `all` avrebbe il limite di 1000 dataset
+    run xloader "refresh delle risorse gia' nel DataStore"
+    ckan xloader submit all-existing -y >> "$LOG" 2>&1
     ;;
   *)
-    echo "uso: $0 {harvest-run|harvest-all|daily|weekly|xloader-all}" >&2; exit 2
+    echo "uso: $0 {harvest-run|harvest-all|daily|weekly|xloader-refresh}" >&2; exit 2
     ;;
 esac
