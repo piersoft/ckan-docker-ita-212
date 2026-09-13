@@ -24,7 +24,7 @@ case "${1:-}" in
     ;;
   daily)
     run daily "--- inizio"
-    ckan harvester abort-failed-jobs --life-span 24 >> "$LOG" 2>&1   # job harvest in limbo da >24h
+    ckan harvester abort-failed-jobs 1 >> "$LOG" 2>&1               # job harvest in limbo da >1 giorno
     ckan harvester clean-harvest-log >> "$LOG" 2>&1                  # log harvest piu' vecchi di ckan.harvest.log_timeframe (default 10 gg)
     # log e job di xloader piu' vecchi di 30 giorni (tabelle jobs_db in ckandb)
     docker compose exec -T db psql -U postgres -d ckandb -qAtc \
