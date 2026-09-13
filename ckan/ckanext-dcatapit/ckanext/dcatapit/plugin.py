@@ -719,7 +719,7 @@ class DCATAPITOrganizationPlugin(plugins.SingletonPlugin, toolkit.DefaultOrganiz
     # CKAN >= 2.12: form_to_db_* / db_to_form_* sono stati rimossi da IGroupForm
     # in favore di create/update/show_group_schema().
     def create_group_schema(self):
-        schema = logic.schema.default_group_schema()
+        schema = logic.schema.default_create_group_schema()
         return self._modify_group_schema(schema)
 
     def update_group_schema(self):
