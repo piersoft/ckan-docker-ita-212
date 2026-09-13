@@ -200,8 +200,9 @@ crontab consigliato per root (adattare il percorso):
 |---|---|---|
 | ogni 15 min | `harvest-run` | `ckan harvester run`: avvia i job delle sorgenti la cui frequenza (`DAILY`, `WEEKLY`…) è scaduta **e chiude quelli finiti** (senza, restano "Running"). Con sorgenti `MANUAL` non crea job. |
 | ogni notte | `harvest-all` | `ckan harvester job-all` + `run`: harvest di **tutte** le sorgenti attive, indipendentemente dalla frequenza |
-| ogni notte | `daily` | `abort-failed-jobs` (job harvest in limbo >24h), `clean-harvest-log`, pulizia log/job xloader >30 gg, `docker image prune` |
+| ogni notte | `daily` | `abort-failed-jobs` (job harvest in limbo), `clean-harvest-log`, `xloader-cleanup`, pulizia log/job xloader >30 gg, `docker image prune` |
 | domenica | `weekly` | build cache Docker >7 gg, container fermi, riepilogo `docker system df` |
+| dentro `daily` | `xloader-cleanup` | marca "error" i job xloader rimasti `pending`/`running` da oltre 6 ore (container riavviato, worker ucciso): senza, quella risorsa non viene più risottomessa |
 | facoltativo | `xloader-refresh` | `ckan xloader submit all-existing`: ricarica nel DataStore le risorse già caricate (pesante: riscarica i CSV remoti). Le risorse nuove/modificate le carica xloader da solo tramite hook, anche durante gli harvest. |
 
 I log dei container sono ruotati da Docker (`x-logging` in `docker-compose.yml`: 20 MB × 3
