@@ -45,3 +45,12 @@ Aggiungere un ente = aggiungere una riga, non codice.
 `base`; `slash`; `strip`). Il profilo `it_dcat_ap` di ckanext-dcatapit la chiama al
 posto delle ~200 righe di `if holder_identifier` che aveva nel 2.10: dcatapit dipende
 quindi da ckanext-dcatita a runtime.
+
+## Note su casi reali gestiti
+
+- `access_url_from_download` (INPS, Comune di Palermo): `dcat:accessURL` = `downloadURL`.
+  Il fallback e' a cascata (`download_url` → `url` → pagina risorsa CKAN): su dati.gov.it
+  alcune risorse INPS senza `download_url` generavano un accessURL vuoto e facevano
+  fallire `catalog.ttl`.
+- Tutti i match per ente passano da `rules.match_subcatalog()`, che normalizza i campi
+  mancanti a stringa vuota: nessun `TypeError` su `holder_identifier` assente.

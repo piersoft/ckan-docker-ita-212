@@ -130,6 +130,9 @@ class DCATItaProfile(RDFProfile):
         if r.get("id") and dataset_dict.get("id") and site_url:
             access_url = f"{site_url}/dataset/{dataset_dict['id']}/resource/{r['id']}"
             if entry.get("access_url_from_download"):
+                # Fallback a cascata: su dati.gov.it (CKAN 2.10) alcune risorse INPS
+                # senza download_url producevano un accessURL vuoto e rompevano la
+                # generazione di catalog.ttl.
                 access_url = r.get("download_url") or url or access_url
             self._replace_all(dist, DCAT.accessURL, CleanedURIRef(access_url))
         if url and not any(g.objects(dist, DCAT.downloadURL)):
