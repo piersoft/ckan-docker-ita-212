@@ -112,7 +112,9 @@
                     <tr>
                         <th scope="row" class="dataset-label">{{ _(field.label) }}</th>
                         <td class="dataset-details">
-                            {% set hname = holder.holder_name[lang] or holder.holder_name %}
+                            {# ckan-docker-ita: se manca la lingua corrente il vecchio
+                               `or holder.holder_name` stampava il dict multilingua #}
+                            {% set hname = h.localize_field_value(holder.holder_name, lang) %}
                             {% if hname %}
                             <span class="bold">{{_('Name')}}: </span>
                             <span>{{ hname }}</span>
