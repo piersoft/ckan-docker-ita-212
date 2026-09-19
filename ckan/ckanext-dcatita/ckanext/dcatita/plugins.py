@@ -52,6 +52,27 @@ def dcatita_signature():
         return ""
 
 
+RESTRICTED_ACCESS_RIGHTS = "http://publications.europa.eu/resource/authority/access-right/RESTRICTED"
+
+
+def dcatita_is_restricted(pkg):
+    """True se il dataset ha dct:accessRights RESTRICTED (dati ad accesso limitato
+    ai sensi del Data Governance Act). Funziona sia con il dict completo di
+    package_show sia con quello ridotto dei risultati di ricerca."""
+    if not pkg:
+        return False
+    value = pkg.get("access_rights") or rules._get_extra(pkg, "access_rights") or ""
+    return "RESTRICTED" in str(value).upper()
+
+
+def dcatita_restricted_search_url():
+    """URL della ricerca filtrata sui soli dataset ad accesso limitato."""
+    try:
+        return tk.h.url_for("dataset.search", access_rights=RESTRICTED_ACCESS_RIGHTS)
+    except Exception:
+        return "/dataset/?access_rights=" + RESTRICTED_ACCESS_RIGHTS
+
+
 def dcatita_mqa_badge_enabled():
     """Badge MQA di data.europa.eu nella pagina dataset (ha senso solo se il
     catalogo e' harvestato dal portale europeo)."""
@@ -69,7 +90,9 @@ class DCATItaHarvestPlugin(p.SingletonPlugin):
 
     def get_helpers(self):
         return {"dcatita_signature": dcatita_signature,
-                "dcatita_mqa_badge_enabled": dcatita_mqa_badge_enabled}
+                "dcatita_mqa_badge_enabled": dcatita_mqa_badge_enabled,
+                "dcatita_is_restricted": dcatita_is_restricted,
+                "dcatita_restricted_search_url": dcatita_restricted_search_url}
 
     # --- sessione HTTP: i cataloghi PA con catene TLS rotte ------------------
     def update_session(self, session):

@@ -2,6 +2,12 @@
 
 {# ckan-docker-ita: badge con il punteggio MQA di data.europa.eu (era una copia intera
    di package/read.html nel 2.10). Attivo solo con ckanext.dcatita.mqa_badge = true. #}
+{# ckan-docker-ita: etichetta DGA accanto al titolo del dataset #}
+{% block page_heading %}
+  {{ super() }}
+  {% snippet "snippets/dcatita_dga_badge.html", pkg=pkg %}
+{% endblock %}
+
 {% block package_notes %}
   {{ super() }}
   {% if h.dcatita_mqa_badge_enabled() %}

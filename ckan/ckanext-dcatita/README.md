@@ -54,3 +54,11 @@ quindi da ckanext-dcatita a runtime.
   fallire `catalog.ttl`.
 - Tutti i match per ente passano da `rules.match_subcatalog()`, che normalizza i campi
   mancanti a stringa vuota: nessun `TypeError` su `holder_identifier` assente.
+
+## Etichetta DGA
+
+I dataset con `dct:accessRights` = `.../access-right/RESTRICTED` (accesso limitato ai sensi
+del Regolamento UE 2022/868, Data Governance Act) mostrano un'etichetta **DGA** accanto al
+titolo, sia nei risultati di ricerca sia nella pagina del dataset. L'etichetta è un link
+alla ricerca filtrata su quei soli dataset. Helper: `h.dcatita_is_restricted(pkg)`,
+`h.dcatita_restricted_search_url()`; snippet riusabile: `snippets/dcatita_dga_badge.html`.

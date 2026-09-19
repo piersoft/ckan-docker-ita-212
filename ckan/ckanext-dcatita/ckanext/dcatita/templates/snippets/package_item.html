@@ -1,0 +1,7 @@
+{% ckan_extends %}
+
+{# ckan-docker-ita: etichetta DGA accanto al titolo nei risultati di ricerca #}
+{% block heading_meta %}
+  {{ super() }}
+  {% snippet "snippets/dcatita_dga_badge.html", pkg=package, small=true %}
+{% endblock %}

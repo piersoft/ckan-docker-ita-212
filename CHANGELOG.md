@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-09-19` — Etichetta DGA sui dataset ad accesso limitato
+- I dataset con `dct:accessRights` RESTRICTED mostrano un badge **DGA** accanto al titolo (risultati di ricerca e pagina dataset), che linka alla ricerca filtrata. Helper `dcatita_is_restricted` / `dcatita_restricted_search_url` e snippet `snippets/dcatita_dga_badge.html` in ckanext-dcatita; override di `snippets/package_item.html` (blocco `heading_meta`) e `package/read.html` (blocco `page_heading`).
+
 ## `2026-09-13` — DataStore con tipi delle colonne
 - Attivato `ckanext.xloader.use_type_guessing` (con `strict_type_guessing=false`: una colonna con celle sporche diventa `text` invece di far fallire l'intero typing) e alzato `ckan.max_resource_size`, da cui dipende `max_type_guessing_length` (default: 1/10). Il Data Dictionary non e' piu' tutto `text`: sul catalogo di collaudo 32 colonne `numeric` e 1 `timestamp` su 70.
 - `use_type_guessing` agisce **solo alla creazione** della tabella DataStore: `xloader submit` su una risorsa gia' caricata non ritipizza. Per il pregresso c'e' `scripts/maintenance.sh xloader-retype [N]` (datastore_delete + submit, a scaglioni).
