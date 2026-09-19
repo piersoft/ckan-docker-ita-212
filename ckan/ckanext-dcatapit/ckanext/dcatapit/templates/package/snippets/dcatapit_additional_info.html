@@ -94,7 +94,7 @@
                         <tr>
                             <th scope="row" class="dataset-label">{{ _(field.label) }}</th>
                             <td class="dataset-details">
-                                {% set crname = creator.creator_name[lang] or creator.creator_name%}
+                                {% set crname = h.localize_field_value(creator.creator_name, lang) %}
                                 {% if crname %}
                                 <span class="bold">{{_('Name')}}: </span>
                                 <span>{{ crname }}</span>

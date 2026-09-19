@@ -22,7 +22,7 @@
               </tr>
               <tr>
                 <th scope="row">{{ _('License') }}</th>
-                <td>{{ lic_names[lang] or lic_name }}
+                <td>{{ h.localize_field_value(lic_names, lang) or lic_name }}
                  {% if lic_duri %}
                  <a href="{{ h.url_for_static_or_external(lic_duri) }}">LINK</a>
                  {% endif %}
