@@ -1,0 +1,11 @@
+{#
+  Etichetta "DGA" per i dataset con dct:accessRights RESTRICTED (Data Governance Act).
+  Parametri: pkg (dict del dataset), small (true per la versione compatta nei risultati).
+#}
+{% if h.dcatita_is_restricted(pkg) %}
+  <a href="{{ h.dcatita_restricted_search_url() }}"
+     class="badge bg-warning text-dark dcatita-dga-badge{{ ' ms-2' if not small }}"
+     title="{{ _('Dati ad accesso limitato ai sensi del Regolamento (UE) 2022/868 - Data Governance Act') }}">
+    DGA
+  </a>
+{% endif %}
