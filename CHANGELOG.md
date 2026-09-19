@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-09-19` — Campi multilingua stampati come dict
+- Alcuni cataloghi harvestati valorizzano i campi multilingua (es. `holder_name`) con un dict `{'en': '...'}`: la scheda dataset mostrava letteralmente `Nome: {'en': 'ATS della Montagna'}`. Aggiunto `helpers.localize_field_value()` (lingua corrente → it → en → primo valore), applicato in `couple_to_dict` e `couple_to_html`, cioe' in tutti i campi "accoppiati" della scheda (titolare, creatore, publisher…). Gestisce dict, JSON e repr Python; le stringhe normali restano invariate.
+
 ## `2026-09-19` — Etichetta DGA sui dataset ad accesso limitato
 - I dataset con `dct:accessRights` RESTRICTED mostrano un badge **DGA** accanto al titolo (risultati di ricerca e pagina dataset), che linka alla ricerca filtrata. Helper `dcatita_is_restricted` / `dcatita_restricted_search_url` e snippet `snippets/dcatita_dga_badge.html` in ckanext-dcatita; override di `snippets/package_item.html` (blocco `heading_meta`) e `package/read.html` (blocco `page_heading`).
 

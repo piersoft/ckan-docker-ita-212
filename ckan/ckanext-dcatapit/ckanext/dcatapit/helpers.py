@@ -166,12 +166,63 @@ def couple_to_html(field_couples, pkg_dict):
                     couple_type = couple.get('type', None)
                     field_value = format(field_value, couple_format, couple_type)
 
+                field_value = localize_field_value(field_value)
+
                 couple_label = couple.get('label', None)
                 if field_value and couple_label:
                     html_elements.append(Markup(('<span style="font-weight:bold">%s: </span><span>%s</span>') % (couple_label, field_value)))
 
         return html_elements if len(html_elements) > 0 else []
     return []
+
+
+def localize_field_value(value, lang=None):
+    """ckan-docker-ita: alcuni cataloghi harvestati valorizzano i campi multilingua
+    (es. holder_name) con un dict {'en': '...', 'it': '...'} oppure con la sua
+    rappresentazione testuale. Senza questa normalizzazione il template stampava
+    letteralmente "{'en': 'ATS della Montagna'}".
+    Ordine di preferenza: lingua corrente, italiano, inglese, primo valore utile."""
+    import ast
+
+    if value is None or isinstance(value, (int, float, bool)):
+        return value
+
+    if isinstance(value, str):
+        text = value.strip()
+        if not (text.startswith('{') and text.endswith('}')):
+            return value
+        parsed = None
+        for _parser in (json.loads, ast.literal_eval):
+            try:
+                parsed = _parser(text)
+                break
+            except Exception:
+                continue
+        if not isinstance(parsed, dict):
+            return value
+        value = parsed
+
+    if isinstance(value, dict):
+        if not value:
+            return ''
+        if lang is None:
+            try:
+                lang = h.lang()
+            except Exception:
+                lang = 'it'
+        for key in (lang, 'it', 'en'):
+            if value.get(key):
+                return value[key]
+        for item in value.values():
+            if item:
+                return item
+        return ''
+
+    if isinstance(value, (list, tuple)):
+        items = [str(localize_field_value(v, lang)) for v in value if v]
+        return ', '.join(items)
+
+    return value
 
 
 def couple_to_dict(field_couples, pkg_dict):
@@ -187,6 +238,8 @@ def couple_to_dict(field_couples, pkg_dict):
                 if couple_format:
                     couple_type = couple.get('type', None)
                     field_value = format(field_value, couple_format, couple_type)
+
+                field_value = localize_field_value(field_value)
 
                 couple_label = couple.get('label', None)
                 if field_value and couple_label:
