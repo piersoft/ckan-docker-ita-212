@@ -48,6 +48,12 @@ quindi da ckanext-dcatita a runtime.
 
 ## Note su casi reali gestiti
 
+- `adms:status` = `.../distribution-status/COMPLETED` su ogni distribuzione con un URL
+  reale: lo chiede il modello MQA 0-7,5 di data.europa.eu. Non sovrascrive uno status
+  dichiarato dalla sorgente (Deprecated, Withdrawn...). `accessURL` non e' un criterio
+  utile per decidere se la risorsa esiste, perche' e' sempre valorizzato con la pagina
+  risorsa CKAN.
+
 - `access_url_from_download` (INPS, Comune di Palermo): `dcat:accessURL` = `downloadURL`.
   Il fallback e' a cascata (`download_url` → `url` → pagina risorsa CKAN): su dati.gov.it
   alcune risorse INPS senza `download_url` generavano un accessURL vuoto e facevano
