@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-09-23` — adms:status sulle distribuzioni (modello MQA 0-7,5)
+- Il profilo `dcat_ita` aggiunge `adms:status` = `.../distribution-status/COMPLETED` alle distribuzioni con un URL reale, senza sovrascrivere uno status gia' dichiarato dalla sorgente. Su CKAN 2.10 era una patch a `euro_dcat_ap.py` di ckanext-dcat; qui non serve toccare upstream, che mappa gia' `status` -> `adms:status` (`euro_dcat_ap_base.py`): bastava valorizzarlo.
+
 ## `2026-09-19` — Campi multilingua stampati come dict
 - Alcuni cataloghi harvestati valorizzano i campi multilingua (es. `holder_name`) con un dict `{'en': '...'}`: la scheda dataset mostrava letteralmente `Nome: {'en': 'ATS della Montagna'}`. Aggiunto `helpers.localize_field_value()` (lingua corrente → it → en → primo valore), applicato in `couple_to_dict` e `couple_to_html`, cioe' in tutti i campi "accoppiati" della scheda (titolare, creatore, publisher…). Gestisce dict, JSON e repr Python; le stringhe normali restano invariate.
 

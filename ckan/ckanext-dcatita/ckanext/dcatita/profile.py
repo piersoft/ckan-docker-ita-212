@@ -16,7 +16,7 @@ from rdflib.namespace import RDF, XSD
 import ckan.plugins.toolkit as tk
 
 from ckanext.dcat.profiles.base import (
-    RDFProfile, CleanedURIRef, DCAT, DCT, RDFS, SPDX, FOAF,
+    RDFProfile, CleanedURIRef, ADMS, DCAT, DCT, RDFS, SPDX, FOAF,
 )
 from ckanext.dcat.utils import resource_uri
 
@@ -142,6 +142,14 @@ class DCATItaProfile(RDFProfile):
         if not any(g.objects(dist, DCT.rights)):
             self._add_statement(dist, DCT.rights, r.get("rights") or rules.PUBLIC_ACCESS_RIGHTS,
                                 DCT.RightsStatement)
+
+        # adms:status della distribuzione (richiesto dal modello MQA 0-7,5 di
+        # data.europa.eu). Si valorizza solo se la risorsa ha un URL reale e la
+        # sorgente non dichiara gia' uno status (es. Deprecated/Withdrawn).
+        # Nota: accessURL qui e' sempre valorizzato (pagina risorsa CKAN), quindi
+        # non e' un criterio utile per capire se la risorsa esiste davvero.
+        if url and not any(g.objects(dist, ADMS.status)):
+            g.add((dist, ADMS.status, URIRef(rules.DISTRIBUTION_STATUS_COMPLETED)))
 
         # licenza: mapping URI italiane -> URI canoniche (solo le voci lato grafo)
         for obj in list(g.objects(dist, DCT.license)):

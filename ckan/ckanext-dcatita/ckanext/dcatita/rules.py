@@ -21,6 +21,11 @@ FILETYPE_AUTHORITY = "http://publications.europa.eu/resource/authority/file-type
 IANA_MEDIA_TYPES = "https://iana.org/assignments/media-types/"
 FALLBACK_LICENSE = "http://creativecommons.org/licenses/by/4.0/"
 SPDX_SHA1 = "http://spdx.org/rdf/terms#checksumAlgorithm_sha1"
+# Vocabolario EU Publications Office (DCAT-AP 3). Alternativa storica ADMS:
+# http://purl.org/adms/status/Completed
+DISTRIBUTION_STATUS_COMPLETED = (
+    "http://publications.europa.eu/resource/authority/distribution-status/COMPLETED"
+)
 
 _CONFIG = None
 
