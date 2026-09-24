@@ -16,4 +16,4 @@ groups:
       - key: ckanext.dcatita.mqa_badge
         type: bool
         default: false
-        description: Mostra nella pagina dataset il punteggio MQA letto da data.europa.eu
+        description: Mostra nella pagina dataset il punteggio MQA v2 (datasetFinal, scala 0-7,5) letto lato server da data.europa.eu, con cache Redis

@@ -21,7 +21,7 @@ import ckan.plugins.toolkit as tk
 from ckanext.dcat.interfaces import IDCATRDFHarvester, IDCATURIGenerator
 from ckanext.dcat.utils import catalog_uri
 
-from ckanext.dcatita import rules
+from ckanext.dcatita import edp_mqa, rules
 
 log = logging.getLogger(__name__)
 
@@ -92,7 +92,8 @@ class DCATItaHarvestPlugin(p.SingletonPlugin):
         return {"dcatita_signature": dcatita_signature,
                 "dcatita_mqa_badge_enabled": dcatita_mqa_badge_enabled,
                 "dcatita_is_restricted": dcatita_is_restricted,
-                "dcatita_restricted_search_url": dcatita_restricted_search_url}
+                "dcatita_restricted_search_url": dcatita_restricted_search_url,
+                "dcatita_edp_mqa": edp_mqa.edp_mqa}
 
     # --- sessione HTTP: i cataloghi PA con catene TLS rotte ------------------
     def update_session(self, session):
