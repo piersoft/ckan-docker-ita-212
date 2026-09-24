@@ -161,11 +161,17 @@
       }
     }
 
+    // Nuova metodologia MQA EDP (set. 2026): scala 0-7,5
+    // Sufficiente 0-2,5 | Buono 2,5-5 | Eccellente 5-7,5
+    // L'API restituisce il valore x100 (es. 650 = 6,50)
     function labelForScore(qm) {
-      if (qm >= 351) return { label: "Eccellente", color: "green" };
-      if (qm >= 221) return { label: "Buono", color: "goldenrod" };
-      if (qm >= 121) return { label: "Sufficiente", color: "red" };
-      return { label: "Scarso", color: "red" };
+      if (qm >= 500) return { label: "Eccellente", color: "green" };
+      if (qm >= 250) return { label: "Buono", color: "goldenrod" };
+      return { label: "Sufficiente", color: "red" };
+    }
+
+    function formatScore(qm) {
+      return (qm / 100).toFixed(2).replace(".", ",") + " / 7,5";
     }
 
     // Prende BEST scoring non-null e si porta dietro la "resource" corrispondente
@@ -185,7 +191,7 @@
         }
 
         if (sc == null) continue;
-        const scoreInt = parseInt(sc, 10);
+        const scoreInt = parseFloat(sc);
         if (Number.isNaN(scoreInt)) continue;
 
         const resource = (typeof r.resource === "string" && r.resource) ? r.resource : null;
@@ -256,7 +262,7 @@
       }
 
       const info = labelForScore(best.score);
-      valueEl.innerHTML = `<span style="color:${info.color}; font-weight:bold;">${best.score} (${info.label})</span>`;
+      valueEl.innerHTML = `<span style="color:${info.color}; font-weight:bold;">${formatScore(best.score)} (${info.label})</span>`;
 
       // Link Approfondisci: se ho resource, uso quella (coerente col best score)
       let edpLink = null;
