@@ -3,7 +3,7 @@
 ## `2026-09-28` — dct:provenance sui dataset harvestati
 - `dcatita_harvest` compila `provenance` quando manca, con i soli dati certi del dataset (ente titolare, catalogo d'origine, URL della harvest source); se non bastano, il campo resta vuoto. Copre l'indicatore MQA "Origine" (Riutilizzabilita', 0,25). Testo configurabile con `ckanext.dcatita.provenance_template`.
 - Nuovo plugin autonomo `dcatita_provenance` (solo questa regola), per gli stack dove non si attiva l'intero `dcatita_harvest`.
-- `ckanext-dcatita` reso installabile anche su CKAN 2.10 / ckanext-dcat 1.x: import condizionale di `IDCATURIGenerator`, cosi' la stessa regola vale per entrambi gli stack attivando `dcatita_harvest`.
+- `ckanext-dcatita` reso importabile anche con ckanext-dcat 1.x (import condizionale di `IDCATURIGenerator`). Sullo stack 2.10, dove le estensioni sono vendorizzate in `patches/`, la stessa regola e' implementata in-place nel profilo `it_dcat_ap` di dcatapit: le due copie vanno tenute allineate.
 
 ## `2026-09-23` — adms:status sulle distribuzioni (modello MQA 0-7,5)
 - Il profilo `dcat_ita` aggiunge `adms:status` = `.../distribution-status/COMPLETED` alle distribuzioni con un URL reale, senza sovrascrivere uno status gia' dichiarato dalla sorgente. Su CKAN 2.10 era una patch a `euro_dcat_ap.py` di ckanext-dcat; qui non serve toccare upstream, che mappa gia' `status` -> `adms:status` (`euro_dcat_ap_base.py`): bastava valorizzarlo.
