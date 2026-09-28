@@ -52,6 +52,10 @@ quindi da ckanext-dcatita a runtime.
 usando solo dati gia' presenti: ente titolare, catalogo d'origine, URL della harvest
 source. Se non bastano, il campo resta vuoto (nessun testo generico).
 
+Sugli stack dove non si vuole attivare l'intero `dcatita_harvest` (es. CKAN 2.10, dove
+le normalizzazioni sono ancora patch dentro ckanext-dcat) c'e' il plugin autonomo
+**`dcatita_provenance`**, che fa solo questo.
+
 Testo predefinito:
 > Dataset pubblicato da {holder_name} nel catalogo {source_catalog_title}
 > ({source_catalog_homepage}), acquisito da {site_title} tramite harvesting.

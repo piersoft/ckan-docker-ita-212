@@ -15,6 +15,7 @@ classifiers = ["Programming Language :: Python :: 3"]
 [project.entry-points."ckan.plugins"]
 dcatita_harvest = "ckanext.dcatita.plugins:DCATItaHarvestPlugin"
 dcatita_uri = "ckanext.dcatita.plugins:DCATItaURIPlugin"
+dcatita_provenance = "ckanext.dcatita.plugins:DCATItaProvenancePlugin"
 
 [project.entry-points."ckan.rdf.profiles"]
 dcat_ita = "ckanext.dcatita.profile:DCATItaProfile"
