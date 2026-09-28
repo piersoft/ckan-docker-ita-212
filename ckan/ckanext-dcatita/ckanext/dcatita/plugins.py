@@ -276,7 +276,11 @@ def set_provenance(dataset_dict, harvest_object=None):
         template=tk.config.get("ckanext.dcatita.provenance_template") or None,
     )
     if provenance:
+        # Va scritta negli extras: `provenance` non e' nello schema di dcatapit,
+        # quindi la chiave di primo livello verrebbe scartata da package_create.
+        # ckanext-dcat la rilegge comunque (_get_dict_value guarda anche gli extras).
         dataset_dict["provenance"] = provenance
+        rules.set_extra(dataset_dict, "provenance", provenance)
     return provenance
 
 
