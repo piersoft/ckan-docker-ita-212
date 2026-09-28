@@ -198,18 +198,8 @@ class DCATItaHarvestPlugin(p.SingletonPlugin):
         self._apply_source_catalog(d, entry, cfg)
 
         # dct:provenance: da dove arriva il dato prima di questo portale
-        # (indicatore "Origine" del modello MQA). Solo se assente e solo con
-        # dati certi; il testo e' personalizzabile da ckan.ini.
-        if not d.get("provenance") and not rules._get_extra(d, "provenance"):
-            provenance = rules.build_provenance(
-                d,
-                site_title=tk.config.get("ckan.site_title") or "",
-                source_url=self._harvest_source_url(harvest_object),
-                template=tk.config.get("ckanext.dcatita.provenance_template") or None,
-                cfg=cfg,
-            )
-            if provenance:
-                d["provenance"] = provenance
+        # (indicatore "Origine" del modello MQA), vedi set_provenance()
+        set_provenance(d, harvest_object)
 
         rules.dedup_extras(d)
 
@@ -265,6 +255,46 @@ class DCATItaHarvestPlugin(p.SingletonPlugin):
                 if name and name not in out:
                     out.append(name)
         return out
+
+
+# ---------------------------------------------------------------------------
+# Provenance (plugin autonomo)
+# ---------------------------------------------------------------------------
+def set_provenance(dataset_dict, harvest_object=None):
+    """Valorizza `provenance` se assente; ritorna il testo impostato o None."""
+    if dataset_dict.get("provenance") or rules._get_extra(dataset_dict, "provenance"):
+        return None
+    source_url = None
+    try:
+        source_url = harvest_object.source.url
+    except Exception:
+        pass
+    provenance = rules.build_provenance(
+        dataset_dict,
+        site_title=tk.config.get("ckan.site_title") or "",
+        source_url=source_url,
+        template=tk.config.get("ckanext.dcatita.provenance_template") or None,
+    )
+    if provenance:
+        dataset_dict["provenance"] = provenance
+    return provenance
+
+
+class DCATItaProvenancePlugin(p.SingletonPlugin):
+    """Compila `dct:provenance` sui dataset harvestati che non ce l'hanno.
+
+    Serve per gli stack dove NON si vuole attivare l'intero `dcatita_harvest`:
+    tipicamente CKAN 2.10, dove le normalizzazioni vivono ancora come patch
+    dentro ckanext-dcat. Su CKAN 2.12 la regola e' gia' in `dcatita_harvest`:
+    attivare entrambi non fa danno (il secondo trova il campo valorizzato).
+    """
+    p.implements(IDCATRDFHarvester, inherit=True)
+
+    def before_create(self, harvest_object, dataset_dict, temp_dict):
+        set_provenance(dataset_dict, harvest_object)
+
+    def before_update(self, harvest_object, dataset_dict, temp_dict):
+        set_provenance(dataset_dict, harvest_object)
 
 
 # ---------------------------------------------------------------------------
