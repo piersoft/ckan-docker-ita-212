@@ -323,6 +323,71 @@ def mimetype_for_format(fmt, cfg=None):
     return None
 
 
+# ---------------------------------------------------------------------------
+# dct:provenance
+# ---------------------------------------------------------------------------
+# Indicatore "Origine" del modello MQA di data.europa.eu (Riutilizzabilita', 0,25).
+# Il testo si compone solo da dati certi gia' presenti nel dataset harvestato:
+# nessuna affermazione inventata.
+PROVENANCE_TEMPLATE = (
+    "Dataset pubblicato da {holder_name} nel catalogo {source_catalog_title} "
+    "({source_catalog_homepage}), acquisito da {site_title} tramite harvesting."
+)
+PROVENANCE_TEMPLATE_NO_CATALOG = (
+    "Dataset pubblicato da {holder_name}, acquisito da {site_title} tramite "
+    "harvesting dalla sorgente {source_url}."
+)
+
+
+def build_provenance(dataset_dict, site_title, source_url=None, template=None, cfg=None):
+    """Testo di dct:provenance per un dataset harvestato, o None se non ci sono
+    dati sufficienti (meglio nessuna provenance che una generica).
+
+    Ordine: catalogo d'origine noto -> template completo; solo ente titolare ->
+    template ridotto con l'URL della harvest source; niente ente -> None.
+    """
+    holder = (dataset_dict.get("holder_name")
+              or _get_extra(dataset_dict, "holder_name") or "")
+    holder = localize(holder)
+    if not holder or not site_title:
+        return None
+
+    cat_title = localize(_get_extra(dataset_dict, "source_catalog_title") or "")
+    cat_home = _get_extra(dataset_dict, "source_catalog_homepage") or ""
+    if cat_title and cat_home and cat_title.lower() not in ("portale dati aperti",):
+        return (template or PROVENANCE_TEMPLATE).format(
+            holder_name=holder, source_catalog_title=cat_title,
+            source_catalog_homepage=cat_home.rstrip("/"), site_title=site_title)
+
+    if source_url:
+        return PROVENANCE_TEMPLATE_NO_CATALOG.format(
+            holder_name=holder, site_title=site_title, source_url=source_url)
+    return None
+
+
+def localize(value, lang="it"):
+    """Alcuni cataloghi valorizzano i campi multilingua con un dict
+    {'it': '...', 'en': '...'}: qui se ne prende un solo valore."""
+    if isinstance(value, str):
+        text = value.strip()
+        if text.startswith("{") and text.endswith("}"):
+            try:
+                value = json.loads(text)
+            except ValueError:
+                return text
+        else:
+            return text
+    if isinstance(value, dict):
+        for key in (lang, "it", "en"):
+            if value.get(key):
+                return str(value[key])
+        for item in value.values():
+            if item:
+                return str(item)
+        return ""
+    return str(value or "")
+
+
 def clean_tag(name):
     """Versione minimale di ckan.lib.munge.munge_tag (per usi senza CKAN)."""
     name = re.sub(r"[^\w\-. ]", "", name or "").strip().lower()
