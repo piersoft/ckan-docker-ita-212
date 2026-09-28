@@ -46,6 +46,26 @@ Aggiungere un ente = aggiungere una riga, non codice.
 posto delle ~200 righe di `if holder_identifier` che aveva nel 2.10: dcatapit dipende
 quindi da ckanext-dcatita a runtime.
 
+## `dct:provenance` (indicatore MQA "Origine")
+
+`dcatita_harvest` compila `provenance` sui dataset harvestati che non ce l'hanno,
+usando solo dati gia' presenti: ente titolare, catalogo d'origine, URL della harvest
+source. Se non bastano, il campo resta vuoto (nessun testo generico).
+
+Testo predefinito:
+> Dataset pubblicato da {holder_name} nel catalogo {source_catalog_title}
+> ({source_catalog_homepage}), acquisito da {site_title} tramite harvesting.
+
+Personalizzabile con `ckanext.dcatita.provenance_template`.
+
+## Compatibilita' con CKAN 2.10 / ckanext-dcat 1.x
+
+L'estensione si installa anche sullo stack 2.10 (`piersoft/ckan-docker-ita`): l'import
+di `IDCATURIGenerator` (introdotta in ckanext-dcat 2.4) e' condizionale, quindi il plugin
+`dcatita_uri` semplicemente non si registra. Su 2.10 va attivato il solo
+`dcatita_harvest`: gli hook `IDCATRDFHarvester.before_create/before_update` esistono
+anche li', e `ckanext-dcat` 1.x mappa gia' `provenance` -> `dct:provenance`.
+
 ## Note su casi reali gestiti
 
 - `adms:status` = `.../distribution-status/COMPLETED` su ogni distribuzione con un URL

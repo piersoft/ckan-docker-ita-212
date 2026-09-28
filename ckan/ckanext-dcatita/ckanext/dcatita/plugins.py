@@ -18,7 +18,12 @@ import logging
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 
-from ckanext.dcat.interfaces import IDCATRDFHarvester, IDCATURIGenerator
+from ckanext.dcat.interfaces import IDCATRDFHarvester
+
+try:  # ckanext-dcat >= 2.4 (CKAN 2.12). Su CKAN 2.10 / dcat 1.x non esiste:
+    from ckanext.dcat.interfaces import IDCATURIGenerator
+except ImportError:  # l'estensione resta installabile, senza il plugin dcatita_uri
+    IDCATURIGenerator = None
 from ckanext.dcat.utils import catalog_uri
 
 from ckanext.dcatita import edp_mqa, rules
@@ -119,12 +124,19 @@ class DCATItaHarvestPlugin(p.SingletonPlugin):
 
     # --- dataset ---------------------------------------------------------------
     def before_create(self, harvest_object, dataset_dict, temp_dict):
-        self._normalize(dataset_dict, creating=True)
+        self._normalize(dataset_dict, creating=True, harvest_object=harvest_object)
 
     def before_update(self, harvest_object, dataset_dict, temp_dict):
-        self._normalize(dataset_dict, creating=False)
+        self._normalize(dataset_dict, creating=False, harvest_object=harvest_object)
 
-    def _normalize(self, d, creating):
+    @staticmethod
+    def _harvest_source_url(harvest_object):
+        try:
+            return harvest_object.source.url
+        except Exception:
+            return None
+
+    def _normalize(self, d, creating, harvest_object=None):
         cfg = _cfg()
         entry = rules.match_subcatalog(d, cfg) or {}
 
@@ -184,6 +196,20 @@ class DCATItaHarvestPlugin(p.SingletonPlugin):
 
         # subcatalog (dct:hasPart) — metadati del catalogo d'origine
         self._apply_source_catalog(d, entry, cfg)
+
+        # dct:provenance: da dove arriva il dato prima di questo portale
+        # (indicatore "Origine" del modello MQA). Solo se assente e solo con
+        # dati certi; il testo e' personalizzabile da ckan.ini.
+        if not d.get("provenance") and not rules._get_extra(d, "provenance"):
+            provenance = rules.build_provenance(
+                d,
+                site_title=tk.config.get("ckan.site_title") or "",
+                source_url=self._harvest_source_url(harvest_object),
+                template=tk.config.get("ckanext.dcatita.provenance_template") or None,
+                cfg=cfg,
+            )
+            if provenance:
+                d["provenance"] = provenance
 
         rules.dedup_extras(d)
 
@@ -257,7 +283,8 @@ class DCATItaURIPlugin(p.SingletonPlugin):
     dati.gov.it, per i cataloghi elencati in subcatalogs.json. Passando da
     IDCATURIGenerator la stessa URI viene vista da TUTTI i profili
     (euro_dcat_ap_3, it_dcat_ap, dcat_ita): nessun nodo sdoppiato."""
-    p.implements(IDCATURIGenerator, inherit=True)
+    if IDCATURIGenerator is not None:
+        p.implements(IDCATURIGenerator, inherit=True)
 
     def dataset_uri(self, dataset_dict, default_uri):
         entry = rules.match_subcatalog(dataset_dict, _cfg())
