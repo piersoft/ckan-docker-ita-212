@@ -21,11 +21,10 @@ FILETYPE_AUTHORITY = "http://publications.europa.eu/resource/authority/file-type
 IANA_MEDIA_TYPES = "https://iana.org/assignments/media-types/"
 FALLBACK_LICENSE = "http://creativecommons.org/licenses/by/4.0/"
 SPDX_SHA1 = "http://spdx.org/rdf/terms#checksumAlgorithm_sha1"
-# Vocabolario EU Publications Office (DCAT-AP 3). Alternativa storica ADMS:
-# http://purl.org/adms/status/Completed
-DISTRIBUTION_STATUS_COMPLETED = (
-    "http://publications.europa.eu/resource/authority/distribution-status/COMPLETED"
-)
+# ADMS status vocabulary: e' quello richiesto dalle shape SHACL DCAT-AP 2.x usate dal
+# validatore di data.europa.eu (skos:inScheme <http://purl.org/adms/status/1.0>).
+# Il vocabolario EU distribution-status (DCAT-AP 3) genera violazioni su EDP.
+DISTRIBUTION_STATUS_COMPLETED = "http://purl.org/adms/status/Completed"
 
 _CONFIG = None
 
