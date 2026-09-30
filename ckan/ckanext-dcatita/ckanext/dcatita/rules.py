@@ -14,6 +14,17 @@ log = logging.getLogger(__name__)
 
 PUBLIC_ACCESS_RIGHTS = "http://publications.europa.eu/resource/authority/access-right/PUBLIC"
 HVD_LEGISLATION = "http://data.europa.eu/eli/reg_impl/2023/138/oj"
+# dcatap:applicableLegislation per i dataset non HVD (solo in serializzazione):
+# Direttiva Open Data 2019/1024, oppure Data Governance Act 2022/868 per i dataset DGA
+OPEN_DATA_DIRECTIVE = "http://data.europa.eu/eli/dir/2019/1024/oj"
+DGA_REGULATION = "http://data.europa.eu/eli/reg/2022/868/oj"
+
+
+def default_legislation(access_rights):
+    """ELI da dichiarare quando il dataset non ha applicableLegislation."""
+    if "RESTRICTED" in str(access_rights or "").upper():
+        return DGA_REGULATION
+    return OPEN_DATA_DIRECTIVE
 FREQ_AUTHORITY = "http://publications.europa.eu/resource/authority/frequency/"
 THEME_AUTHORITY = "http://publications.europa.eu/resource/authority/data-theme/"
 LANG_AUTHORITY = "http://publications.europa.eu/resource/authority/language/"
