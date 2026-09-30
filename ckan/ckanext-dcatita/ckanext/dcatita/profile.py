@@ -16,7 +16,7 @@ from rdflib.namespace import RDF, XSD
 import ckan.plugins.toolkit as tk
 
 from ckanext.dcat.profiles.base import (
-    RDFProfile, CleanedURIRef, ADMS, DCAT, DCT, RDFS, SPDX, FOAF,
+    RDFProfile, CleanedURIRef, ADMS, DCAT, DCATAP, DCT, RDFS, SPDX, FOAF,
 )
 from ckanext.dcat.utils import resource_uri
 
@@ -67,6 +67,13 @@ class DCATItaProfile(RDFProfile):
             for obj in g.objects(dataset_ref, DCT.accessRights):
                 if isinstance(obj, URIRef) and (obj, RDF.type, DCT.RightsStatement) not in g:
                     g.add((obj, RDF.type, DCT.RightsStatement))
+
+        # --- dcatap:applicableLegislation per i non HVD (indicatore MQA) ----------
+        if not any(g.objects(dataset_ref, DCATAP.applicableLegislation)):
+            ar = str(dataset_dict.get("access_rights") or rules._get_extra(dataset_dict, "access_rights") or "")
+            for obj in g.objects(dataset_ref, DCT.accessRights):
+                ar += " " + str(obj)
+            g.add((dataset_ref, DCATAP.applicableLegislation, URIRef(rules.default_legislation(ar))))
 
         prov = dataset_dict.get("provenance") or rules._get_extra(dataset_dict, "provenance")
         if prov and not any(g.objects(dataset_ref, DCT.provenance)):

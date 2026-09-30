@@ -10,7 +10,7 @@ Plugin CKAN di ckanext-dcatita.
 Opzioni ckan.ini (tutte facoltative):
   ckanext.dcatita.subcatalogs_file        = /path/subcatalogs.json
   ckanext.dcatita.harvest_verify_ssl      = false   (default: false, come lo stack 2.10)
-  ckanext.dcatita.default_applicable_legislation = true  (imposta l'ELI HVD in creazione se assente)
+  ckanext.dcatita.default_applicable_legislation = true  (imposta l'ELI HVD in creazione se assente e il dataset ha hvd_category)
 """
 import json
 import logging
@@ -183,7 +183,10 @@ class DCATItaHarvestPlugin(p.SingletonPlugin):
                 rules.set_extra(d, k, rules.scalar_from_json_list(ex))
         if d.get("applicableLegislation") and not d.get("applicable_legislation"):
             d["applicable_legislation"] = rules.scalar_from_json_list(d.pop("applicableLegislation"))
+        # l'ELI HVD si imposta solo se il dataset ha una categoria HVD: ai non HVD
+        # l'applicableLegislation (Direttiva Open Data / DGA) la aggiunge il profilo
         if creating and not d.get("applicable_legislation") and \
+                (d.get("hvd_category") or rules._get_extra(d, "hvd_category")) and \
                 tk.asbool(tk.config.get("ckanext.dcatita.default_applicable_legislation", True)):
             d["applicable_legislation"] = rules.HVD_LEGISLATION
 

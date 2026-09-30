@@ -12,7 +12,7 @@ groups:
       - key: ckanext.dcatita.default_applicable_legislation
         type: bool
         default: true
-        description: Imposta l'ELI del regolamento HVD in creazione se assente
+        description: Imposta l'ELI del regolamento HVD in creazione se assente e il dataset ha hvd_category
       - key: ckanext.dcatita.mqa_badge
         type: bool
         default: false
