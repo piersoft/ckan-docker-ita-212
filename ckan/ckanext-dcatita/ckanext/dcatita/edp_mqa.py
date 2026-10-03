@@ -47,7 +47,8 @@ SUFFISSI = ('', '~~1', '~~2', '~~3')
 EDP_PAGE = 'https://data.europa.eu/data/datasets/'
 EDP_HOME = 'https://data.europa.eu/data/datasets?locale=it'
 
-TIMEOUT = (3, 5)            # (connessione, lettura) in secondi
+TIMEOUT = (3, 8)            # (connessione, lettura) in secondi; la lettura e'
+                            # piu' lenta su /datasets/<id> che sulla search
 CACHE_TTL_OK = 6 * 3600     # esito con punteggio o "in attesa di rivalutazione"
 CACHE_TTL_KO = 30 * 60      # dataset non trovato / errore
 BREAKER_TTL = 5 * 60        # pausa dopo un errore di rete verso data.europa.eu
@@ -150,10 +151,23 @@ def _copia_del_catalogo(base):
     La ricerca testuale non restituisce le varianti ~~N, quindi le si interroga
     direttamente per indirizzo.
     """
+    verificata = False
+    errore = None
     for suffisso in SUFFISSI:
         candidato = base + suffisso
-        if _catalogo_di(candidato) == _catalogo():
+        try:
+            catalogo = _catalogo_di(candidato)
+        except requests.exceptions.RequestException as err:
+            # una variante lenta non deve far scattare il circuit breaker:
+            # si prova la successiva, l'errore si propaga solo se nessuna
+            # delle chiamate e' andata a buon fine
+            errore = err
+            continue
+        verificata = True
+        if catalogo == _catalogo():
             return candidato
+    if not verificata and errore is not None:
+        raise errore
     return None
 
 
