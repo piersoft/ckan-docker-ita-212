@@ -23,3 +23,9 @@ groups:
           Testo di dct:provenance per i dataset harvestati (indicatore MQA "Origine").
           Segnaposto disponibili: {holder_name}, {source_catalog_title},
           {source_catalog_homepage}, {site_title}. Vuoto = testo predefinito italiano.
+      - key: ckanext.dcatita.edp_catalog
+        default: dati-gov-it
+        description: >
+          Id del catalogo di data.europa.eu che corrisponde a questo portale. Lo stesso
+          dct:identifier puo' arrivare a EDP da piu' cataloghi (es. dati.gov.it e RNDT):
+          serve a mostrare il punteggio MQA della copia giusta, non di un'altra.
