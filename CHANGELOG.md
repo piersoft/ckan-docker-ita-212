@@ -1,5 +1,9 @@
 # Changelog
 
+## `2026-10-03` — MQA: punteggio della copia giusta su data.europa.eu
+- `edp_mqa` sceglieva fra le copie EDP dello stesso `dct:identifier` quella con `quality_meas.scoring` piu' alto: per i dataset presenti anche nell'RNDT finiva per mostrare il voto del record RNDT. Ora risolve la copia che appartiene al catalogo del portale (`ckanext.dcatita.edp_catalog`, default `dati-gov-it`), interrogando `/datasets/<id>` anche per le varianti `~~N` che la ricerca testuale non restituisce. Prefisso di cache portato a `v3`.
+- Allineamento della stessa correzione fatta sullo stack 2.10 (`piersoft/ckan-docker-ita`, commit `d7ea2a1`).
+
 ## `2026-09-28` — dct:provenance sui dataset harvestati
 - `dcatita_harvest` compila `provenance` quando manca, con i soli dati certi del dataset (ente titolare, catalogo d'origine, URL della harvest source); se non bastano, il campo resta vuoto. Copre l'indicatore MQA "Origine" (Riutilizzabilita', 0,25). Testo configurabile con `ckanext.dcatita.provenance_template`.
 - Nuovo plugin autonomo `dcatita_provenance` (solo questa regola), per gli stack dove non si attiva l'intero `dcatita_harvest`.

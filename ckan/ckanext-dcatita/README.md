@@ -96,3 +96,15 @@ del Regolamento UE 2022/868, Data Governance Act) mostrano un'etichetta **DGA** 
 titolo, sia nei risultati di ricerca sia nella pagina del dataset. L'etichetta è un link
 alla ricerca filtrata su quei soli dataset. Helper: `h.dcatita_is_restricted(pkg)`,
 `h.dcatita_restricted_search_url()`; snippet riusabile: `snippets/dcatita_dga_badge.html`.
+
+## Punteggio MQA nella scheda dataset (`edp_mqa`)
+
+L'helper `h.dcatita_edp_mqa(pkg)` legge da data.europa.eu il punteggio MQA v2
+(`datasetFinal`, scala 0-7,5) con cache Redis.
+
+Lo stesso `dct:identifier` puo' arrivare a EDP da piu' cataloghi (p.es. un dataset
+cartografico presente sia su dati.gov.it sia sull'RNDT): EDP assegna l'URI canonico a
+chi arriva prima e il suffisso `~~N` agli altri, con metadati e punteggi diversi.
+L'helper sceglie quindi la copia che appartiene al **proprio** catalogo, interrogando
+`/datasets/<id>` per le varianti `~~1..~~3`; l'id del catalogo si imposta con
+`ckanext.dcatita.edp_catalog` (default `dati-gov-it`).
