@@ -62,6 +62,13 @@ Testo predefinito:
 
 Personalizzabile con `ckanext.dcatita.provenance_template`.
 
+La stessa regola vale anche **in serializzazione** (05.10.26): se un dataset non ha
+`provenance` nel DB — harvestato prima della regola e mai piu' ripassato, oppure
+inserito a mano — il profilo `dcatita` compone il testo al momento dell'export, senza
+salvarlo (`rules.export_provenance`). Cosi' un export completo verso data.europa.eu
+la porta a tutti i dataset. Per quelli inseriti direttamente sul portale:
+> Dataset pubblicato da {holder_name} direttamente su {site_title}.
+
 ## Compatibilita' con CKAN 2.10 / ckanext-dcat 1.x
 
 L'import di `IDCATURIGenerator` (introdotta in ckanext-dcat 2.4) e' condizionale, quindi
@@ -70,7 +77,8 @@ l'estensione resta importabile anche con dcat 1.x (senza il plugin `dcatita_uri`
 Nota: sullo stack 2.10 (`piersoft/ckan-docker-ita`) le estensioni sono **vendorizzate in
 `patches/`** e copiate nell'immagine, non installate da qui: li' la stessa regola di
 `dct:provenance` vive in-place a fine `parse_dataset` del profilo `it_dcat_ap`
-(`patches/ckanext-dcatapit/.../dcat/profiles.py`, patch 28.09.26), con
+(`patches/ckanext-dcatapit/.../dcat/profiles.py`, patch 28.09.26) e, dalla patch
+05.10.26, anche a fine `graph_from_dataset` per la serializzazione, con
 `ckanext.dcatapit.provenance_template` come chiave di configurazione. Le due
 implementazioni vanno tenute allineate a mano.
 

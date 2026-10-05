@@ -375,6 +375,50 @@ def build_provenance(dataset_dict, site_title, source_url=None, template=None, c
     return None
 
 
+# Serializzazione (05.10.26): la provenance si scrive nel DB solo quando il
+# dataset viene harvestato. Quelli harvestati prima della regola e mai piu'
+# ripassati, e quelli inseriti a mano, ne restano senza: un export completo
+# verso data.europa.eu non basterebbe. export_provenance compone lo stesso testo
+# al momento della serializzazione, senza salvare nulla.
+PROVENANCE_TEMPLATE_HARVESTED = (
+    "Dataset pubblicato da {holder_name}, acquisito da {site_title} tramite harvesting."
+)
+PROVENANCE_TEMPLATE_DIRECT = (
+    "Dataset pubblicato da {holder_name} direttamente su {site_title}."
+)
+
+
+def _value(dataset_dict, key):
+    return dataset_dict.get(key) or _get_extra(dataset_dict, key)
+
+
+def export_provenance(dataset_dict, site_title, template=None):
+    """Testo di dct:provenance per la serializzazione di un dataset che non
+    ne ha una, o None se mancano i dati certi (ente, titolo del sito).
+
+    Harvestato: stessa regola di build_provenance; senza catalogo d'origine,
+    e senza l'URL della harvest source (non disponibile qui), un testo ridotto.
+    Inserito direttamente: una formula che non parla di harvesting.
+    """
+    if _value(dataset_dict, "provenance") or not site_title:
+        return None
+    harvested = bool(_value(dataset_dict, "harvest_source_id")
+                     or _value(dataset_dict, "harvest_object_id"))
+    if harvested:
+        text = build_provenance(dataset_dict, site_title, template=template)
+        if text:
+            return text
+        holder = localize(_value(dataset_dict, "holder_name") or "")
+        if not holder:
+            return None
+        return PROVENANCE_TEMPLATE_HARVESTED.format(holder_name=holder, site_title=site_title)
+    holder = localize(_value(dataset_dict, "holder_name")
+                      or (dataset_dict.get("organization") or {}).get("title") or "")
+    if not holder:
+        return None
+    return PROVENANCE_TEMPLATE_DIRECT.format(holder_name=holder, site_title=site_title)
+
+
 def localize(value, lang="it"):
     """Alcuni cataloghi valorizzano i campi multilingua con un dict
     {'it': '...', 'en': '...'}: qui se ne prende un solo valore."""
