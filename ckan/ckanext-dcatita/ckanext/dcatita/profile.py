@@ -76,6 +76,13 @@ class DCATItaProfile(RDFProfile):
             g.add((dataset_ref, DCATAP.applicableLegislation, URIRef(rules.default_legislation(ar))))
 
         prov = dataset_dict.get("provenance") or rules._get_extra(dataset_dict, "provenance")
+        if not prov:
+            # anche per i dataset senza provenance nel DB (vedi rules.export_provenance)
+            prov = rules.export_provenance(
+                dataset_dict,
+                site_title=tk.config.get("ckan.site_title") or "",
+                template=tk.config.get("ckanext.dcatita.provenance_template") or None,
+            )
         if prov and not any(g.objects(dataset_ref, DCT.provenance)):
             self._add_statement(dataset_ref, DCT.provenance, prov, DCT.ProvenanceStatement)
 
