@@ -92,7 +92,9 @@ RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcat-ap-edp-mqa \
 #        sovrascriveva l'extra landingpage (dcatapit) -> campo `redirect_url`
 #  03    _json_serial sollevava TypeError("Unhandled Object") senza dire quale
 #        oggetto: 500 opaco su /api/3/action/organization_list?all_fields=true.
-#        Ora logga tipo e repr e degrada a stringa invece di rompere la risposta.
+#        Causa: il sentinella `missing` di navl finiva in output (str(missing)
+#        solleva Invalid). Ora e' mappato a None come in MissingNullEncoder;
+#        gli altri tipi ignoti vanno a log con tipo e repr.
 # ---------------------------------------------------------------------
 COPY patches/ckan-core-patches ${APP_DIR}/patches/ckan-core-patches
 RUN cd ${SRC_DIR}/ckan && for f in ${APP_DIR}/patches/ckan-core-patches/*.patch; do \

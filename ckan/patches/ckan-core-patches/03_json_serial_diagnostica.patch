@@ -1,6 +1,6 @@
 --- a/ckan/views/api.py
 +++ b/ckan/views/api.py
-@@ -46,9 +46,25 @@
+@@ -46,9 +46,42 @@
  
  
  def _json_serial(obj: Any):
@@ -10,21 +10,38 @@
 -    raise TypeError("Unhandled Object")
 +    if isinstance(obj, datetime.timedelta):
 +        return obj.total_seconds()
++
++    # Il sentinella `missing` di navl non deve mai arrivare in output: significa
++    # che una catena di validator di uno schema non ha rimosso la chiave.
++    # Succede il 09.10.26 su /api/3/action/organization_list?all_fields=true,
++    # che internamente chiama organization_show con include_extras=False:
++    # il `convert_from_extras` degli schemi custom non trova nulla da
++    # convertire e la chiave resta a `missing`.
++    # Nota: str(missing) SOLLEVA Invalid, quindi il fallback generico a stringa
++    # qui sotto non basta e va intercettato prima. Mappiamo a None come fa gia'
++    # CKAN stesso in ckan.lib.navl.dictization_functions.MissingNullEncoder.
++    # Import locale: questo ramo e' raro e si evita qualsiasi ciclo di import.
++    from ckan.lib.navl.dictization_functions import Missing
++    if isinstance(obj, Missing):
++        log.warning("API JSON: valore `missing` in uscita, schema da "
++                    "correggere (chiave con validator senza ignore_missing)")
++        return None
++
 +    if isinstance(obj, (set, frozenset)):
 +        return sorted(obj, key=str)
 +    if isinstance(obj, (bytes, bytearray, memoryview)):
 +        return bytes(obj).decode("utf-8", "replace")
-+    # Patch locale. CKAN qui solleva TypeError("Unhandled Object") senza dire
-+    # QUALE oggetto: la chiamata API diventa un 500 opaco e dal log non si
-+    # risale al campo. Caso visto il 09.10.26 su
-+    # /api/3/action/organization_list?all_fields=true (500 su entrambi gli
-+    # stack, 2.10 e 2.12; group_list?all_fields=true invece funziona).
-+    # Qui logghiamo tipo e valore e degradiamo a stringa, invece di far
-+    # cadere l'intera risposta. Decimal e UUID finiscono di proposito in
-+    # questo ramo: vanno a log, cosi' si vede il campo responsabile.
++
++    # CKAN qui solleva TypeError("Unhandled Object") senza dire QUALE oggetto:
++    # la chiamata diventa un 500 opaco e dal log non si risale al campo.
++    # Logghiamo tipo e valore e degradiamo a stringa. Decimal e UUID finiscono
++    # di proposito in questo ramo, cosi' si vede il campo responsabile.
 +    log.error("API JSON: oggetto non serializzabile type=%s repr=%.300r",
 +              type(obj).__name__, obj)
-+    return str(obj)
++    try:
++        return str(obj)
++    except Exception:
++        return None
  
  
  def _finish(status_int: int,
