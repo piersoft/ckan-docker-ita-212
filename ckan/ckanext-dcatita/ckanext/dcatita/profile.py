@@ -11,7 +11,7 @@ nulla: le normalizzazioni dei dati harvestati stanno in plugins.DCATItaHarvestPl
 import logging
 
 from rdflib import BNode, Literal, URIRef
-from rdflib.namespace import RDF, XSD
+from rdflib.namespace import RDF, SKOS, XSD
 
 import ckan.plugins.toolkit as tk
 
@@ -164,6 +164,13 @@ class DCATItaProfile(RDFProfile):
         # non e' un criterio utile per capire se la risorsa esiste davvero.
         if url and not any(g.objects(dist, ADMS.status)):
             g.add((dist, ADMS.status, URIRef(rules.DISTRIBUTION_STATUS_COMPLETED)))
+        # Dichiarazione SKOS del concetto: il validatore di EDP cerca skos:inScheme
+        # nel grafo pubblicato e non risolve il vocabolario, quindi senza queste due
+        # triple segnala StatusRestrictionADMS (vedi rules.DISTRIBUTION_STATUS_SCHEME).
+        for _st in list(g.objects(dist, ADMS.status)):
+            if str(_st).startswith(rules.DISTRIBUTION_STATUS_SCHEME):
+                g.add((_st, RDF.type, SKOS.Concept))
+                g.add((_st, SKOS.inScheme, URIRef(rules.DISTRIBUTION_STATUS_SCHEME)))
 
         # licenza: mapping URI italiane -> URI canoniche (solo le voci lato grafo)
         for obj in list(g.objects(dist, DCT.license)):
