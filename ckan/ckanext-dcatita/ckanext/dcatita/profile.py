@@ -103,6 +103,26 @@ class DCATItaProfile(RDFProfile):
             if holder and not any(g.objects(pub, DCT.identifier)):
                 g.add((pub, DCT.identifier, Literal(holder)))
 
+        # --- metriche MQA 2.0.0 "Optional" rimaste a zero --------------------------
+        # Su dati.gov.it (CKAN 2.10) i soli result=0 dell'API MQA erano
+        # admsIdentifierAvailability e relationAvailability (0,25 ciascuna).
+        # Il mapping degli extra alternate_identifier/related_resource esiste
+        # in euro_dcat_ap, ma gli extra non sono mai valorizzati.
+        # Entrambe le shape DCAT-AP 3.0 impongono sh:nodeKind
+        # sh:BlankNodeOrIRI: niente Literal, altrimenti warning nuovo.
+        if not any(g.objects(dataset_ref, ADMS.identifier)) and dataset_dict.get("id"):
+            # adms:IdentifierShape: esattamente una skos:notation literal.
+            idnode = BNode()
+            g.add((idnode, RDF.type, ADMS.Identifier))
+            g.add((idnode, SKOS.notation, Literal(dataset_dict["id"])))
+            g.add((dataset_ref, ADMS.identifier, idnode))
+
+        if not any(g.objects(dataset_ref, DCT.relation)) and site_url:
+            org = (dataset_dict.get("organization") or {}).get("name")
+            if org:
+                g.add((dataset_ref, DCT.relation,
+                       CleanedURIRef(f"{site_url}/organization/{org}")))
+
         # --- distribuzioni ---------------------------------------------------------
         resources = {}
         for r in dataset_dict.get("resources") or []:
@@ -171,6 +191,19 @@ class DCATItaProfile(RDFProfile):
             if str(_st).startswith(rules.DISTRIBUTION_STATUS_SCHEME):
                 g.add((_st, RDF.type, SKOS.Concept))
                 g.add((_st, SKOS.inScheme, URIRef(rules.DISTRIBUTION_STATUS_SCHEME)))
+
+        # foaf:page sulla distribuzione (documentationAvailability, 0,25):
+        # terza metrica MQA a zero. La shape impone sh:class foaf:Document,
+        # quindi il nodo va tipizzato NEL GRAFO perche' il validatore non
+        # dereferenzia (stesso meccanismo di skos:inScheme per adms:status).
+        if not any(g.objects(dist, FOAF.page)):
+            doc = r.get("documentation") or r.get("describedBy") or r.get("describedby")
+            if not doc and site_url and dataset_dict.get("name"):
+                doc = f"{site_url}/dataset/{dataset_dict['name']}"
+            if doc:
+                doc = CleanedURIRef(doc)
+                g.add((dist, FOAF.page, doc))
+                g.add((doc, RDF.type, FOAF.Document))
 
         # licenza: mapping URI italiane -> URI canoniche (solo le voci lato grafo)
         for obj in list(g.objects(dist, DCT.license)):
