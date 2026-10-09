@@ -32,10 +32,18 @@ FILETYPE_AUTHORITY = "http://publications.europa.eu/resource/authority/file-type
 IANA_MEDIA_TYPES = "https://iana.org/assignments/media-types/"
 FALLBACK_LICENSE = "http://creativecommons.org/licenses/by/4.0/"
 SPDX_SHA1 = "http://spdx.org/rdf/terms#checksumAlgorithm_sha1"
-# ADMS status vocabulary: e' quello richiesto dalle shape SHACL DCAT-AP 2.x usate dal
-# validatore di data.europa.eu (skos:inScheme <http://purl.org/adms/status/1.0>).
-# Il vocabolario EU distribution-status (DCAT-AP 3) genera violazioni su EDP.
-DISTRIBUTION_STATUS_COMPLETED = "http://purl.org/adms/status/Completed"
+# adms:status della distribuzione. La shape DCAT-AP 3.0 :StatusRestriction (il
+# validatore di data.europa.eu la applica come dcatap300level1) impone insieme:
+#   1. un concetto del vocabolario EU "distribution-status";
+#   2. la tripla skos:inScheme PRESENTE NEL GRAFO pubblicato (il validatore non
+#      dereferenzia il NAL).
+# Senza la 2 il warning StatusRestrictionADMS scatta con qualunque URI, ADMS
+# compreso: su EDP 205.860 warning con purl.org/adms/status/Completed e 17.216
+# con l'URI EU "nudo"; le ~3.600 distribuzioni pulite hanno URI EU + inScheme.
+DISTRIBUTION_STATUS_SCHEME = (
+    "http://publications.europa.eu/resource/authority/distribution-status"
+)
+DISTRIBUTION_STATUS_COMPLETED = DISTRIBUTION_STATUS_SCHEME + "/COMPLETED"
 
 _CONFIG = None
 

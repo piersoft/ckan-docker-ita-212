@@ -1,5 +1,11 @@
 # Changelog
 
+## `2026-10-09` — adms:status: il warning SHACL di EDP non dipendeva dal vocabolario
+- Il validatore di data.europa.eu (shape `dcatap300level1`, `:StatusRestriction`) segnalava `StatusRestrictionADMS` sulle distribuzioni. Verificato sull'endpoint SPARQL di EDP: il warning scatta con **entrambi** i vocabolari — 205.860 risultati con `purl.org/adms/status/Completed` e 17.216 con l'URI EU `distribution-status/COMPLETED` usato "nudo". Cambiare valore non bastava.
+- La shape richiede `skos:inScheme <...distribution-status>` **sul grafo pubblicato**: il validatore non dereferenzia il NAL. Le uniche distribuzioni senza warning (circa 3.600 su EDP) usano l'URI EU **e** dichiarano il concetto nel grafo.
+- Quindi: valore riportato al vocabolario EU (`DISTRIBUTION_STATUS_SCHEME + "/COMPLETED"`) e aggiunte le due triple `a skos:Concept` / `skos:inScheme` accanto a ogni `adms:status`.
+- Nota: il punteggio MQA non era comunque intaccato — `statusAvailability` risulta 0,25 assegnato anche con l'URI ADMS, perche' quella metrica misura solo la presenza della proprieta'.
+
 ## `2026-10-03` — MQA: punteggio della copia giusta su data.europa.eu
 - `edp_mqa` sceglieva fra le copie EDP dello stesso `dct:identifier` quella con `quality_meas.scoring` piu' alto: per i dataset presenti anche nell'RNDT finiva per mostrare il voto del record RNDT. Ora risolve la copia che appartiene al catalogo del portale (`ckanext.dcatita.edp_catalog`, default `dati-gov-it`), interrogando `/datasets/<id>` anche per le varianti `~~N` che la ricerca testuale non restituisce. Prefisso di cache portato a `v3`.
 - Il controllo delle varianti fa piu' chiamate in sequenza: un singolo read timeout non fa piu' scattare il circuit breaker (si prova la variante successiva, l'errore si propaga solo se nessuna chiamata riesce) e il timeout di lettura passa da 5 a 8 secondi.
