@@ -1,5 +1,12 @@
 # Changelog
 
+## `2026-10-09` — organization_list?all_fields=true: il campo era `identifier` (fix in dcatapit)
+- Il campo che lasciava il sentinella `missing` in output e' **`identifier`**, confermato dalla risposta ora che l'endpoint torna 200: `[k for k,v in r.items() if v is None]` -> `['identifier']`.
+- Meccanismo completo: `organization_list?all_fields=true` chiama `organization_show` per ogni organizzazione forzando `include_extras=False`; `convert_from_extras` non trova extras da convertire e la chiave resta a `missing`. Nella catena di `identifier` c'e' **solo** `not_empty`, che registra l'errore ma **non rimuove la chiave** (a differenza di `ignore_missing` e `ignore_empty`, che fanno `data.pop(key)`); `group_show` poi **scarta** gli errori (`group_dict, _errors = plugin_validate(...)`) e il sentinella finisce in `json.dumps`.
+- Correzione: in `show_group_schema()` (2.12) / `db_to_form_schema()` (2.10) la catena diventa `[convert_from_extras, ignore_missing] + validator`. Messo qui e non in `get_custom_organization_schema()`, perche' quella lista serve anche a `create_group_schema`/`update_group_schema`: anteporre `ignore_missing` la' renderebbe `identifier` opzionale in scrittura.
+- Nota: `hvd_category` NON era a rischio, come avevo ipotizzato in un primo momento: `ignore_empty` rimuove la chiave esattamente come `ignore_missing`. Solo le catene che iniziano con `not_empty` perdono il sentinella.
+- La patch al core su `_json_serial` resta come rete di sicurezza per casi analoghi in altri schemi, non e' piu' la correzione.
+
 ## `2026-10-09` — organization_list?all_fields=true restituiva 500: _json_serial muto
 - Nei log di produzione: `ERROR [ckan.config.middleware.flask_app] Unhandled Object` seguito da `500 /api/3/action/organization_list render time 0.295 seconds`. Il traceback finisce in `ckan/views/api.py` `_json_serial`, che per qualsiasi tipo diverso da `datetime`/`date` solleva `TypeError("Unhandled Object")` **senza dire quale oggetto**.
 - Riscontri sul campo: `organization_list?all_fields=true` -> 500 su **entrambi** gli stack (2.10 su EKS e 2.12), `group_list?all_fields=true` -> 200, `organization_show` -> 200. Quindi il problema e' nelle sole organizzazioni e in una parte di codice comune ai due stack, non nell'immagine nuova.
