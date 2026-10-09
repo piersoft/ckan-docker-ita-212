@@ -1,5 +1,12 @@
 # Changelog
 
+## `2026-10-09` — organization_list?all_fields=true restituiva 500: _json_serial muto
+- Nei log di produzione: `ERROR [ckan.config.middleware.flask_app] Unhandled Object` seguito da `500 /api/3/action/organization_list render time 0.295 seconds`. Il traceback finisce in `ckan/views/api.py` `_json_serial`, che per qualsiasi tipo diverso da `datetime`/`date` solleva `TypeError("Unhandled Object")` **senza dire quale oggetto**.
+- Riscontri sul campo: `organization_list?all_fields=true` -> 500 su **entrambi** gli stack (2.10 su EKS e 2.12), `group_list?all_fields=true` -> 200, `organization_show` -> 200. Quindi il problema e' nelle sole organizzazioni e in una parte di codice comune ai due stack, non nell'immagine nuova.
+- `limit` e `offset` non isolano il colpevole (provati 0, 1, 2, 5, 20, 100, 300: tutti 500): CKAN dictizza e ordina tutte le organizzazioni e applica il limite dopo, quindi basta un singolo valore non serializzabile per far cadere ogni chiamata. `organization_show` funziona perche' applica `db_to_form_schema()` di dcatapit, che passa gli extra per `convert_from_extras`; in modalita' `all_fields` nessuno schema viene applicato e il dict grezzo va diritto a `json.dumps`.
+- Nuova patch al core `patches/ckan-core-patches/03_json_serial_diagnostica.patch`: `_json_serial` gestisce anche `time`, `timedelta`, `set`/`frozenset` e `bytes`, e per tutto il resto **logga tipo e repr** e degrada a stringa invece di far cadere la risposta. `Decimal` e `UUID` cadono di proposito nel ramo loggato, per vedere il campo responsabile.
+- Patch diagnostica, non la correzione finale: con il tipo in mano si decide se il fallback va tenuto (caso legittimo) o se il dato va corretto alla fonte.
+
 ## `2026-10-09` — le ultime 3 metriche MQA a zero: adms:identifier, dct:relation, foaf:page
 - Rilevate sull'API MQA di data.europa.eu (`metricsVersion 2.0.0`): dataset **7,0/7,5**, distribuzioni **7,25/7,5**, `datasetFinal` **7,125**. Gli unici `result=0` erano `admsIdentifierAvailability`, `relationAvailability` (dataset) e `documentationAvailability` (distribuzione), 0,25 ciascuna.
 - Il mapping in `euro_dcat_ap` esiste (extra `alternate_identifier`, `related_resource`, `documentation`): mancano i **valori**, perche' nessuno popola quegli extra. Aggiunti fallback deterministici in `profile.py`, coerenti con quanto fatto per `adms:status`, `dct:provenance` e `byteSize`.
