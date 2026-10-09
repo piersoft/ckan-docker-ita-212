@@ -198,12 +198,22 @@ class DCATItaProfile(RDFProfile):
         # dereferenzia (stesso meccanismo di skos:inScheme per adms:status).
         if not any(g.objects(dist, FOAF.page)):
             doc = r.get("documentation") or r.get("describedBy") or r.get("describedby")
+            if not doc:
+                # Prima scelta: una landingPage gia' nel grafo. Costruire un
+                # URL "pagina del dataset" e' rischioso: sullo stack 2.10
+                # l'URI del dataset era proprio quel pattern e la
+                # distribuzione finiva per documentarsi col dataset stesso.
+                for lp in g.objects(dataset_ref, DCAT.landingPage):
+                    doc = lp
+                    break
             if not doc and site_url and dataset_dict.get("name"):
                 doc = f"{site_url}/dataset/{dataset_dict['name']}"
             if doc:
                 doc = CleanedURIRef(doc)
-                g.add((dist, FOAF.page, doc))
-                g.add((doc, RDF.type, FOAF.Document))
+                # mai il dataset stesso o la distribuzione stessa
+                if doc != dataset_ref and doc != dist:
+                    g.add((dist, FOAF.page, doc))
+                    g.add((doc, RDF.type, FOAF.Document))
 
         # licenza: mapping URI italiane -> URI canoniche (solo le voci lato grafo)
         for obj in list(g.objects(dist, DCT.license)):
