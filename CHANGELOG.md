@@ -1,5 +1,15 @@
 # Changelog
 
+## `2026-10-09` — le ultime 3 metriche MQA a zero: adms:identifier, dct:relation, foaf:page
+- Rilevate sull'API MQA di data.europa.eu (`metricsVersion 2.0.0`): dataset **7,0/7,5**, distribuzioni **7,25/7,5**, `datasetFinal` **7,125**. Gli unici `result=0` erano `admsIdentifierAvailability`, `relationAvailability` (dataset) e `documentationAvailability` (distribuzione), 0,25 ciascuna.
+- Il mapping in `euro_dcat_ap` esiste (extra `alternate_identifier`, `related_resource`, `documentation`): mancano i **valori**, perche' nessuno popola quegli extra. Aggiunti fallback deterministici in `profile.py`, coerenti con quanto fatto per `adms:status`, `dct:provenance` e `byteSize`.
+- `adms:identifier`: nodo `adms:Identifier` con una sola `skos:notation` (id CKAN) — `dct:identifier` porta gia' quello DCAT-AP_IT.
+- `dct:relation`: pagina dell'organizzazione sul portale (`<site_url>/organization/<name>`).
+- `foaf:page` sulla distribuzione: `documentation`/`describedBy` della risorsa, altrimenti la pagina del dataset, **con `rdf:type foaf:Document` nel grafo** (la shape impone `sh:class foaf:Document` e il validatore non dereferenzia).
+- Nessun valore passa da `URIRefOrLiteral`: le shape di `adms:identifier` e `dct:relation` impongono `sh:nodeKind sh:BlankNodeOrIRI`, un Literal genererebbe un warning nuovo.
+- Sullo stack 2.10 lo stesso fix e' spezzato in due file: `adms:identifier` deve stare in `ckanext-dcatapit` perche' il profilo `it_dcat_ap` esegue `g.remove((dataset_ref, ADMS.identifier, None))` dopo `euro_dcat_ap`. Qui no: `dcat_ita` e' l'ultimo profilo della catena, quindi i tre blocchi stanno insieme.
+- Atteso: dataset 7,5/7,5, distribuzioni 7,5/7,5, `datasetFinal` **7,5**.
+
 ## `2026-10-09` — adms:status: il warning SHACL di EDP non dipendeva dal vocabolario
 - Il validatore di data.europa.eu (shape `dcatap300level1`, `:StatusRestriction`) segnalava `StatusRestrictionADMS` sulle distribuzioni. Verificato sull'endpoint SPARQL di EDP: il warning scatta con **entrambi** i vocabolari — 205.860 risultati con `purl.org/adms/status/Completed` e 17.216 con l'URI EU `distribution-status/COMPLETED` usato "nudo". Cambiare valore non bastava.
 - La shape richiede `skos:inScheme <...distribution-status>` **sul grafo pubblicato**: il validatore non dereferenzia il NAL. Le uniche distribuzioni senza warning (circa 3.600 su EDP) usano l'URI EU **e** dichiarano il concetto nel grafo.
