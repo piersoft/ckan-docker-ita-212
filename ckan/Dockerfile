@@ -90,6 +90,9 @@ RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcat-ap-edp-mqa \
 #  Patch a CKAN core (patches/ckan-core-patches/*.patch, generate contro 2.12.0):
 #  01/02 il selettore lingua usava un campo `url` che dentro il form dataset
 #        sovrascriveva l'extra landingpage (dcatapit) -> campo `redirect_url`
+#  03    _json_serial sollevava TypeError("Unhandled Object") senza dire quale
+#        oggetto: 500 opaco su /api/3/action/organization_list?all_fields=true.
+#        Ora logga tipo e repr e degrada a stringa invece di rompere la risposta.
 # ---------------------------------------------------------------------
 COPY patches/ckan-core-patches ${APP_DIR}/patches/ckan-core-patches
 RUN cd ${SRC_DIR}/ckan && for f in ${APP_DIR}/patches/ckan-core-patches/*.patch; do \

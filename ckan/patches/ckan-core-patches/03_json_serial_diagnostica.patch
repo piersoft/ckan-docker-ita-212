@@ -1,0 +1,30 @@
+--- a/ckan/views/api.py
++++ b/ckan/views/api.py
+@@ -46,9 +46,25 @@
+ 
+ 
+ def _json_serial(obj: Any):
+-    if isinstance(obj, (datetime.datetime, datetime.date)):
++    if isinstance(obj, (datetime.datetime, datetime.date, datetime.time)):
+         return obj.isoformat()
+-    raise TypeError("Unhandled Object")
++    if isinstance(obj, datetime.timedelta):
++        return obj.total_seconds()
++    if isinstance(obj, (set, frozenset)):
++        return sorted(obj, key=str)
++    if isinstance(obj, (bytes, bytearray, memoryview)):
++        return bytes(obj).decode("utf-8", "replace")
++    # Patch locale. CKAN qui solleva TypeError("Unhandled Object") senza dire
++    # QUALE oggetto: la chiamata API diventa un 500 opaco e dal log non si
++    # risale al campo. Caso visto il 09.10.26 su
++    # /api/3/action/organization_list?all_fields=true (500 su entrambi gli
++    # stack, 2.10 e 2.12; group_list?all_fields=true invece funziona).
++    # Qui logghiamo tipo e valore e degradiamo a stringa, invece di far
++    # cadere l'intera risposta. Decimal e UUID finiscono di proposito in
++    # questo ramo: vanno a log, cosi' si vede il campo responsabile.
++    log.error("API JSON: oggetto non serializzabile type=%s repr=%.300r",
++              type(obj).__name__, obj)
++    return str(obj)
+ 
+ 
+ def _finish(status_int: int,
