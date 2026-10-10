@@ -203,6 +203,11 @@ class DCATItaProfile(RDFProfile):
             if str(_st).startswith(rules.DISTRIBUTION_STATUS_SCHEME):
                 g.add((_st, RDF.type, SKOS.Concept))
                 g.add((_st, SKOS.inScheme, URIRef(rules.DISTRIBUTION_STATUS_SCHEME)))
+                # La shape dei concetti (DCAT-AP 3.0.1) richiede skos:prefLabel
+                # su ogni skos:Concept presente nel grafo: senza, Violation.
+                if str(_st) == rules.DISTRIBUTION_STATUS_COMPLETED:
+                    g.add((_st, SKOS.prefLabel, Literal("Completed", lang="en")))
+                    g.add((_st, SKOS.prefLabel, Literal("Completato", lang="it")))
 
         # foaf:page sulla distribuzione (documentationAvailability, 0,25):
         # terza metrica MQA a zero. La shape impone sh:class foaf:Document,
