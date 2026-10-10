@@ -58,6 +58,18 @@ class DCATItaProfile(RDFProfile):
             if not rules.clean_dataset_url(str(obj)):
                 g.remove((dataset_ref, DCAT.landingPage, obj))
 
+        # 10.10.26 DCAT-AP 3.0: dcat:landingPage ha sh:class foaf:Document e il
+        # validatore non dereferenzia, quindi il tipo va dichiarato nel grafo.
+        # Finora veniva dichiarato solo per effetto collaterale, quando il
+        # fallback di foaf:page piu' sotto capitava di usare la landingPage:
+        # sui dataset la cui sorgente fornisce gia' foaf:page (es. Cruscotto
+        # Italia, che emette about.html#fonti) la landingPage restava un IRI
+        # nudo e violava la shape. Qui il profilo e' l'ultimo della catena,
+        # quindi vede anche le landingPage aggiunte da it_dcat_ap.
+        for obj in set(g.objects(dataset_ref, DCAT.landingPage)):
+            if obj != dataset_ref:
+                g.add((obj, RDF.type, FOAF.Document))
+
         # --- dct:accessRights come RightsStatement (default PUBLIC) -------------
         if not any(g.objects(dataset_ref, DCT.accessRights)):
             ar = dataset_dict.get("access_rights") or rules._get_extra(dataset_dict, "access_rights") \
