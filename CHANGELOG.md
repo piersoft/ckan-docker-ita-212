@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-10-10` — `dcat:landingPage` non sempre tipizzata `foaf:Document`
+- `dcat:DatasetShape` di DCAT-AP 3.0 impone `sh:class foaf:Document` su `dcat:landingPage`, e il validatore non dereferenzia: il tipo va dichiarato nel grafo. Nel profilo `dcat_ita` non esisteva un blocco dedicato, quindi la landingPage veniva tipizzata solo **per effetto collaterale**, quando il fallback di `foaf:page` capitava di usarla.
+- Conseguenza: sui dataset la cui sorgente fornisce gia' `foaf:page` il fallback non scatta, la landingPage resta un IRI nudo e la shape e' violata. Verificato su un dataset harvestato da Cruscotto Italia, che emette `foaf:page` di suo (`about.html#fonti`): la `dcat:landingPage` del dataset risultava non tipizzata.
+- Aggiunto il blocco di tipizzazione subito dopo la pulizia delle landingPage. Sta nel profilo `dcat_ita`, che e' l'ultimo della catena, quindi copre anche le landingPage aggiunte da `it_dcat_ap`.
+
 ## `2026-10-09` — foaf:page puntava al dataset stesso (difetto introdotto in giornata)
 - Verificato sul grafo in produzione: su dati.gov.it l'URI del dataset e' **esattamente** `https://www.dati.gov.it/view-dataset/dataset?id=<name>`, lo stesso URL che il fallback di `foaf:page` costruiva. Risultato: la distribuzione documentava il dataset stesso e il nodo del dataset si portava dietro un `rdf:type foaf:Document`.
 - `foaf:page` ora usa, in ordine: `documentation`/`describedBy` della risorsa, altrimenti una `dcat:landingPage` gia' presente nel grafo. Piu' una guardia: il valore non puo' mai coincidere con `dataset_ref` ne' con la distribuzione.
