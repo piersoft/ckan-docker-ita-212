@@ -144,6 +144,21 @@ class DCATItaProfile(RDFProfile):
             r = resources.get(str(dist), {})
             self._fix_distribution(dataset_dict, dataset_ref, dist, r, entry, site_url, cfg)
 
+        # 11.10.26 Ogni oggetto di foaf:page va tipizzato foaf:Document, non
+        # solo quello che il fallback qui sotto imposta di sua iniziativa: la
+        # shape impone sh:class foaf:Document e il validatore non dereferenzia.
+        # Caso non coperto prima: l'extra `documentation` della risorsa, che
+        # alcuni cataloghi sorgente pubblicano e che il mapping generico di
+        # euro_dcat_ap riemette come foaf:page senza tipo; il fallback lo salta
+        # per la guardia `if not any(g.objects(dist, FOAF.page))`.
+        # Il ciclo resta limitato a questo dataset e non esteso a tutto il
+        # grafo: in catalog.ttl il grafo contiene tutti i dataset della pagina,
+        # quindi una scansione globale per ogni dataset sarebbe quadratica.
+        for ref in [dataset_ref] + list(g.objects(dataset_ref, DCAT.distribution)):
+            for pg in set(g.objects(ref, FOAF.page)):
+                if pg != dataset_ref and pg != ref:
+                    g.add((pg, RDF.type, FOAF.Document))
+
         self._prune_orphan_license_nodes()
 
     def _prune_orphan_license_nodes(self):

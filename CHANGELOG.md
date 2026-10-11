@@ -1,5 +1,12 @@
 # Changelog
 
+## `2026-10-11` — `foaf:page` tipizzato in ogni caso, non solo dove lo imposta il fallback
+- La shape DCAT-AP 3.0 impone `sh:class foaf:Document` su `foaf:page` e il validatore non dereferenzia l'URI: il tipo va dichiarato nel grafo. Finora veniva dichiarato solo sul valore che il fallback imposta di sua iniziativa.
+- Caso scoperto: l'extra `documentation` della risorsa, che alcuni cataloghi sorgente pubblicano e che il mapping generico di `euro_dcat_ap` riemette come `foaf:page` senza tipo. Il fallback lo salta per la guardia `if not any(g.objects(dist, FOAF.page))`, quindi quel `foaf:page` restava senza tipo.
+- Ora vengono tipizzati tutti gli oggetti di `foaf:page` del dataset e delle sue distribuzioni, con un ciclo limitato al dataset corrente: in `catalog.ttl` il grafo contiene tutti i dataset della pagina, quindi una scansione globale per ogni dataset sarebbe quadratica.
+- Il difetto del doppio `##` sulle landing page riguarda solo lo stack 2.10: qui la `dcat:landingPage` viene emessa cosi' com'e', senza appendere il separatore.
+- Nessun effetto sul punteggio MQA: `documentationAvailability` verifica la sola presenza del predicato.
+
 ## `2026-10-10` — `dcat:landingPage` non sempre tipizzata `foaf:Document`
 - `dcat:DatasetShape` di DCAT-AP 3.0 impone `sh:class foaf:Document` su `dcat:landingPage`, e il validatore non dereferenzia: il tipo va dichiarato nel grafo. Nel profilo `dcat_ita` non esisteva un blocco dedicato, quindi la landingPage veniva tipizzata solo **per effetto collaterale**, quando il fallback di `foaf:page` capitava di usarla.
 - Conseguenza: sui dataset la cui sorgente fornisce gia' `foaf:page` il fallback non scatta, la landingPage resta un IRI nudo e la shape e' violata. Verificato su un dataset harvestato da Cruscotto Italia, che emette `foaf:page` di suo (`about.html#fonti`): la `dcat:landingPage` del dataset risultava non tipizzata.
