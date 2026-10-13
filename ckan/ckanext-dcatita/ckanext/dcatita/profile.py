@@ -9,6 +9,7 @@ ckanext-dcat (processors.py / euro_dcat_ap.py / base.py). Lato parse non fa
 nulla: le normalizzazioni dei dati harvestati stanno in plugins.DCATItaHarvestPlugin.
 """
 import logging
+from decimal import Decimal
 
 from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import RDF, SKOS, XSD
@@ -269,16 +270,20 @@ class DCATItaProfile(RDFProfile):
                     g.add((URIRef(mt), RDF.type, DCT.MediaType))
 
         # byteSize: MQA vuole un valore; storico = 1024 se sconosciuto.
-        # DCAT-AP 3 lo vuole xsd:nonNegativeInteger (il profilo EU ricasta con int()
-        # tutti i byteSize del grafo: un decimal qui rompe il catalogo).
+        # Datatype xsd:decimal con valore intero: data.europa.eu valida i dataset
+        # con il profilo piveau "dcatap300level1" (shape DCAT-AP 3.0.0), che impone
+        # sh:datatype xsd:decimal; con xsd:nonNegativeInteger (shape 3.0.1) ogni
+        # distribuzione dava una Violation "Expected xsd:decimal". Questo profilo e'
+        # l'ultimo della catena, quindi il datatype qui e' quello pubblicato.
         for obj in list(g.objects(dist, DCAT.byteSize)):
             try:
+                _b = int(float(str(obj)))
                 g.remove((dist, DCAT.byteSize, obj))
-                g.add((dist, DCAT.byteSize, Literal(int(float(str(obj))), datatype=XSD.nonNegativeInteger)))
+                g.add((dist, DCAT.byteSize, Literal(Decimal(_b), datatype=XSD.decimal)))
             except (ValueError, TypeError):
                 pass
         if not any(g.objects(dist, DCAT.byteSize)):
-            g.add((dist, DCAT.byteSize, Literal(1024, datatype=XSD.nonNegativeInteger)))
+            g.add((dist, DCAT.byteSize, Literal(Decimal(1024), datatype=XSD.decimal)))
 
         # checksum: Emilia-Romagna espone hash non validi -> si toglie; altrimenti algoritmo default sha1
         for cs in list(g.objects(dist, SPDX.checksum)):
