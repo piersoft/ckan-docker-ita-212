@@ -1,5 +1,14 @@
 # Changelog
 
+## `2026-10-13` — licenze harvestate trasformate in CC BY 4.0
+- Su ogni dataset harvestato la licenza finiva in CC BY 4.0 anche quando il catalogo sorgente dichiarava altro (es. IODL 2.0 con `A29_IODL20`). Unica eccezione: le licenze CC0, salvate dal controllo `publicdomain`.
+- Causa, in `ckanext-dcatapit/.../dcat/profiles.py`: le `license.replace(...)` trasformano il nodo `URIRef` della licenza in una `str` semplice. Le letture successive dal grafo (`dct:type`, `foaf:name`, `versionInfo`) usavano quella `str`, e rdflib non la riconosce come URI: zero risultati. Con `names` vuoto si entrava nel ramo di ripiego, che imposta `license_name` = CC BY 4.0, `license_type` = `A21_CCBY40` e `document_uri` = creativecommons by/4.0. Per lo stesso motivo la toppa per `r_lazio` veniva sovrascritta subito dopo.
+- Correzione: il nodo originale viene salvato in `license_node` prima delle sostituzioni, e le tre letture dal grafo usano `license_node`. Le sostituzioni restano invariate e continuano a valere per la ricerca nel vocabolario.
+- Corretta anche `names.values()[0]` (sintassi Python 2, `TypeError` su Python 3) in `list(names.values())[0]`.
+- Verificato sul `catalog.ttl` del Ministero della Salute: prima `A21_CCBY40` / "CC BY 4.0", dopo `A29_IODL20` / "Italian Open Data License 2.0 (IODL 2.0)".
+- Stessa correzione del repo `ckan-docker-ita` (CKAN 2.10), commit `23ae1c4`.
+- Effetto atteso al prossimo harvest: le sorgenti che dichiarano licenze diverse da CC BY 4.0 e CC0 (IODL, CC BY-SA, ODbL…) mostreranno la licenza reale invece di CC BY 4.0.
+
 ## `2026-10-11` — `foaf:page` tipizzato in ogni caso, non solo dove lo imposta il fallback
 - La shape DCAT-AP 3.0 impone `sh:class foaf:Document` su `foaf:page` e il validatore non dereferenzia l'URI: il tipo va dichiarato nel grafo. Finora veniva dichiarato solo sul valore che il fallback imposta di sua iniziativa.
 - Caso scoperto: l'extra `documentation` della risorsa, che alcuni cataloghi sorgente pubblicano e che il mapping generico di `euro_dcat_ap` riemette come `foaf:page` senza tipo. Il fallback lo salta per la guardia `if not any(g.objects(dist, FOAF.page))`, quindi quel `foaf:page` restava senza tipo.
