@@ -1,0 +1,38 @@
+--- a/ckanext/dcat/profiles/euro_dcat_ap_base.py	2026-10-16 18:16:14.723094476 +0200
++++ b/ckanext/dcat/profiles/euro_dcat_ap_base.py	2026-10-16 18:16:14.725120599 +0200
+@@ -726,17 +726,33 @@
+                 except (ValueError, TypeError, DecimalException):
+                     g.add((distribution, DCAT.byteSize, Literal(resource_dict["size"])))
+             # Checksum
+-            if resource_dict.get("hash"):
++            # ckan-docker-ita: il blocco puo' girare due volte sulla stessa
++            # distribuzione (dcat_ap_edp_mqa eredita da euro_dcat_ap_3 e richiama
++            # super()); il nodo e' anonimo, quindi senza questo controllo
++            # spdx:checksum usciva doppio (Violation EDP sh:maxCount 1).
++            hash_value = str(resource_dict.get("hash") or "").strip()
++            already = hash_value and any(
++                str(self._object_value(c, SPDX.checksumValue)) == hash_value
++                for c in g.objects(distribution, SPDX.checksum)
++            )
++            if hash_value and not already:
+                 checksum = BNode()
+                 g.add((checksum, RDF.type, SPDX.Checksum))
+                 g.add(
+                     (
+                         checksum,
+                         SPDX.checksumValue,
+-                        Literal(resource_dict["hash"], datatype=XSD.hexBinary),
++                        Literal(hash_value, datatype=XSD.hexBinary),
+                     )
+                 )
+ 
++                if not resource_dict.get("hash_algorithm"):
++                    # ckan-docker-ita: algoritmo ricavato dalla lunghezza
++                    # dell'hash (32 = MD5, 40 = SHA-1, 64 = SHA-256)
++                    algo = {32: "md5", 40: "sha1", 64: "sha256"}.get(len(hash_value))
++                    if algo:
++                        resource_dict["hash_algorithm"] = (
++                            "http://spdx.org/rdf/terms#checksumAlgorithm_" + algo)
+                 if resource_dict.get("hash_algorithm"):
+                     checksum_algo = URIRefOrLiteral(resource_dict["hash_algorithm"])
+                     g.add(
