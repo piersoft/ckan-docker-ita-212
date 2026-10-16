@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-10-16` — lingua dei sottocataloghi emessa come testo
+- Nei sottocataloghi `dct:language` usciva come stringa (`"http://publications.europa.eu/resource/authority/language/ITA"`): Violation EDP `sh:BlankNodeOrIRI`, una per sottocatalogo. Il `processors.py` upstream di ckanext-dcat v2.4.4 aggiunge l'extra `source_catalog_language` sempre come `Literal`.
+- Correzione in `patches/ckanext-dcat-patches/01_processors.patch`: nuova funzione `_catalog_language`. Un URI resta URI (`https://publications.europa.eu/` riportato a `http://`), un codice a 3 lettere diventa `.../language/ITA`, uno a 2 lettere (`it`, `en`, `de`, `fr`, `es`) viene convertito; ogni altro valore resta letterale.
+- Verificato che le cinque patch si applichino ancora in sequenza su ckanext-dcat v2.4.4. Stessa correzione dello stack CKAN 2.10.
+
 ## `2026-10-16` — `tools/validate_edp_shacl.py`: profili italiani
 - Allineato alla versione dello stack CKAN 2.10. Nuova opzione `--profile`: oltre al profilo EDP (default, invariato) valida con `dcatapit` (Linee guida AgID per i cataloghi dati), `vocabolari` (authority table EU) e `hvd` (dati di elevato valore, Reg. UE 2023/138); `it` li attiva tutti e tre, `tutti` aggiunge anche EDP.
 - Le shape italiane stanno in `tools/shapes/`. `--file` accetta anche RDF/XML e JSON-LD.
