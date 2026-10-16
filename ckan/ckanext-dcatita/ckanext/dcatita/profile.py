@@ -71,6 +71,16 @@ class DCATItaProfile(RDFProfile):
             if obj != dataset_ref:
                 g.add((obj, RDF.type, FOAF.Document))
 
+        # --- dcatap:availability: authority table EU con http:// ----------------
+        # Un valore salvato o harvestato con https:// non corrisponde ad alcun
+        # concetto del vocabolario planned-availability.
+        for dist in list(g.objects(dataset_ref, DCAT.distribution)):
+            for obj in list(g.objects(dist, DCATAP.availability)):
+                if str(obj).startswith("https://publications.europa.eu/"):
+                    g.remove((dist, DCATAP.availability, obj))
+                    g.add((dist, DCATAP.availability,
+                           URIRef("http://" + str(obj)[len("https://"):])))
+
         # --- dct:accessRights come RightsStatement (default PUBLIC) -------------
         if not any(g.objects(dataset_ref, DCT.accessRights)):
             ar = dataset_dict.get("access_rights") or rules._get_extra(dataset_dict, "access_rights") \
