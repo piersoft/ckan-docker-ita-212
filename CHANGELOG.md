@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-10-16` — lingua dei sottocataloghi harvestati scelta a caso tra quelle della sorgente
+- I cataloghi sorgente possono dichiarare piu' lingue: per esempio Crispiano e Copertino dichiarano DEU, ENG, FRA, ITA e il letterale `"it"`. In fase di harvest l'extra `source_catalog_language` ne prendeva una qualsiasi (`_object_value`), quindi i sottocataloghi uscivano con `DEU`, `FRA` o `ENG` invece di `ITA`, e il valore poteva cambiare da un harvest all'altro.
+- Correzione nella nuova `patches/ckanext-dcat-patches/07_catalog_language.patch` (su `profiles/base.py` di ckanext-dcat v2.4.4, `_extract_catalog_dict`): si sceglie l'italiano; altrimenti la prima lingua in ordine alfabetico. Una lingua impostata in `subcatalogs.json` continua ad avere la precedenza.
+- Verificato che le sette patch si applichino in sequenza su ckanext-dcat v2.4.4. L'extra viene scritto al momento dell'harvest: i sottocataloghi gia' importati si correggono al successivo harvest.
+
 ## `2026-10-16` — `dcatap:availability` con `https://`
 - `dcatap:availability` usciva con `https://publications.europa.eu/resource/authority/planned-availability/...`: le authority table EU usano `http://`, quindi il valore non corrispondeva ad alcun concetto del vocabolario. Lo generavano le opzioni del modulo in `ckanext-dcatapit/.../schema.py`, e arriva uguale anche da alcuni cataloghi harvestati.
 - Correzione: il profilo `dcat_ita`, ultimo della catena, riporta a `http://` i valori di `dcatap:availability` delle distribuzioni, compresi quelli gia' salvati e quelli harvestati; nel modulo di `ckanext-dcatapit` le due opzioni ora hanno il valore `http://`.
