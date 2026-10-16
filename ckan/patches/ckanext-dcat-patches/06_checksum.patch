@@ -1,6 +1,6 @@
 --- a/ckanext/dcat/profiles/euro_dcat_ap_base.py	2026-10-16 18:16:14.723094476 +0200
-+++ b/ckanext/dcat/profiles/euro_dcat_ap_base.py	2026-10-16 18:16:14.725120599 +0200
-@@ -726,17 +726,33 @@
++++ b/ckanext/dcat/profiles/euro_dcat_ap_base.py	2026-10-16 18:21:11.440804257 +0200
+@@ -726,17 +726,34 @@
                  except (ValueError, TypeError, DecimalException):
                      g.add((distribution, DCAT.byteSize, Literal(resource_dict["size"])))
              # Checksum
@@ -9,9 +9,10 @@
 +            # distribuzione (dcat_ap_edp_mqa eredita da euro_dcat_ap_3 e richiama
 +            # super()); il nodo e' anonimo, quindi senza questo controllo
 +            # spdx:checksum usciva doppio (Violation EDP sh:maxCount 1).
++            # Confronto senza maiuscole: rdflib normalizza in minuscolo xsd:hexBinary.
 +            hash_value = str(resource_dict.get("hash") or "").strip()
 +            already = hash_value and any(
-+                str(self._object_value(c, SPDX.checksumValue)) == hash_value
++                str(self._object_value(c, SPDX.checksumValue)).lower() == hash_value.lower()
 +                for c in g.objects(distribution, SPDX.checksum)
 +            )
 +            if hash_value and not already:
