@@ -496,16 +496,6 @@
     },
     {
       "match": [
-        "cci"
-      ],
-      "landing": {
-        "mode": "uri",
-        "base": "https://www.mistralportal.it",
-        "slash": false
-      }
-    },
-    {
-      "match": [
         "agid"
       ],
       "landing": {
