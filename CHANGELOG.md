@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-10-16` — `dcatap:availability` con `https://`
+- `dcatap:availability` usciva con `https://publications.europa.eu/resource/authority/planned-availability/...`: le authority table EU usano `http://`, quindi il valore non corrispondeva ad alcun concetto del vocabolario. Lo generavano le opzioni del modulo in `ckanext-dcatapit/.../schema.py`, e arriva uguale anche da alcuni cataloghi harvestati.
+- Correzione: il profilo `dcat_ita`, ultimo della catena, riporta a `http://` i valori di `dcatap:availability` delle distribuzioni, compresi quelli gia' salvati e quelli harvestati; nel modulo di `ckanext-dcatapit` le due opzioni ora hanno il valore `http://`.
+- `tools/shapes/vocabolari.ttl`: media type IANA accettati con `http`/`https` e con o senza `www`, come fa EDP.
+
 ## `2026-10-16` — `spdx:checksum` doppio sulle distribuzioni
 - Con il profilo `dcat_ap_edp_mqa` attivo ogni distribuzione con un hash usciva con due nodi `spdx:checksum` identici: una Violation EDP (`sh:maxCount 1`) per distribuzione.
 - Causa: `MqaEuropeanDCATAP2Profile` eredita da `euro_dcat_ap_3` e richiama `super().graph_from_dataset()`, quindi il codice europeo delle distribuzioni gira due volte. Il checksum e' un nodo anonimo creato con un `BNode()` nuovo, quindi restava doppio; le triple con URI invece si fondono da sole.
