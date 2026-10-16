@@ -1,5 +1,9 @@
 # Changelog
 
+## `2026-10-16` — `tools/validate_edp_shacl.py`: profili italiani
+- Allineato alla versione dello stack CKAN 2.10. Nuova opzione `--profile`: oltre al profilo EDP (default, invariato) valida con `dcatapit` (Linee guida AgID per i cataloghi dati), `vocabolari` (authority table EU) e `hvd` (dati di elevato valore, Reg. UE 2023/138); `it` li attiva tutti e tre, `tutti` aggiunge anche EDP.
+- Le shape italiane stanno in `tools/shapes/`. `--file` accetta anche RDF/XML e JSON-LD.
+
 ## `2026-10-13` — licenze harvestate trasformate in CC BY 4.0
 - Su ogni dataset harvestato la licenza finiva in CC BY 4.0 anche quando il catalogo sorgente dichiarava altro (es. IODL 2.0 con `A29_IODL20`). Unica eccezione: le licenze CC0, salvate dal controllo `publicdomain`.
 - Causa, in `ckanext-dcatapit/.../dcat/profiles.py`: le `license.replace(...)` trasformano il nodo `URIRef` della licenza in una `str` semplice. Le letture successive dal grafo (`dct:type`, `foaf:name`, `versionInfo`) usavano quella `str`, e rdflib non la riconosce come URI: zero risultati. Con `names` vuoto si entrava nel ramo di ripiego, che imposta `license_name` = CC BY 4.0, `license_type` = `A21_CCBY40` e `document_uri` = creativecommons by/4.0. Per lo stesso motivo la toppa per `r_lazio` veniva sovrascritta subito dopo.
