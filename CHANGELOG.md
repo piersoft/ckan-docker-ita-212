@@ -1,5 +1,11 @@
 # Changelog
 
+## `2026-10-16` — `spdx:checksum` doppio sulle distribuzioni
+- Con il profilo `dcat_ap_edp_mqa` attivo ogni distribuzione con un hash usciva con due nodi `spdx:checksum` identici: una Violation EDP (`sh:maxCount 1`) per distribuzione.
+- Causa: `MqaEuropeanDCATAP2Profile` eredita da `euro_dcat_ap_3` e richiama `super().graph_from_dataset()`, quindi il codice europeo delle distribuzioni gira due volte. Il checksum e' un nodo anonimo creato con un `BNode()` nuovo, quindi restava doppio; le triple con URI invece si fondono da sole.
+- Correzione nella nuova `patches/ckanext-dcat-patches/06_checksum.patch` (su `profiles/euro_dcat_ap_base.py` di ckanext-dcat v2.4.4): il checksum non viene aggiunto se la distribuzione ne ha gia' uno con lo stesso valore. Senza `hash_algorithm` l'algoritmo si ricava dalla lunghezza dell'hash (32 MD5, 40 SHA-1, 64 SHA-256); prima mancava del tutto.
+- Verificato che le sei patch si applichino in sequenza su ckanext-dcat v2.4.4. Stessa correzione dello stack CKAN 2.10.
+
 ## `2026-10-16` — lingua dei sottocataloghi emessa come testo
 - Nei sottocataloghi `dct:language` usciva come stringa (`"http://publications.europa.eu/resource/authority/language/ITA"`): Violation EDP `sh:BlankNodeOrIRI`, una per sottocatalogo. Il `processors.py` upstream di ckanext-dcat v2.4.4 aggiunge l'extra `source_catalog_language` sempre come `Literal`.
 - Correzione in `patches/ckanext-dcat-patches/01_processors.patch`: nuova funzione `_catalog_language`. Un URI resta URI (`https://publications.europa.eu/` riportato a `http://`), un codice a 3 lettere diventa `.../language/ITA`, uno a 2 lettere (`it`, `en`, `de`, `fr`, `es`) viene convertito; ogni altro valore resta letterale.
