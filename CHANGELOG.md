@@ -1,5 +1,13 @@
 # Changelog
 
+## `2026-10-17` — `dct:relation`: ricerca per titolare invece dell'organizzazione
+- Il ripiego di `dct:relation` (metrica MQA `relationAvailability`) puntava a `<site_url>/organization/<org>`. Su un portale federato come dati.gov.it le organizzazioni sono i cataloghi, non i titolari: il dataset di ASSET Puglia sta sotto `regione-puglia`.
+- Inoltre lo stack 2.10 scriveva `https://www.dati.gov.it/view-dataset?organization=<org>` con l'organizzazione del portale di origine (es. `asset-puglia` da dati.puglia.it), che su dati.gov.it non esiste: il valore arrivava con l'harvest nell'extra `related_resource` e veniva ri-esposto.
+- Correzione in `ckanext-dcatita` (`profile.py`, `rules.holder_relation_url`):
+  - i valori `...view-dataset?organization=...` vengono scartati in serializzazione, anche se arrivano dall'harvest;
+  - il ripiego punta alla ricerca dei dataset dello stesso titolare (`holder_name`; se manca, il titolo dell'organizzazione). Formato con `CKANEXT__DCATITA__RELATION_URL`; vuoto = `{site_url}/dataset/?holder_name=<titolare>`; per dati.gov.it `https://www.dati.gov.it/view-dataset?holder_name={qholder}`.
+  - il titolare si legge prima dagli extra: nei risultati di `package_search`, che alimentano `catalog.ttl`, `holder_name` di primo livello vale il titolo dell'organizzazione (verificato su `synthetic-photovoltaic-data`: primo livello "Master class", titolare vero "Università del Salento").
+
 ## `2026-10-17` — publisher dei sottocataloghi con valori vuoti
 - Il `dct:publisher` dei sottocataloghi usciva con `foaf:mbox ""` e, quando mancavano, con `foaf:homepage <>` e `dct:type <>`: i campi `email`, `url` e `type` vuoti dell'extra `source_catalog_publisher` (o del publisher di ripiego) venivano scritti lo stesso. Il ciclo saltava solo i valori assenti, non le stringhe vuote.
 - Correzione nella nuova `patches/ckanext-dcat-patches/08_publisher_empty.patch` (su `processors.py` di ckanext-dcat v2.4.4, ciclo `publisher_sources`): anche i valori vuoti vengono saltati. `foaf:name` non cambia, perche' viene ricavato prima se manca.

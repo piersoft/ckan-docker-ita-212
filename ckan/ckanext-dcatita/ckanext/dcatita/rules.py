@@ -20,6 +20,37 @@ OPEN_DATA_DIRECTIVE = "http://data.europa.eu/eli/dir/2019/1024/oj"
 DGA_REGULATION = "http://data.europa.eu/eli/reg/2022/868/oj"
 
 
+# dct:relation di ripiego: ricerca dei dataset dello stesso titolare.
+# Segnaposto: {site_url}, {holder} (codificato), {qholder} (tra virgolette,
+# codificato). Il default usa la ricerca di CKAN, che trasforma holder_name=...
+# in un filtro fq. dati.gov.it: https://www.dati.gov.it/view-dataset?holder_name={qholder}
+RELATION_URL_DEFAULT = "{site_url}/dataset/?holder_name={holder}"
+
+
+def holder_relation_url(dataset_dict, site_url, template=None):
+    """URL della ricerca per titolare (holder_name, poi titolo dell'organizzazione)."""
+    from urllib.parse import quote
+    # Prima l'extra: nei risultati di package_search (che alimentano
+    # catalog.ttl) holder_name di primo livello vale il titolo
+    # dell'organizzazione; il titolare vero sta negli extra. In package_show
+    # gli extra sono gia' al primo livello e la lista e' vuota.
+    holder = _get_extra(dataset_dict, "holder_name") or dataset_dict.get("holder_name")
+    if not holder:
+        holder = (dataset_dict.get("organization") or {}).get("title")
+    holder = (holder or "").strip()
+    site_url = (site_url or "").rstrip("/")
+    if not holder or not site_url:
+        return None
+    template = template or RELATION_URL_DEFAULT
+    try:
+        return template.format(site_url=site_url,
+                               holder=quote(holder, safe=""),
+                               qholder=quote('"%s"' % holder, safe=""))
+    except (KeyError, IndexError, ValueError):
+        log.warning("[dcatita] ckanext.dcatita.relation_url non valida: %r", template)
+        return None
+
+
 def default_legislation(access_rights):
     """ELI da dichiarare quando il dataset non ha applicableLegislation."""
     if "RESTRICTED" in str(access_rights or "").upper():

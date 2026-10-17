@@ -140,11 +140,20 @@ class DCATItaProfile(RDFProfile):
             g.add((idnode, SKOS.notation, Literal(dataset_dict["id"])))
             g.add((dataset_ref, ADMS.identifier, idnode))
 
+        # 17.10.26 dct:relation: il ripiego punta alla ricerca dei dataset
+        # dello stesso titolare, non all'organizzazione. Su un portale
+        # federato (dati.gov.it) le organizzazioni sono i cataloghi, non i
+        # titolari. Si scartano anche i valori del vecchio ripiego dello stack
+        # 2.10 (https://www.dati.gov.it/view-dataset?organization=<org>), che
+        # arrivano dall'harvest con organizzazioni del portale di origine.
+        for rel in list(g.objects(dataset_ref, DCT.relation)):
+            if "view-dataset?organization=" in str(rel):
+                g.remove((dataset_ref, DCT.relation, rel))
         if not any(g.objects(dataset_ref, DCT.relation)) and site_url:
-            org = (dataset_dict.get("organization") or {}).get("name")
-            if org:
-                g.add((dataset_ref, DCT.relation,
-                       CleanedURIRef(f"{site_url}/organization/{org}")))
+            rel_url = rules.holder_relation_url(
+                dataset_dict, site_url, tk.config.get("ckanext.dcatita.relation_url"))
+            if rel_url:
+                g.add((dataset_ref, DCT.relation, URIRef(rel_url)))
 
         # --- distribuzioni ---------------------------------------------------------
         resources = {}
