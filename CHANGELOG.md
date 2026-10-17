@@ -1,5 +1,9 @@
 # Changelog
 
+## `2026-10-17` — publisher dei sottocataloghi con valori vuoti
+- Il `dct:publisher` dei sottocataloghi usciva con `foaf:mbox ""` e, quando mancavano, con `foaf:homepage <>` e `dct:type <>`: i campi `email`, `url` e `type` vuoti dell'extra `source_catalog_publisher` (o del publisher di ripiego) venivano scritti lo stesso. Il ciclo saltava solo i valori assenti, non le stringhe vuote.
+- Correzione nella nuova `patches/ckanext-dcat-patches/08_publisher_empty.patch` (su `processors.py` di ckanext-dcat v2.4.4, ciclo `publisher_sources`): anche i valori vuoti vengono saltati. `foaf:name` non cambia, perche' viene ricavato prima se manca.
+
 ## `2026-10-16` — landing page dei dataset delle Camere di Commercio verso mistralportal.it
 - I dataset con `cci` nell'identificativo del titolare (Camere di Commercio) uscivano con `dcat:landingPage` su `https://www.mistralportal.it/...`. Il portale MISTRAL non esiste piu': il dominio rimanda alla home di MeteoHub (Agenzia ItaliaMeteo), quindi quelle landing page non portano al dataset. Su dati.gov.it erano circa 500 dataset, tra cui quelli della Camera di Commercio di Lecce pubblicati su dati.puglia.it.
 - Correzione: tolta la regola in `ckanext-dcatita/.../subcatalogs.json`. Questi dataset ora hanno la landing page del portale che li pubblica, come gli altri.
