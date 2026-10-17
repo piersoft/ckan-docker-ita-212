@@ -1,0 +1,12 @@
+--- a/ckanext/dcat/processors.py	2026-10-17 02:20:52.258130626 +0200
++++ b/ckanext/dcat/processors.py	2026-10-17 02:20:52.259405514 +0200
+@@ -517,7 +517,8 @@
+                     val = pub.get(src_key)
+                     if val is None and required:
+                         raise ValueError("Value for %s (%s) is required" % (src_key, predicate))
+-                    elif val is None:
++                    elif val is None or val == '':
++                        # ckan-docker-ita: niente foaf:mbox "", foaf:homepage <> o dct:type <>
+                         continue
+                     g.add((agent, predicate, _type(val)))
+ 
