@@ -23,6 +23,13 @@ groups:
           Testo di dct:provenance per i dataset harvestati (indicatore MQA "Origine").
           Segnaposto disponibili: {holder_name}, {source_catalog_title},
           {source_catalog_homepage}, {site_title}. Vuoto = testo predefinito italiano.
+      - key: ckanext.dcatita.relation_url
+        default: ""
+        description: >
+          Modello dell'URL di dct:relation di ripiego (ricerca dei dataset dello stesso
+          titolare). Segnaposto: {site_url}, {holder} (codificato per URL), {qholder}
+          (tra virgolette, codificato). Vuoto = {site_url}/dataset/?holder_name={holder}.
+          dati.gov.it: https://www.dati.gov.it/view-dataset?holder_name={qholder}
       - key: ckanext.dcatita.edp_catalog
         default: dati-gov-it
         description: >
