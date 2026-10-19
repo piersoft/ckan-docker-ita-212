@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-10-19` — script di validazione: regole operative AgID
+- `tools/validate_edp_shacl.py` e `tools/shapes/agid.ttl` allineati allo stack 2.10: nuovo profilo `agid` (identificativo `codiceIPA:identificativo` con prefisso uguale al codice IPA del titolare, email dell'editore del catalogo non PEC) e percorsi a sequenza mostrati per intero. Dettagli nel CHANGELOG di ckan-docker-ita.
+
 ## `2026-10-17` — `dct:relation`: ricerca per titolare invece dell'organizzazione
 - Il ripiego di `dct:relation` (metrica MQA `relationAvailability`) puntava a `<site_url>/organization/<org>`. Su un portale federato come dati.gov.it le organizzazioni sono i cataloghi, non i titolari: il dataset di ASSET Puglia sta sotto `regione-puglia`.
 - Inoltre lo stack 2.10 scriveva `https://www.dati.gov.it/view-dataset?organization=<org>` con l'organizzazione del portale di origine (es. `asset-puglia` da dati.puglia.it), che su dati.gov.it non esiste: il valore arrivava con l'harvest nell'extra `related_resource` e veniva ri-esposto.
