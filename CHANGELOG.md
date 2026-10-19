@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-10-19` — script di validazione: regole AgID come indicazioni
+- Nel profilo `agid` di `tools/validate_edp_shacl.py` tutte le segnalazioni sono ora `Info`: sono indicazioni operative AgID, non regole DCAT, e non cambiano l'esito ne' il codice di uscita. Allineato allo stack 2.10.
+
 ## `2026-10-19` — script di validazione: regole operative AgID
 - `tools/validate_edp_shacl.py` e `tools/shapes/agid.ttl` allineati allo stack 2.10: nuovo profilo `agid` (identificativo `codiceIPA:identificativo` con prefisso uguale al codice IPA del titolare, email dell'editore del catalogo non PEC) e percorsi a sequenza mostrati per intero. Dettagli nel CHANGELOG di ckan-docker-ita.
 
