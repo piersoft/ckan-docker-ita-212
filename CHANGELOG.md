@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-10-20` — indicazioni AgID: temi e formati segnaposto
+- Script di validazione: nuove indicazioni (Info) per tema e formato `OP_DATPRO` («dati provvisori», segnaposto) e per il formato `ARC` (quasi sempre scelto per errore).
+
 ## `2026-10-20` — validatore: punto ammesso nell'identificativo del dataset
 - L'indicazione AgID sull'identificativo `codiceIPA:identificativo` ora accetta anche il punto dopo i due punti (es. `c_e506:scuole.2026`): CKAN e dcatapit non limitano i caratteri dell'identificativo (lo richiedono solo non vuoto e unico). Restano esclusi spazi, accenti, barre e altri caratteri; il codice IPA prima dei due punti resta lettere, cifre e `_`.
 
