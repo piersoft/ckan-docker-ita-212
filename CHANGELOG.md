@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-10-20` — script di validazione: formati e media type sugli elenchi di data.europa.eu
+- `tools/validate_edp_shacl.py --profile vocabolari` controlla `dct:format` sul vocabolario EU `file-type` e `dcat:mediaType` sul registro IANA, con gli elenchi di data.europa.eu in `tools/shapes/vocabolari-elenchi.ttl`. Il file si rigenera a mano con il nuovo `tools/aggiorna_vocabolari.py`. Allineato allo stack 2.10.
+
 ## `2026-10-19` — script di validazione: regole AgID come indicazioni
 - Nel profilo `agid` di `tools/validate_edp_shacl.py` tutte le segnalazioni sono ora `Info`: sono indicazioni operative AgID, non regole DCAT, e non cambiano l'esito ne' il codice di uscita. Allineato allo stack 2.10.
 
