@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-10-20` — validatore: punto ammesso nell'identificativo del dataset
+- L'indicazione AgID sull'identificativo `codiceIPA:identificativo` ora accetta anche il punto dopo i due punti (es. `c_e506:scuole.2026`): CKAN e dcatapit non limitano i caratteri dell'identificativo (lo richiedono solo non vuoto e unico). Restano esclusi spazi, accenti, barre e altri caratteri; il codice IPA prima dei due punti resta lettere, cifre e `_`.
+
 ## `2026-10-20` — script di validazione: codice IPA con maiuscole e minuscole
 - Nel profilo `agid` il codice IPA del titolare deve essere scritto come in IndicePA (`UNITO`, non `unito`), e il prefisso dell'identificativo deve coincidere esattamente. Allineato allo stack 2.10.
 
