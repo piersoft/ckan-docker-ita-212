@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-10-20` — script di validazione: codice IPA del titolare su IndicePA
+- Nel profilo `agid` di `tools/validate_edp_shacl.py` il codice IPA del titolare viene cercato nel dataset "enti" di IndicePA; se e' il codice di un'unita' organizzativa o un codice fiscale, l'indicazione riporta il codice IPA da usare. `--no-ipa` salta la verifica. Allineato allo stack 2.10.
+
 ## `2026-10-20` — script di validazione: formati e media type sugli elenchi di data.europa.eu
 - `tools/validate_edp_shacl.py --profile vocabolari` controlla `dct:format` sul vocabolario EU `file-type` e `dcat:mediaType` sul registro IANA, con gli elenchi di data.europa.eu in `tools/shapes/vocabolari-elenchi.ttl`. Il file si rigenera a mano con il nuovo `tools/aggiorna_vocabolari.py`. Allineato allo stack 2.10.
 
