@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-10-20` — script di validazione: codice IPA con maiuscole e minuscole
+- Nel profilo `agid` il codice IPA del titolare deve essere scritto come in IndicePA (`UNITO`, non `unito`), e il prefisso dell'identificativo deve coincidere esattamente. Allineato allo stack 2.10.
+
 ## `2026-10-20` — script di validazione: codice IPA del titolare su IndicePA
 - Nel profilo `agid` di `tools/validate_edp_shacl.py` il codice IPA del titolare viene cercato nel dataset "enti" di IndicePA; se e' il codice di un'unita' organizzativa o un codice fiscale, l'indicazione riporta il codice IPA da usare. `--no-ipa` salta la verifica. Allineato allo stack 2.10.
 
