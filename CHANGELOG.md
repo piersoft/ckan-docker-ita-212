@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-10-21` — indicazione AgID: prefisso dell'editore invece che del titolare
+- Quando il prefisso dell'identificativo del dataset non e' il codice IPA del titolare ma quello dell'editore (`dct:publisher`), l'indicazione ha un messaggio proprio: «il prefisso e' il codice IPA dell'editore, non quello del titolare: l'identificativo va costruito con il codice IPA del titolare», con i due codici nel valore. Caso tipico: un comune che pubblica nel proprio catalogo dataset di cui e' titolare una societa' partecipata. Resta un'indicazione (Info) e la regola resta sul titolare.
+
 ## `2026-10-21` — validatore: dataset con piu' titolari (DCAT 3)
 - DCAT-AP_IT: `dct:rightsHolder` del dataset ora e' 1..N, come previsto con DCAT 3 (dataset aggregati con piu' enti titolari). Prima la regola ne ammetteva uno solo e segnalava una violazione per ogni dataset con piu' titolari.
 - Indicazione AgID sul prefisso dell'identificativo: con piu' titolari basta che il prefisso coincida con il codice IPA di uno di loro (prima si guardava solo il primo letto).
