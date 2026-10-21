@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-10-21` — dcatapit: il vocabolario licenze non viene piu' alterato dall'harvest
+- Nella lettura della licenza (parse della distribuzione) il codice modificava `document_uri` e `uri` della riga del vocabolario licenze restituita da `get_license_from_dcat()`. Quella riga e' un oggetto SQLAlchemy della sessione: al commit dell'harvest la modifica restava nel database e valeva da quel momento per tutti i dataset con quella licenza. Esempi visti: su dati.puglia.it CC BY-SA esce come `http://creativecommons.org/licenses/by/4.0/` (con tipo e nomi BY-SA); su dati.gov.it lo stesso indirizzo descrive insieme CC BY e IODL 1.0. Il ramo DGA poteva trasformare in OtherRestrictiveClauses la licenza di tutti i dataset.
+- Ora le sostituzioni si fanno su variabili locali (`lic_uri`, `doc_uri`); il risultato per il singolo dataset non cambia.
+- **Da fare una volta su ogni istanza gia' in esercizio**, per ripulire il vocabolario: `ckan dcatapit load --filename <ckanext-dcatapit>/vocabularies/licences.rdf` (svuota e ricarica le licenze; le risorse conservano la loro licenza, salvata come URI). Il catalogo esposto si corregge subito, senza nuovo harvest.
+
 ## `2026-10-20` — IRI relativi mostrati come scritti nel catalogo
 - Un IRI relativo nel catalogo (es. `vcard:hasEmail <opendatamilano@comune.milano.it>`, senza `mailto:`) veniva completato con la cartella di chi esegue lo script: nel report compariva `file:///home/.../opendatamilano@comune.milano.it`, un percorso del server che non c'entra con l'ente. Ora i dati si leggono con una base fittizia (`https://iri-relativo.invalid/`) e il valore si mostra com'e' scritto, con la nota "(IRI relativo: manca lo schema, es. mailto: o https://)".
 - Vale per il validatore web, `validate_edp_shacl.py` e il report settimanale.
