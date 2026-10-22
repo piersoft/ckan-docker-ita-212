@@ -7,6 +7,7 @@
 - Nuovo `README-dockerhub.md`: descrizione per la pagina Docker Hub.
 - Immagine CKAN: nuovo entrypoint `ckan/setup/ckan-ita-entrypoint.sh`. Se nel `.env` i segreti (`SECRET_KEY`, `WTF_CSRF_SECRET_KEY`, JWT) mancano o sono `CHANGE_ME`, li genera una volta e li conserva nel volume `ckan_storage`, condiviso con i worker. Con segreti reali nel `.env` non cambia nulla.
 - Nuovo `ckan/docker-entrypoint.d/03_setup_groups.sh`: con `CKAN_SETUP_GROUPS=true` i gruppi tematici vengono creati da soli al primo avvio (in background, appena il web server risponde; marker nel volume). Default spento: resta valido il comando manuale `setup_groups.sh`.
+- OAI-PMH: `Identify` su un catalogo vuoto (installazione nuova) dava errore 500, perche' la data del primo dataset non esisteva. Ora usa la data corrente finche' non ci sono dataset.
 - OAI-PMH: l'email nella risposta Identify non e' piu' fissa nel codice; viene da `CKAN_OAIPMH_ADMIN_EMAIL` o, se vuota, da `CKAN_SYSADMIN_EMAIL`. **Istanze esistenti**: per mantenere l'indirizzo attuale impostare `CKAN_OAIPMH_ADMIN_EMAIL` nel `.env`.
 
 ## `2026-10-22` — validatore: «raccomandata» e «obbligatoria» secondo la gravita'; parole chiave tra le indicazioni AgID

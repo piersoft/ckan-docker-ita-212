@@ -1,3 +1,5 @@
+import datetime
+
 from iso639 import languages
 
 import ckan.model as model
@@ -28,8 +30,12 @@ def get_earliest_datestamp():
     http://www.openarchives.org/OAI/openarchivesprotocol.html#Identify
     """
 
-    return (
+    row = (
         model.Session.query(model.Package.metadata_modified)
         .order_by(model.Package.metadata_modified)
-        .first()[0]
+        .first()
     )
+    if row is None or row[0] is None:
+        # Catalogo vuoto (installazione nuova): Identify non deve dare 500.
+        return datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+    return row[0]
