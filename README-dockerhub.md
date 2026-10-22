@@ -27,13 +27,39 @@ Le quattro immagini vanno usate sempre con lo stesso tag (variabile `CKAN_ITA_TA
 
 Requisiti: Docker Engine con Compose v2 (`docker compose version`), architettura amd64.
 
+Non si scarica il codice sorgente e non si fa nessuna build: bastano due file,
+il compose e la configurazione `.env`.
+
+**1. Scaricare i due file**
+
 ```sh
 mkdir ckan && cd ckan
 curl -fsSLO https://raw.githubusercontent.com/piersoft/ckan-docker-ita-212/main/docker-compose.hub.yml
 curl -fsSL  https://raw.githubusercontent.com/piersoft/ckan-docker-ita-212/main/.env.hub.example -o .env
-# modificare nel .env almeno CKAN_SITE_URL e CKAN_SYSADMIN_PASSWORD
+```
+
+Il secondo comando salva il modello di configurazione direttamente come `.env`.
+
+**2. Modificare `.env` prima del primo avvio**
+
+```sh
+nano .env
+```
+
+Da cambiare subito:
+
+- `CKAN_SITE_URL` — indirizzo pubblico del portale (es. `https://dati.miocomune.it`) e,
+  con lo stesso valore, `CKANEXT__DCAT__BASE__URI`
+- `CKAN_SYSADMIN_PASSWORD` e `CKAN_SYSADMIN_EMAIL`
+- in produzione, le password del database (vedi *Modificare la configurazione*)
+
+**3. Avviare**
+
+```sh
 docker compose -f docker-compose.hub.yml up -d
 ```
+
+Le immagini vengono scaricate da Docker Hub al primo `up`.
 
 Il primo avvio richiede alcuni minuti (creazione del database e caricamento dei
 vocabolari DCAT-AP_IT). Lo stato si controlla con:
@@ -83,8 +109,40 @@ e il catalogo non supera la validazione DCAT-AP_IT.
 | `CKAN_OAIPMH_ADMIN_EMAIL` | Email nella risposta OAI-PMH Identify (default: email del sysadmin) |
 | `POSTGRES_PASSWORD`, `CKAN_DB_PASSWORD`, `DATASTORE_READONLY_PASSWORD` | Password del database: in produzione cambiarle e riportarle negli URL `CKAN_SQLALCHEMY_URL` e `CKAN_DATASTORE_*_URL` **prima** del primo avvio |
 
-Dopo una modifica al `.env` ricreare i container:
-`docker compose -f docker-compose.hub.yml up -d`.
+## Modificare la configurazione
+
+La configurazione sta solo nel file `.env` della cartella di installazione: non serve
+mai una build. Dopo ogni modifica:
+
+```sh
+docker compose -f docker-compose.hub.yml up -d
+```
+
+Compose ricrea solo i container interessati (`restart` non basta: tiene il vecchio ambiente).
+
+**Modificabili in qualsiasi momento**
+
+- `CKAN_SITE_URL` / `CKANEXT__DCAT__BASE__URI` — rilette a ogni avvio. Cambiano anche le
+  URI dei dataset nel catalogo: conviene fissarle prima che il catalogo venga harvestato.
+- `CKAN__PLUGINS`, `CKANEXT__DCAT__RDF__PROFILES`, `CKAN_OAIPMH_ADMIN_EMAIL`, impostazioni
+  di Xloader, SMTP, GeoNames, log e uWSGI.
+- `NGINX_PORT_HOST` / `NGINX_SSLPORT_HOST`.
+- `CKAN_ITA_TAG` — dopo la modifica: `pull` e `up -d` (vedi *Aggiornare*).
+
+**Usate solo al primo avvio** (da decidere prima)
+
+- Password del database (`POSTGRES_PASSWORD`, `CKAN_DB_PASSWORD`,
+  `DATASTORE_READONLY_PASSWORD` e gli URL `CKAN_SQLALCHEMY_URL`, `CKAN_DATASTORE_*_URL`):
+  PostgreSQL le applica solo quando crea il volume vuoto. Cambiarle dopo nel `.env`
+  impedisce a CKAN di connettersi, a meno di cambiarle anche nel database.
+- `CKAN_SYSADMIN_PASSWORD` — serve solo a creare l'utente; poi la password si cambia
+  dal profilo utente nell'interfaccia.
+- `CKAN_SETUP_GROUPS` — i gruppi tematici si creano una volta sola.
+- Segreti applicativi — generati al primo avvio e conservati nel volume `ckan_storage`.
+  Impostarli dopo nel `.env` invalida i token API già emessi.
+
+Per ripartire da zero con una nuova configurazione (cancella tutti i dati):
+`docker compose -f docker-compose.hub.yml down -v`, poi `up -d`.
 
 ## Verifica
 
