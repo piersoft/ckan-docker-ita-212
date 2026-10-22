@@ -49,6 +49,13 @@ Accesso con l'utente `CKAN_SYSADMIN_NAME` e la password impostata nel `.env`.
 Per non ripetere `-f` a ogni comando: aggiungere al `.env`
 `COMPOSE_FILE=docker-compose.hub.yml`.
 
+## Dopo il primo avvio
+
+Da amministratore, in **Amministrazione → Configurazione** (`/ckan-admin/config`),
+compilare i dati del catalogo: titolo, editore (nome e codice IPA) e descrizione.
+Finché restano vuoti, `catalog.ttl` espone un editore senza nome né identificativo
+e il catalogo non supera la validazione DCAT-AP_IT.
+
 ## Cosa avviene in automatico
 
 - **Database e indice**: creazione dei database CKAN e DataStore, dello schema
