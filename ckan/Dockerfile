@@ -112,7 +112,16 @@ RUN chmod +x ${APP_DIR}/setup_groups.sh
 # CA bundle aggiornato (harvest verso host con catena Sectigo R46 ecc.)
 RUN pip3 install --no-cache-dir -U certifi
 
+# Entrypoint: genera e conserva nel volume i segreti se nel .env mancano
+# (o sono CHANGE_ME). Con segreti reali nel .env non fa nulla. Vedi lo script.
+COPY setup/ckan-ita-entrypoint.sh ${APP_DIR}/ckan-ita-entrypoint.sh
+RUN chmod 755 ${APP_DIR}/ckan-ita-entrypoint.sh
+
 # Permessi: tutto cio' che e' stato aggiunto deve essere leggibile da `ckan`
 RUN chown -R ckan:ckan-sys ${SRC_DIR} ${APP_DIR}/patches ${APP_DIR}/setup_groups.sh
 
 USER ckan
+
+# Impostare ENTRYPOINT azzera il CMD ereditato: va ridichiarato.
+ENTRYPOINT ["/srv/app/ckan-ita-entrypoint.sh"]
+CMD ["/srv/app/start_ckan.sh"]

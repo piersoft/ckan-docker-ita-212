@@ -1,5 +1,14 @@
 # Changelog
 
+## `2026-10-22` — immagini pronte su Docker Hub
+- Quattro immagini da pubblicare su Docker Hub: `piersoft/ckan` (anche per i worker), `piersoft/ckan-solr` (schema DCAT-AP_IT incluso), `piersoft/ckan-db` (creazione database CKAN e DataStore), `piersoft/ckan-nginx`. Tag `2.12-dcatapit-X.Y.Z`, `2.12` e `latest`.
+- Nuovo `docker-compose.hub.yml`: avvio senza build e senza clonare il repository, solo con il compose e il `.env` (`.env.hub.example`, con porte 8080/8443 e nomi senza suffisso). Versione delle immagini in `CKAN_ITA_TAG`.
+- Nuovo `scripts/build-push.sh <versione>`: build (linux/amd64) e push delle quattro immagini con le label OCI. Da lanciare dopo `docker login`.
+- Nuovo `README-dockerhub.md`: descrizione per la pagina Docker Hub.
+- Immagine CKAN: nuovo entrypoint `ckan/setup/ckan-ita-entrypoint.sh`. Se nel `.env` i segreti (`SECRET_KEY`, `WTF_CSRF_SECRET_KEY`, JWT) mancano o sono `CHANGE_ME`, li genera una volta e li conserva nel volume `ckan_storage`, condiviso con i worker. Con segreti reali nel `.env` non cambia nulla.
+- Nuovo `ckan/docker-entrypoint.d/03_setup_groups.sh`: con `CKAN_SETUP_GROUPS=true` i gruppi tematici vengono creati da soli al primo avvio (in background, appena il web server risponde; marker nel volume). Default spento: resta valido il comando manuale `setup_groups.sh`.
+- OAI-PMH: l'email nella risposta Identify non e' piu' fissa nel codice; viene da `CKAN_OAIPMH_ADMIN_EMAIL` o, se vuota, da `CKAN_SYSADMIN_EMAIL`. **Istanze esistenti**: per mantenere l'indirizzo attuale impostare `CKAN_OAIPMH_ADMIN_EMAIL` nel `.env`.
+
 ## `2026-10-22` — manuale del validatore impaginato sul modello AgID
 - `tools/docs/Manuale_Validatore_DCAT-AP_IT.pdf` ora usa l'impaginazione dei documenti AgID: copertina, licenza CC BY 4.0, frontespizio, scheda del documento (autore, riferimenti normativi, stato, scopo, campo di applicazione), indice e piè di pagina con il capitolo corrente. Contenuto invariato (versione 1.1), sempre in bozza con filigrana «BOZZA».
 

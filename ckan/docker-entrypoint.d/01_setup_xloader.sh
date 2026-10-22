@@ -21,6 +21,8 @@ if [[ $CKAN__PLUGINS == *"oai_pmh_server"* ]]; then
   # URL base dell'OAI-PMH: CKAN_OAIPMH_BASE_URL se valorizzato, altrimenti ${CKAN_SITE_URL}/oai
   OAIPMH_BASE_URL="${CKAN_OAIPMH_BASE_URL:-${CKAN_SITE_URL}/oai}"
   ckan config-tool "$CKAN_INI" "ckan.oaipmh.base_url=${OAIPMH_BASE_URL}"
+  # Email dell'amministratore nella risposta Identify: CKAN_OAIPMH_ADMIN_EMAIL, altrimenti CKAN_SYSADMIN_EMAIL
+  ckan config-tool "$CKAN_INI" "ckan.oaipmh.admin_email=${CKAN_OAIPMH_ADMIN_EMAIL:-${CKAN_SYSADMIN_EMAIL:-ckan@localhost}}"
   ckan config-tool "$CKAN_INI" "ckan.oaipmh.sets=dataset_authority, custom_tag_set"
   ckan config-tool "$CKAN_INI" "ckan.oaipmh.metadata_formats=oai_dc"
   ckan config-tool "$CKAN_INI" "ckan.oaipmh.dc_element_map=title,description,keyword,publisher,identifier"

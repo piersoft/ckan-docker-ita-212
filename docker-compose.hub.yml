@@ -1,0 +1,159 @@
+# =====================================================================
+#  CKAN Docker per l'Italia — avvio da immagini pronte su Docker Hub
+#  (CKAN 2.12 + DCAT-AP_IT + Postgres16 + Solr9 + Redis + NGINX)
+#
+#  Non serve clonare il repository ne' fare build. Bastano questo file e
+#  il .env (da .env.hub.example):
+#     cp .env.hub.example .env      # modificare CKAN_SITE_URL e le password
+#     docker compose -f docker-compose.hub.yml up -d
+#
+#  Versione delle immagini: CKAN_ITA_TAG nel .env (default 2.12 = ultima 2.12;
+#  per bloccare una versione precisa, es. 2.12-dcatapit-1.0.0).
+#  Per costruire le immagini dai sorgenti usare invece docker-compose.yml.
+# =====================================================================
+
+name: ${COMPOSE_PROJECT_NAME:-ckan}
+
+volumes:
+  ckan_storage:
+  pg_data:
+  solr_data:
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "3"
+
+x-ckan-image: &ckan-image piersoft/ckan:${CKAN_ITA_TAG:-2.12}
+
+services:
+
+  nginx:
+    logging: *default-logging
+    image: piersoft/ckan-nginx:${CKAN_ITA_TAG:-2.12}
+    networks: [webnet, ckannet]
+    depends_on: [ckan]
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:${NGINX_PORT_HOST:-8080}:80"
+      - "0.0.0.0:${NGINX_SSLPORT_HOST:-8443}:443"
+
+  ckan:
+    logging: *default-logging
+    image: *ckan-image
+    networks: [ckannet, dbnet, solrnet, redisnet]
+    env_file: [.env]
+    depends_on:
+      db:
+        condition: service_healthy
+      solr:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:5000/api/3/action/status_show"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      # Primo avvio lungo (init DB + vocabolari DCAT-AP_IT)
+      start_period: 300s
+
+  ckan-worker:
+    logging: *default-logging
+    image: *ckan-image
+    networks: [ckannet, dbnet, solrnet, redisnet]
+    env_file: [.env]
+    depends_on:
+      ckan:
+        condition: service_healthy
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: unless-stopped
+    command: ["ckan", "-c", "/srv/app/ckan.ini", "jobs", "worker"]
+
+  ckan-gather:
+    logging: *default-logging
+    image: *ckan-image
+    networks: [ckannet, dbnet, solrnet, redisnet]
+    env_file: [.env]
+    depends_on:
+      ckan:
+        condition: service_healthy
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: unless-stopped
+    command: ["ckan", "-c", "/srv/app/ckan.ini", "harvester", "gather-consumer"]
+
+  ckan-fetch:
+    logging: *default-logging
+    image: *ckan-image
+    networks: [ckannet, dbnet, solrnet, redisnet]
+    env_file: [.env]
+    depends_on:
+      ckan:
+        condition: service_healthy
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: unless-stopped
+    command: ["ckan", "-c", "/srv/app/ckan.ini", "harvester", "fetch-consumer"]
+
+  db:
+    logging: *default-logging
+    image: piersoft/ckan-db:${CKAN_ITA_TAG:-2.12}
+    networks: [dbnet]
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - CKAN_DB_USER
+      - CKAN_DB_PASSWORD
+      - CKAN_DB
+      - DATASTORE_READONLY_USER
+      - DATASTORE_READONLY_PASSWORD
+      - DATASTORE_DB
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-postgres}", "-d", "${POSTGRES_DB:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  solr:
+    logging: *default-logging
+    image: piersoft/ckan-solr:${CKAN_ITA_TAG:-2.12}
+    networks: [solrnet]
+    volumes:
+      - solr_data:/var/solr
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8983/solr/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    logging: *default-logging
+    image: redis:${REDIS_VERSION:-7}
+    networks: [redisnet]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-e", "QUIT"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  webnet:
+  ckannet:
+  solrnet:
+    internal: true
+  dbnet:
+    internal: true
+  redisnet:
+    internal: true

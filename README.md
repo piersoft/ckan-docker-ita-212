@@ -37,6 +37,16 @@ I worker (jobs/xloader, harvest gather e fetch) girano come servizi Compose sepa
 
 ---
 
+## Immagini pronte (Docker Hub)
+
+Per provare o installare lo stack senza fare build esistono le immagini
+`piersoft/ckan`, `piersoft/ckan-solr`, `piersoft/ckan-db` e `piersoft/ckan-nginx`:
+bastano `docker-compose.hub.yml` e `.env.hub.example` (rinominato `.env`).
+Istruzioni in [README-dockerhub.md](README-dockerhub.md). Per pubblicare una nuova
+versione: `scripts/build-push.sh <versione>` dopo `docker login`.
+
+---
+
 ## Configurazione (`.env`)
 
 Tutta la configurazione passa dal file `.env`. Si parte da `.env.example`:
@@ -124,6 +134,9 @@ Eseguire i comandi **in ordine**, aspettando il completamento di ciascuno.
    ```sh
    docker compose exec ckan bash /srv/app/setup_groups.sh
    ```
+
+   In alternativa, con `CKAN_SETUP_GROUPS=true` nel `.env` i gruppi vengono creati
+   da soli al primo avvio.
 
 Il portale è ora raggiungibile all'indirizzo impostato in `CKAN_SITE_URL`.
 

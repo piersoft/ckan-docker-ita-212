@@ -45,7 +45,7 @@ class CKANServer(ResumptionOAIPMH):
                 f"{internal_plugin.BLUEPRINT_NAME}.{internal_plugin.BLUEPRINT_OAI_ACTION_NAME}"
             ),
             protocolVersion="2.0",
-            adminEmails=["ckan@piersoft.it"],
+            adminEmails=[config.get("ckan.oaipmh.admin_email") or "ckan@localhost"],
             earliestDatestamp=utils.get_earliest_datestamp(),
             deletedRecord="no",
             granularity="YYYY-MM-DDThh:mm:ssZ",
