@@ -9,12 +9,6 @@
 - Nuovo `ckan/docker-entrypoint.d/03_setup_groups.sh`: con `CKAN_SETUP_GROUPS=true` i gruppi tematici vengono creati da soli al primo avvio (in background, appena il web server risponde; marker nel volume). Default spento: resta valido il comando manuale `setup_groups.sh`.
 - OAI-PMH: l'email nella risposta Identify non e' piu' fissa nel codice; viene da `CKAN_OAIPMH_ADMIN_EMAIL` o, se vuota, da `CKAN_SYSADMIN_EMAIL`. **Istanze esistenti**: per mantenere l'indirizzo attuale impostare `CKAN_OAIPMH_ADMIN_EMAIL` nel `.env`.
 
-## `2026-10-22` — manuale del validatore impaginato sul modello AgID
-- `tools/docs/Manuale_Validatore_DCAT-AP_IT.pdf` ora usa l'impaginazione dei documenti AgID: copertina, licenza CC BY 4.0, frontespizio, scheda del documento (autore, riferimenti normativi, stato, scopo, campo di applicazione), indice e piè di pagina con il capitolo corrente. Contenuto invariato (versione 1.1), sempre in bozza con filigrana «BOZZA».
-
-## `2026-10-22` — manuale del validatore in PDF (bozza)
-- Nuovo `tools/docs/Manuale_Validatore_DCAT-AP_IT.pdf` (versione 1.1, bozza in attesa di approvazione, con filigrana «BOZZA» in copertina): uso del validatore web, lettura dei risultati, significato e correzione di ogni segnalazione per profilo (EDP, DCAT-AP_IT, Vocabolari, HVD, Indicazioni AgID), report CSV/JSON, messaggi di errore e uso da riga di comando di `tools/validate_edp_shacl.py`.
-
 ## `2026-10-22` — validatore: «raccomandata» e «obbligatoria» secondo la gravita'; parole chiave tra le indicazioni AgID
 - Le regole piveau usano lo stesso vincolo (`sh:minCount`) per le proprieta' obbligatorie (Violation) e per quelle raccomandate (Warning, profilo «EDP · raccomandate»). Il messaggio tradotto diceva sempre «Proprieta' obbligatoria assente»; ora dice «Proprieta' raccomandata assente» quando la gravita' e' Warning. Vale per il validatore web e il report settimanale.
 - Nuova indicazione AgID (Info): dataset senza parole chiave (`dcat:keyword`), richieste per l'harvesting su dati.gov.it e valutate dall'MQA.
