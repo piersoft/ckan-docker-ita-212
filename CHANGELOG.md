@@ -1,5 +1,9 @@
 # Changelog
 
+## `2026-10-22` — validatore: «raccomandata» e «obbligatoria» secondo la gravita'; parole chiave tra le indicazioni AgID
+- Le regole piveau usano lo stesso vincolo (`sh:minCount`) per le proprieta' obbligatorie (Violation) e per quelle raccomandate (Warning, profilo «EDP · raccomandate»). Il messaggio tradotto diceva sempre «Proprieta' obbligatoria assente»; ora dice «Proprieta' raccomandata assente» quando la gravita' e' Warning. Vale per il validatore web e il report settimanale.
+- Nuova indicazione AgID (Info): dataset senza parole chiave (`dcat:keyword`), richieste per l'harvesting su dati.gov.it e valutate dall'MQA.
+
 ## `2026-10-21` — indicazione AgID: prefisso dell'editore invece che del titolare
 - Quando il prefisso dell'identificativo del dataset non e' il codice IPA del titolare ma quello dell'editore (`dct:publisher`), l'indicazione ha un messaggio proprio: «il prefisso e' il codice IPA dell'editore, non quello del titolare: l'identificativo va costruito con il codice IPA del titolare», con i due codici nel valore. Caso tipico: un comune che pubblica nel proprio catalogo dataset di cui e' titolare una societa' partecipata. Resta un'indicazione (Info) e la regola resta sul titolare.
 
