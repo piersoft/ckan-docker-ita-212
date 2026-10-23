@@ -105,6 +105,9 @@ RUN cd ${SRC_DIR}/ckan && for f in ${APP_DIR}/patches/ckan-core-patches/*.patch;
 COPY patches/ckan_logo_col.png patches/sprite-resource-icons.png ${SRC_DIR}/ckan/ckan/public/base/images/
 
 # Script di inizializzazione (eseguiti da start_ckan.sh a ogni avvio)
+# CSS predefinito accessibile (WCAG 2.1 AA): impostato come "Custom CSS" da
+# docker-entrypoint.d/04_custom_css.sh se l'admin non ne ha uno proprio
+COPY css.example ${APP_DIR}/css.example
 COPY docker-entrypoint.d/*.sh /docker-entrypoint.d/
 RUN chmod 755 /docker-entrypoint.d/*.sh
 

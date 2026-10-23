@@ -108,6 +108,7 @@ e il catalogo non supera la validazione DCAT-AP_IT.
 | `CKANEXT__DCAT__RDF__PROFILES` | Catena dei profili RDF (`dcat_ita` sempre per ultimo) |
 | `CKAN_OAIPMH_ADMIN_EMAIL` | Email nella risposta OAI-PMH Identify (default: email del sysadmin) |
 | `CKANEXT__DCATITA__ACCESSIBILITY_STATEMENT_URL` | URL della dichiarazione di accessibilità (per le PA è obbligatoria, Linee guida AgID: quella pubblicata su form.agid.gov.it). Se valorizzato, il footer mostra il link «Dichiarazione di accessibilità»; vuoto (default) = nessun link. |
+| `CKAN_CUSTOM_CSS_DEFAULT` / `CKAN_CUSTOM_CSS_FORCE` | Tema predefinito accessibile (WCAG 2.1 AA) in `ckan/css.example`: con `true` (default) all'avvio viene impostato come «Custom CSS» (Admin → Config) se l'admin non ne ha uno proprio, e aggiornato alle nuove versioni finché l'admin non lo modifica (script `docker-entrypoint.d/04_custom_css.sh`). `false` non tocca mai il Custom CSS. `CKAN_CUSTOM_CSS_FORCE=true` lo sovrascrive col predefinito al prossimo avvio. Per tornare al predefinito basta anche svuotare il Custom CSS dall'admin e riavviare. |
 | `POSTGRES_PASSWORD`, `CKAN_DB_PASSWORD`, `DATASTORE_READONLY_PASSWORD` | Password del database: in produzione cambiarle e riportarle negli URL `CKAN_SQLALCHEMY_URL` e `CKAN_DATASTORE_*_URL` **prima** del primo avvio |
 
 ## Modificare la configurazione

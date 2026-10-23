@@ -68,6 +68,7 @@ Variabili chiave:
 | `CKANEXT__DCATITA__MQA_BADGE` | `true` mostra nella pagina di ogni dataset il riquadro "Punteggio qualità dal portale europeo" letto via API da data.europa.eu (default `false`). Ha senso solo se il catalogo è harvestato dal portale europeo; per gli altri il riquadro resta senza punteggio. |
 | `CKANEXT__DCATITA__HARVEST_VERIFY_SSL` | `false` (default) non verifica i certificati TLS dei cataloghi harvestati via RDF. |
 | `CKANEXT__DCATITA__ACCESSIBILITY_STATEMENT_URL` | URL della dichiarazione di accessibilità (per le PA è obbligatoria, Linee guida AgID: quella pubblicata su form.agid.gov.it). Se valorizzato, il footer mostra il link «Dichiarazione di accessibilità»; vuoto (default) = nessun link. |
+| `CKAN_CUSTOM_CSS_DEFAULT` / `CKAN_CUSTOM_CSS_FORCE` | Tema predefinito accessibile (WCAG 2.1 AA) in `ckan/css.example`: con `true` (default) all'avvio viene impostato come «Custom CSS» (Admin → Config) se l'admin non ne ha uno proprio, e aggiornato alle nuove versioni finché l'admin non lo modifica (script `docker-entrypoint.d/04_custom_css.sh`). `false` non tocca mai il Custom CSS. `CKAN_CUSTOM_CSS_FORCE=true` lo sovrascrive col predefinito al prossimo avvio. Per tornare al predefinito basta anche svuotare il Custom CSS dall'admin e riavviare. |
 | `CKANEXT__OAI_PMH_SERVER__RESUMPTION_TOKEN_BATCH_SIZE` | Record per pagina di `ListRecords` (default `1024`). |
 | `CKAN_LOG_LEVEL_EXTENSIONS` | Livello di log delle estensioni (default `INFO`; `DEBUG` è molto verboso). |
 

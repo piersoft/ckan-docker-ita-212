@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-10-23` — CSS accessibile predefinito
+- Il tema accessibile (WCAG 2.1 AA) è ora predefinito: `css.example` si sposta in `ckan/css.example`, viene copiato nell'immagine e all'avvio lo script `docker-entrypoint.d/04_custom_css.sh` lo imposta come «Custom CSS» (chiave `ckan.site_custom_css`) se l'admin non ne ha uno proprio. Alle versioni successive viene aggiornato finché l'admin non lo modifica; un CSS modificato dall'admin non viene mai sovrascritto.
+- Variabili `CKAN_CUSTOM_CSS_DEFAULT` (default `true`; `false` disattiva) e `CKAN_CUSTOM_CSS_FORCE` (`true` sovrascrive col predefinito al prossimo avvio).
+- Il logo CKAN del footer usa un URL assoluto (`/base/images/ckan_logo_col.png`): con quello relativo, nel CSS inserito nella pagina, l'immagine non si caricava nelle pagine annidate (es. pagina risorsa).
+
 ## `2026-10-23` — accessibilita' WCAG 2.1 AA del front end
 - **Traduzioni**: `ckanext-dcatita` porta un catalogo italiano con le stringhe del core rimaste vuote (skip link «Salta al contenuto principale», ricerca, «Apri o chiudi il menu di navigazione», etichette `aria-label` di dataset, risorse e filtri) e corregge «Linguaggio» in «Lingua» e «Data e Risorse» in «Dati e risorse».
 - **Homepage**: `h1` con il titolo del sito quando c'e' il testo introduttivo; titoli di gruppi e organizzazioni in evidenza h2 e dataset h3 (prima h3 con dentro h2); immagini decorative fuori dal tab; tolta la «sezione in evidenza» d'esempio con immagine segnaposto e link a `#`.
