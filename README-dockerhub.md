@@ -107,6 +107,7 @@ e il catalogo non supera la validazione DCAT-AP_IT.
 | `CKAN__PLUGINS` | Plugin attivi; facoltativi `dcat_ap_edp_mqa` e `oai_pmh_server` |
 | `CKANEXT__DCAT__RDF__PROFILES` | Catena dei profili RDF (`dcat_ita` sempre per ultimo) |
 | `CKAN_OAIPMH_ADMIN_EMAIL` | Email nella risposta OAI-PMH Identify (default: email del sysadmin) |
+| `CKANEXT__DCATITA__ACCESSIBILITY_STATEMENT_URL` | URL della dichiarazione di accessibilità (per le PA è obbligatoria, Linee guida AgID: quella pubblicata su form.agid.gov.it). Se valorizzato, il footer mostra il link «Dichiarazione di accessibilità»; vuoto (default) = nessun link. |
 | `POSTGRES_PASSWORD`, `CKAN_DB_PASSWORD`, `DATASTORE_READONLY_PASSWORD` | Password del database: in produzione cambiarle e riportarle negli URL `CKAN_SQLALCHEMY_URL` e `CKAN_DATASTORE_*_URL` **prima** del primo avvio |
 
 ## Modificare la configurazione

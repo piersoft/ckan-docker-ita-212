@@ -67,6 +67,7 @@ Variabili chiave:
 | `CKANEXT__XLOADER__USE_TYPE_GUESSING` | `true` fa indovinare a xloader i tipi delle colonne (Data Dictionary con `numeric`/`timestamp`/`bool` invece di tutto `text`). Più lento del `COPY` diretto e attivo solo alla creazione della tabella. Da accompagnare a `CKANEXT__XLOADER__STRICT_TYPE_GUESSING=false` (una colonna con celle sporche diventa `text` invece di far fallire il typing) e, se serve su file grandi, a `CKANEXT__XLOADER__MAX_TYPE_GUESSING_LENGTH`. |
 | `CKANEXT__DCATITA__MQA_BADGE` | `true` mostra nella pagina di ogni dataset il riquadro "Punteggio qualità dal portale europeo" letto via API da data.europa.eu (default `false`). Ha senso solo se il catalogo è harvestato dal portale europeo; per gli altri il riquadro resta senza punteggio. |
 | `CKANEXT__DCATITA__HARVEST_VERIFY_SSL` | `false` (default) non verifica i certificati TLS dei cataloghi harvestati via RDF. |
+| `CKANEXT__DCATITA__ACCESSIBILITY_STATEMENT_URL` | URL della dichiarazione di accessibilità (per le PA è obbligatoria, Linee guida AgID: quella pubblicata su form.agid.gov.it). Se valorizzato, il footer mostra il link «Dichiarazione di accessibilità»; vuoto (default) = nessun link. |
 | `CKANEXT__OAI_PMH_SERVER__RESUMPTION_TOKEN_BATCH_SIZE` | Record per pagina di `ListRecords` (default `1024`). |
 | `CKAN_LOG_LEVEL_EXTENSIONS` | Livello di log delle estensioni (default `INFO`; `DEBUG` è molto verboso). |
 
