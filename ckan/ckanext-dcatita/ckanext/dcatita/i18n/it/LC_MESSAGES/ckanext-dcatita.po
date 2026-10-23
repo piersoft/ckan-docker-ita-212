@@ -1,0 +1,159 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-dcatita\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Skip to main content"
+msgstr "Salta al contenuto principale"
+
+msgid "Search Datasets..."
+msgstr "Cerca dataset..."
+
+msgid "Toggle navigation"
+msgstr "Apri o chiudi il menu di navigazione"
+
+msgid "Submit"
+msgstr "Invia"
+
+msgid "Language"
+msgstr "Lingua"
+
+msgid "close"
+msgstr "chiudi"
+
+msgid "Close"
+msgstr "Chiudi"
+
+msgid "Data and Resources"
+msgstr "Dati e risorse"
+
+msgid "Account"
+msgstr "Account"
+
+msgid "Breadcrumb"
+msgstr "Percorso di navigazione"
+
+msgid "Close modal"
+msgstr "Chiudi la finestra"
+
+msgid "Copy to clipboard"
+msgstr "Copia negli appunti"
+
+msgid "Current resource: {name}"
+msgstr "Risorsa corrente: {name}"
+
+msgid "Delete collaborator"
+msgstr "Elimina collaboratore"
+
+msgid "Delete member"
+msgstr "Elimina membro"
+
+msgid "Delete this collaborator from the dataset"
+msgstr "Rimuovi questo collaboratore dal dataset"
+
+msgid "Delete this member from the group"
+msgstr "Rimuovi questo membro dal gruppo"
+
+msgid "Delete this member from the organization"
+msgstr "Rimuovi questo membro dall'organizzazione"
+
+msgid "Edit role"
+msgstr "Modifica ruolo"
+
+msgid "Edit the role of the user within the group"
+msgstr "Modifica il ruolo dell'utente nel gruppo"
+
+msgid "Edit the role of the user within the organization"
+msgstr "Modifica il ruolo dell'utente nell'organizzazione"
+
+msgid "Filter by: {title}"
+msgstr "Filtra per: {title}"
+
+msgid "Manage resource: {name}"
+msgstr "Gestisci la risorsa: {name}"
+
+msgid "Navigate to Home - {site_title}"
+msgstr "Vai alla home - {site_title}"
+
+msgid "Navigate to dataset: {title}"
+msgstr "Vai al dataset: {title}"
+
+msgid "Navigate to resource: {name_or_id}"
+msgstr "Vai alla risorsa: {name_or_id}"
+
+msgid "Navigate to resource: {name}"
+msgstr "Vai alla risorsa: {name}"
+
+msgid "Open details page for dataset - {title}"
+msgstr "Apri la scheda del dataset - {title}"
+
+msgid "Placeholder"
+msgstr "Immagine segnaposto"
+
+msgid "Profile settings"
+msgstr "Impostazioni del profilo"
+
+msgid "Promote user to Sysadmin"
+msgstr "Promuovi l'utente ad amministratore di sistema"
+
+msgid "Remove applied filter: {value}"
+msgstr "Rimuovi il filtro applicato: {value}"
+
+msgid "Resource URL: {url}"
+msgstr "URL della risorsa: {url}"
+
+msgid "Revoke Sysadmin permission"
+msgstr "Revoca i permessi di amministratore di sistema"
+
+msgid "Search datasets"
+msgstr "Cerca dataset"
+
+msgid "Search datasets by {name}: {label}"
+msgstr "Cerca dataset per {name}: {label}"
+
+msgid "Search datasets with the tag: {name}"
+msgstr "Cerca dataset con il tag: {name}"
+
+msgid "Search datasets with the tag: {tag}"
+msgstr "Cerca dataset con il tag: {tag}"
+
+msgid "Search followee"
+msgstr "Cerca tra gli elementi seguiti"
+
+msgid "This information is visible to you and admins"
+msgstr "Questa informazione è visibile a te e agli amministratori"
+
+msgid "View dashboard"
+msgstr "Vai alla dashboard"
+
+msgid "Activity occurred on: {time}"
+msgstr "Attività del: {time}"
+
+msgid "Pagination"
+msgstr "Paginazione"
+
+msgid "Previous page"
+msgstr "Pagina precedente"
+
+msgid "Next page"
+msgstr "Pagina successiva"
+
+msgid "{label}: {count} datasets"
+msgstr "{label}: {count} dataset"
+
+msgid "{label}: {count} datasets, active filter (click to remove)"
+msgstr "{label}: {count} dataset, filtro attivo (premi per rimuoverlo)"
+
+msgid "Resource: {name}, format: {format}"
+msgstr "Risorsa: {name}, formato: {format}"
+
+msgid "Explore resource: {name}"
+msgstr "Esplora la risorsa: {name}"
+
+msgid "Accessibility statement"
+msgstr "Dichiarazione di accessibilità"

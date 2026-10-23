@@ -17,6 +17,7 @@ import logging
 
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
+from ckan.lib.plugins import DefaultTranslation
 
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 
@@ -84,17 +85,32 @@ def dcatita_mqa_badge_enabled():
     return tk.asbool(tk.config.get("ckanext.dcatita.mqa_badge", False))
 
 
+def dcatita_accessibility_statement_url():
+    """URL della dichiarazione di accessibilita' (link nel footer).
+    Vuoto = link non mostrato."""
+    return (tk.config.get("ckanext.dcatita.accessibility_statement_url") or "").strip()
+
+
 @tk.blanket.config_declarations
-class DCATItaHarvestPlugin(p.SingletonPlugin):
+class DCATItaHarvestPlugin(p.SingletonPlugin, DefaultTranslation):
     p.implements(IDCATRDFHarvester, inherit=True)
     p.implements(p.IConfigurer)
     p.implements(p.ITemplateHelpers)
+    # Traduzioni italiane delle stringhe di CKAN core rimaste vuote nel
+    # catalogo ufficiale (etichette aria, skip link, paginazione, ...).
+    # Le traduzioni delle estensioni vengono unite dopo quelle del core,
+    # quindi sovrascrivono anche le voci tradotte male ("Linguaggio").
+    p.implements(p.ITranslation, inherit=True)
+
+    def i18n_domain(self):
+        return "ckanext-dcatita"
 
     def update_config(self, config_):
         tk.add_template_directory(config_, "templates")
 
     def get_helpers(self):
         return {"dcatita_signature": dcatita_signature,
+                "dcatita_accessibility_statement_url": dcatita_accessibility_statement_url,
                 "dcatita_mqa_badge_enabled": dcatita_mqa_badge_enabled,
                 "dcatita_is_restricted": dcatita_is_restricted,
                 "dcatita_restricted_search_url": dcatita_restricted_search_url,

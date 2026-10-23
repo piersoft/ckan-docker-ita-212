@@ -24,4 +24,4 @@ dcat_ita = "ckanext.dcatita.profile:DCATItaProfile"
 include = ["ckanext*"]
 
 [tool.setuptools.package-data]
-"ckanext.dcatita" = ["*.json", "*.yaml", "templates/*.html", "templates/**/*.html"]
+"ckanext.dcatita" = ["*.json", "*.yaml", "templates/*.html", "templates/**/*.html", "i18n/*/LC_MESSAGES/*.po", "i18n/*/LC_MESSAGES/*.mo"]

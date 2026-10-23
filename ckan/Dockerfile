@@ -95,6 +95,9 @@ RUN pip3 install --no-cache-dir -e ${SRC_DIR}/ckanext-dcat-ap-edp-mqa \
 #        Causa: il sentinella `missing` di navl finiva in output (str(missing)
 #        solleva Invalid). Ora e' mappato a None come in MissingNullEncoder;
 #        gli altri tipi ignoti vanno a log con tipo e repr.
+#  04    paginazione accessibile (WCAG 1.3.1, 2.4.4, 4.1.2): contenitore <nav>
+#        con etichetta, frecce precedente/successiva con testo per i lettori
+#        di schermo, aria-current sulla pagina corrente, puntini non piu' link.
 # ---------------------------------------------------------------------
 COPY patches/ckan-core-patches ${APP_DIR}/patches/ckan-core-patches
 RUN cd ${SRC_DIR}/ckan && for f in ${APP_DIR}/patches/ckan-core-patches/*.patch; do \

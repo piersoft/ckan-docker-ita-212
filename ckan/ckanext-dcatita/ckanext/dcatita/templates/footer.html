@@ -1,0 +1,14 @@
+{% ckan_extends %}
+
+{#
+  ckan-docker-ita: link alla dichiarazione di accessibilita' (obbligatorio
+  per le PA, Linee guida AgID). Compare solo se e' impostato
+  ckanext.dcatita.accessibility_statement_url.
+#}
+{% block footer_links %}
+  {{ super() }}
+  {% set accessibility_url = h.dcatita_accessibility_statement_url() %}
+  {% if accessibility_url %}
+    <li><a href="{{ accessibility_url }}">{{ _('Accessibility statement') }}</a></li>
+  {% endif %}
+{% endblock %}

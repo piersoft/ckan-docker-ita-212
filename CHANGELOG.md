@@ -1,5 +1,14 @@
 # Changelog
 
+## `2026-10-23` — accessibilita' WCAG 2.1 AA del front end
+- **Traduzioni**: `ckanext-dcatita` porta un catalogo italiano con le stringhe del core rimaste vuote (skip link «Salta al contenuto principale», ricerca, «Apri o chiudi il menu di navigazione», etichette `aria-label` di dataset, risorse e filtri) e corregge «Linguaggio» in «Lingua» e «Data e Risorse» in «Dati e risorse».
+- **Homepage**: `h1` con il titolo del sito quando c'e' il testo introduttivo; titoli di gruppi e organizzazioni in evidenza h2 e dataset h3 (prima h3 con dentro h2); immagini decorative fuori dal tab; tolta la «sezione in evidenza» d'esempio con immagine segnaposto e link a `#`.
+- **Paginazione** (patch 04 al core): `<nav>` con etichetta, frecce con testo per i lettori di schermo, `aria-current` sulla pagina corrente, puntini non piu' link.
+- **Filtri di ricerca**: l'etichetta dice nome completo e numero di dataset (prima nome troncato e nome tecnico del campo); filtro attivo annunciato come tale.
+- **Risorse**: «Esplora» e' un `<button>` con id univoco (prima `dropdownExplorer` ripetuto); l'etichetta del link dice nome e formato della risorsa.
+- **Footer**: link «Dichiarazione di accessibilita'» se e' impostato `CKANEXT__DCATITA__ACCESSIBILITY_STATEMENT_URL`.
+- **`css.example`**: revisione completa (focus visibile nell'header, contrasto del menu, link del footer sottolineati, campi dei form piu' grandi, pulizia delle regole duplicate); tolto il titolo d'esempio dell'ente aggiunto via CSS.
+
 ## `2026-10-22` — immagini pronte su Docker Hub
 - Quattro immagini da pubblicare su Docker Hub: `piersoft/ckan` (anche per i worker), `piersoft/ckan-solr` (schema DCAT-AP_IT incluso), `piersoft/ckan-db` (creazione database CKAN e DataStore), `piersoft/ckan-nginx`. Tag `2.12-dcatapit-X.Y.Z`, `2.12` e `latest`.
 - Nuovo `docker-compose.hub.yml`: avvio senza build e senza clonare il repository, solo con il compose e il `.env` (`.env.hub.example`, con porte 8080/8443 e nomi senza suffisso). Versione delle immagini in `CKAN_ITA_TAG`.

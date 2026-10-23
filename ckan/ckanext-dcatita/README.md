@@ -23,7 +23,30 @@ ckanext.dcat.expose_subcatalogs = True
 ckanext.dcatita.subcatalogs_file = /srv/app/patches/subcatalogs.json
 ckanext.dcatita.harvest_verify_ssl = false
 ckanext.dcatita.default_applicable_legislation = true
+ckanext.dcatita.accessibility_statement_url = https://form.agid.gov.it/view/...   ; link nel footer
 ```
+
+## Accessibilita' (WCAG 2.1 AA)
+
+`dcatita_harvest` registra anche template e traduzioni che correggono i punti
+segnalati da una revisione di accessibilita' del front end:
+
+- `i18n/it`: traduzioni delle stringhe del core rimaste vuote nel catalogo
+  italiano ufficiale (skip link, ricerca, menu, etichette `aria-label`) e
+  correzione di «Linguaggio» in «Lingua». Le traduzioni delle estensioni sono
+  unite dopo quelle del core, quindi le sovrascrivono. Dopo aver modificato il
+  `.po` va ricompilato il `.mo` (`pybabel compile` o `msgfmt`).
+- `home/snippets/promoted.html`: `h1` con il titolo del sito quando c'e' il
+  testo introduttivo; tolta la sezione in evidenza d'esempio.
+- `snippets/group_item.html`, `organization_item.html`, `package_list.html`,
+  `package_item.html`: titoli h2/h3 coerenti, immagini decorative.
+- `snippets/facet_list.html`: etichette dei filtri con nome completo e numero.
+- `package/snippets/resource_item.html`: «Esplora» come `<button>` con id
+  univoco; nome e formato della risorsa nell'etichetta del link.
+- `footer.html`: link alla dichiarazione di accessibilita'.
+
+La paginazione e' corretta da una patch al core
+(`patches/ckan-core-patches/04_pagination_accessibilita.patch`).
 
 ## `subcatalogs.json`
 
