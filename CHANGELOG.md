@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-10-23` — immagini Docker: aggiornamenti di sicurezza
+- Immagine CKAN: `apt-get upgrade` in fase di build, per gli aggiornamenti di sicurezza Debian non ancora presenti in `ckan/ckan-base:2.12.0` (perl, libexpat1, libpcre2, libssh2: 3 vulnerabilita' critiche e varie alte segnalate da Docker Scout sulla 1.0.0).
+- Librerie Python portate alle versioni corrette: `certifi>=2026.10.19`, `PyJWT>=2.14.0`, `urllib3>=2.8.0`, `msgpack>=1.2.1`, `setuptools>=78.1.1` (sotto la 81, che rimuove `pkg_resources` usato dai namespace `ckanext`).
+- `scripts/build-push.sh`: con il push la build e' senza cache e con `--pull`, cosi' ogni versione pubblicata prende gli ultimi aggiornamenti; con `--no-push` resta la cache.
+
 ## `2026-10-23` — attribuzione del footer configurabile
 - Il testo «rebuilt by …» del footer si imposta con `CKANEXT__DCATITA__FOOTER_REBUILT_BY`; vuoto (default) = `AgID`. Prima era fisso «rebuilt by Piersoft».
 

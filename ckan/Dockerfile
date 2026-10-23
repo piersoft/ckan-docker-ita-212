@@ -16,7 +16,10 @@ FROM ckan/ckan-base:2.12.0-py3.14
 USER root
 
 # Strumenti di base: `patch` serve al loop delle patch, nano/curl per il debug.
+# `apt-get upgrade`: aggiornamenti di sicurezza Debian non ancora presenti
+# nell'immagine base (perl, expat, pcre2, libssh2...).
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends git patch nano curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -115,8 +118,17 @@ RUN chmod 755 /docker-entrypoint.d/*.sh
 COPY setup_groups.sh ${APP_DIR}/setup_groups.sh
 RUN chmod +x ${APP_DIR}/setup_groups.sh
 
-# CA bundle aggiornato (harvest verso host con catena Sectigo R46 ecc.)
-RUN pip3 install --no-cache-dir -U certifi
+# Aggiornamenti di sicurezza delle librerie Python fissate da CKAN 2.12.0 e dalle
+# estensioni (versioni minime che correggono CVE note, segnalate da Trivy/Docker Scout).
+# certifi aggiornato serve anche all'harvest verso host con catena Sectigo R46 ecc.
+# setuptools resta sotto la 81: i namespace ckanext usano ancora pkg_resources.
+RUN pip3 install --no-cache-dir -U \
+        "certifi>=2026.10.19" \
+        "PyJWT>=2.14.0,<3" \
+        "urllib3>=2.8.0,<3" \
+        "msgpack>=1.2.1,<2" \
+        "setuptools>=78.1.1,<81" \
+    && (pip3 check || true)
 
 # Entrypoint: genera e conserva nel volume i segreti se nel .env mancano
 # (o sono CHANGE_ME). Con segreti reali nel .env non fa nulla. Vedi lo script.

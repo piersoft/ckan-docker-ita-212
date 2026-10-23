@@ -11,6 +11,9 @@
 #     2.12-dcatapit-<versione>   (immutabile)
 #     2.12                       (ultima 2.12)
 #     latest
+#  Con il push la build e' senza cache (--no-cache) e riscarica le immagini base
+#  (--pull), cosi' ogni versione include gli ultimi aggiornamenti di sicurezza.
+#  Con --no-push si usa la cache (build di prova piu' veloce).
 #  Architettura: linux/amd64 (l'immagine base ckan/ckan-base non e' multi-arch).
 #  Variabili opzionali: HUB_NAMESPACE (default piersoft), CKAN_SERIES (default 2.12),
 #  SOURCE_URL (repository dei sorgenti, finisce nella label OCI dell'immagine).
@@ -25,6 +28,9 @@ if [ -z "$VERSION" ]; then
   echo "Uso: $0 <versione> [--no-push]   es. $0 1.0.0" >&2
   exit 1
 fi
+
+CACHE_OPT=""
+$PUSH && CACHE_OPT="--no-cache"
 
 NS="${HUB_NAMESPACE:-piersoft}"
 SERIES="${CKAN_SERIES:-2.12}"
@@ -47,7 +53,7 @@ for entry in "${IMAGES[@]}"; do
   repo="${NS}/${name}"
   echo ""
   echo "=== ${repo}  (contesto: ${ctx}/)"
-  docker build --platform linux/amd64 \
+  docker build --platform linux/amd64 --pull ${CACHE_OPT} \
     --build-arg TZ=Europe/Rome \
     --label org.opencontainers.image.title="${name}" \
     --label org.opencontainers.image.version="${SERIES}-dcatapit-${VERSION}" \
