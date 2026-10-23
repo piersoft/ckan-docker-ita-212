@@ -85,6 +85,12 @@ def dcatita_mqa_badge_enabled():
     return tk.asbool(tk.config.get("ckanext.dcatita.mqa_badge", False))
 
 
+def dcatita_footer_rebuilt_by():
+    """Chi ha ricostruito lo stack, mostrato nel footer ("rebuilt by ...").
+    Vuoto = AgID."""
+    return (tk.config.get("ckanext.dcatita.footer_rebuilt_by") or "").strip() or "AgID"
+
+
 def dcatita_accessibility_statement_url():
     """URL della dichiarazione di accessibilita' (link nel footer).
     Vuoto = link non mostrato."""
@@ -111,6 +117,7 @@ class DCATItaHarvestPlugin(p.SingletonPlugin, DefaultTranslation):
     def get_helpers(self):
         return {"dcatita_signature": dcatita_signature,
                 "dcatita_accessibility_statement_url": dcatita_accessibility_statement_url,
+                "dcatita_footer_rebuilt_by": dcatita_footer_rebuilt_by,
                 "dcatita_mqa_badge_enabled": dcatita_mqa_badge_enabled,
                 "dcatita_is_restricted": dcatita_is_restricted,
                 "dcatita_restricted_search_url": dcatita_restricted_search_url,

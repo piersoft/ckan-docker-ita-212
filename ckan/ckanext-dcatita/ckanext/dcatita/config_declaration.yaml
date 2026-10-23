@@ -11,6 +11,11 @@ groups:
           URL della dichiarazione di accessibilita' (per le PA: quella pubblicata
           su form.agid.gov.it). Se valorizzato, il footer mostra il link
           "Dichiarazione di accessibilita'". Vuoto = nessun link.
+      - key: ckanext.dcatita.footer_rebuilt_by
+        default: ""
+        description: >
+          Nome mostrato nel footer dopo "rebuilt by" (chi ha ricostruito lo
+          stack). Vuoto = AgID.
       - key: ckanext.dcatita.harvest_verify_ssl
         type: bool
         default: false
