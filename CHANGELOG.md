@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-10-23` — Solr 9.10 e pulizia dei moduli non usati
+- `solr/Dockerfile`: base `solr:9.10.1` ufficiale al posto di `ckan/ckan-solr:2.12-solr9` (fermo a Solr 9.9), con gli stessi passi dell'immagine CKAN. Corregge le vulnerabilita' di jetty, netty, jackson, zookeeper e solr-core segnalate da Trivy sulla 9.9. Indice compatibile: i volumi `solr_data` esistenti non vanno ricreati.
+- Rimossi i moduli opzionali di Solr non usati da CKAN (`/opt/solr/modules`: Tika, OpenNLP, Kafka/cross-dc, Hadoop, repository cloud) e `prometheus-exporter`, con le loro librerie vulnerabili. Aggiunto `apt-get upgrade` (openssl).
+- Immagine `ckan-db`: le segnalazioni restanti sono nel binario `gosu` dell'immagine ufficiale `postgres:16-alpine` (compilato con una versione di Go non aggiornata). Si usa solo all'avvio per passare all'utente postgres e il database sta su una rete interna; si chiudera' con l'aggiornamento dell'immagine ufficiale.
+
 ## `2026-10-23` — immagini Docker: aggiornamenti di sicurezza
 - Immagine CKAN: `apt-get upgrade` in fase di build, per gli aggiornamenti di sicurezza Debian non ancora presenti in `ckan/ckan-base:2.12.0` (perl, libexpat1, libpcre2, libssh2: 3 vulnerabilita' critiche e varie alte segnalate da Docker Scout sulla 1.0.0).
 - Librerie Python portate alle versioni corrette: `certifi>=2026.10.19`, `PyJWT>=2.14.0`, `urllib3>=2.8.0`, `msgpack>=1.2.1`, `setuptools>=78.1.1` (sotto la 81, che rimuove `pkg_resources` usato dai namespace `ckanext`).
