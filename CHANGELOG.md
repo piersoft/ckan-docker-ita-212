@@ -3,6 +3,7 @@
 ## `2026-10-23` — Solr 9.10 e pulizia dei moduli non usati
 - `solr/Dockerfile`: base `solr:9.10.1` ufficiale al posto di `ckan/ckan-solr:2.12-solr9` (fermo a Solr 9.9), con gli stessi passi dell'immagine CKAN. Corregge le vulnerabilita' di jetty, netty, jackson, zookeeper e solr-core segnalate da Trivy sulla 9.9. Indice compatibile: i volumi `solr_data` esistenti non vanno ricreati.
 - Rimossi i moduli opzionali di Solr non usati da CKAN (`/opt/solr/modules`: Tika, OpenNLP, Kafka/cross-dc, Hadoop, repository cloud) e `prometheus-exporter`, con le loro librerie vulnerabili. Aggiunto `apt-get upgrade` (openssl).
+- Su Solr restano alcune segnalazioni nelle librerie del nucleo (jetty, netty, jackson, zookeeper, commons-beanutils), corrette solo da un rilascio di Solr successivo alla 9.10.1. Solr sta sulla rete interna `solrnet`, non esposta; zookeeper serve solo in modalita' SolrCloud, non usata.
 - Immagine `ckan-db`: le segnalazioni restanti sono nel binario `gosu` dell'immagine ufficiale `postgres:16-alpine` (compilato con una versione di Go non aggiornata). Si usa solo all'avvio per passare all'utente postgres e il database sta su una rete interna; si chiudera' con l'aggiornamento dell'immagine ufficiale.
 
 ## `2026-10-23` — immagini Docker: aggiornamenti di sicurezza
