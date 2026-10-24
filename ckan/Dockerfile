@@ -35,7 +35,7 @@ RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-xloader.g
 # ---------------------------------------------------------------------
 #  ckanext-harvest upstream + patch locali (patches/ckanext-harvest-patches:
 #  normalizzazione dei cataloghi CKAN federati, id risorsa non-UUID,
-#  harvest source con URL duplicato)
+#  harvest source con URL duplicato, ordine dei job di job-all)
 # ---------------------------------------------------------------------
 # (dalla 1.6.3 le dipendenze stanno nel pyproject.toml: niente requirements.txt)
 RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-harvest.git@v1.6.3#egg=ckanext-harvest

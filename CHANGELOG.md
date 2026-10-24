@@ -1,5 +1,9 @@
 # Changelog
 
+## `2026-10-24` — harvest: ordine dei job creati da `job-all`
+- `ckan harvester job-all` crea i job seguendo la data di creazione delle sorgenti, dalla più recente: i job partono nella coda gather in quell'ordine e non c'era modo di cambiarlo. Nuova patch `05_job_all_order.patch` con l'opzione `ckan.harvest.job_all_order` (variabile `CKAN__HARVEST__JOB_ALL_ORDER`): `created_desc` (default, comportamento invariato), `created_asc`, `title_asc` (alfabetico per titolo, senza distinzione tra maiuscole e minuscole), `title_desc`.
+- Cambia solo l'ordine di creazione dei job di `job-all` (`harvest_job_create_all`): `harvest_source_list` e le API restano identiche, e le date di creazione delle sorgenti non vengono toccate. Con più worker gather/fetch in parallelo è garantito l'ordine di partenza, non quello di completamento.
+
 ## `2026-10-23` — Solr 9.10 e pulizia dei moduli non usati
 - `solr/Dockerfile`: base `solr:9.10.1` ufficiale al posto di `ckan/ckan-solr:2.12-solr9` (fermo a Solr 9.9), con gli stessi passi dell'immagine CKAN. Corregge le vulnerabilita' di jetty, netty, jackson, zookeeper e solr-core segnalate da Trivy sulla 9.9. Indice compatibile: i volumi `solr_data` esistenti non vanno ricreati.
 - Rimossi i moduli opzionali di Solr non usati da CKAN (`/opt/solr/modules`: Tika, OpenNLP, Kafka/cross-dc, Hadoop, repository cloud) e `prometheus-exporter`, con le loro librerie vulnerabili. Aggiunto `apt-get upgrade` (openssl).
