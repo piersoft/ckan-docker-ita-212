@@ -106,6 +106,7 @@ e il catalogo non supera la validazione DCAT-AP_IT.
 | `CKAN_SETUP_GROUPS` | `true` crea i gruppi tematici al primo avvio |
 | `CKAN__PLUGINS` | Plugin attivi; facoltativi `dcat_ap_edp_mqa` e `oai_pmh_server` |
 | `CKANEXT__DCAT__RDF__PROFILES` | Catena dei profili RDF (`dcat_ita` sempre per ultimo) |
+| `CKAN__HARVEST__JOB_ALL_ORDER` | Ordine in cui l'harvest di tutte le sorgenti (`ckan harvester job-all`) avvia i job: `created_desc` (default, sorgente più recente per prima), `created_asc`, `title_asc` (alfabetico A-Z), `title_desc` (Z-A). |
 | `CKAN_OAIPMH_ADMIN_EMAIL` | Email nella risposta OAI-PMH Identify (default: email del sysadmin) |
 | `CKANEXT__DCATITA__ACCESSIBILITY_STATEMENT_URL` | URL della dichiarazione di accessibilità (per le PA è obbligatoria, Linee guida AgID: quella pubblicata su form.agid.gov.it). Se valorizzato, il footer mostra il link «Dichiarazione di accessibilità»; vuoto (default) = nessun link. |
 | `CKANEXT__DCATITA__FOOTER_REBUILT_BY` | Nome mostrato nel footer dopo «rebuilt by» (es. il fornitore che gestisce l'istanza). Vuoto (default) = `AgID`. |
