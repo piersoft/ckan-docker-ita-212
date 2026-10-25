@@ -51,8 +51,11 @@ def holder_relation_url(dataset_dict, site_url, template=None):
         return None
 
 
-def default_legislation(access_rights):
-    """ELI da dichiarare quando il dataset non ha applicableLegislation."""
+def default_legislation(access_rights, is_hvd=False):
+    """ELI da dichiarare quando il dataset non ha applicableLegislation.
+    Un dataset con categoria HVD ma senza ELI non deve uscire con la Direttiva."""
+    if is_hvd:
+        return HVD_LEGISLATION
     if "RESTRICTED" in str(access_rights or "").upper():
         return DGA_REGULATION
     return OPEN_DATA_DIRECTIVE

@@ -1,5 +1,9 @@
 # Changelog
 
+## `2026-10-25` — export: `dcatap:applicableLegislation` dei dataset HVD senza ELI
+- Il profilo `dcat_ita` aggiunge `dcatap:applicableLegislation` ai dataset che non ne hanno una (indicatore MQA): ai dataset con `dcatap:hvdCategory` arrivati senza ELI metteva la Direttiva Open Data 2019/1024. Ora mette il Regolamento di esecuzione (UE) 2023/138; DGA (Reg. 2022/868) e Direttiva 2019/1024 restano per gli altri casi (`rules.default_legislation(access_rights, is_hvd)`).
+- Per i dataset HVD l'ELI 2023/138 viene aggiunto anche alle distribuzioni che non lo hanno, come richiede la shape HVD. Solo in serializzazione, dove manca.
+
 ## `2026-10-24` — harvest: ordine dei job creati da `job-all`
 - `ckan harvester job-all` crea i job seguendo la data di creazione delle sorgenti, dalla più recente: i job partono nella coda gather in quell'ordine e non c'era modo di cambiarlo. Nuova patch `05_job_all_order.patch` con l'opzione `ckan.harvest.job_all_order` (variabile `CKAN__HARVEST__JOB_ALL_ORDER`): `created_desc` (default, comportamento invariato), `created_asc`, `title_asc` (alfabetico per titolo, senza distinzione tra maiuscole e minuscole), `title_desc`.
 - Cambia solo l'ordine di creazione dei job di `job-all` (`harvest_job_create_all`): `harvest_source_list` e le API restano identiche, e le date di creazione delle sorgenti non vengono toccate. Con più worker gather/fetch in parallelo è garantito l'ordine di partenza, non quello di completamento.

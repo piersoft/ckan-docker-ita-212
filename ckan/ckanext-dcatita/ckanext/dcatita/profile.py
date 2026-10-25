@@ -91,12 +91,21 @@ class DCATItaProfile(RDFProfile):
                 if isinstance(obj, URIRef) and (obj, RDF.type, DCT.RightsStatement) not in g:
                     g.add((obj, RDF.type, DCT.RightsStatement))
 
-        # --- dcatap:applicableLegislation per i non HVD (indicatore MQA) ----------
+        # --- dcatap:applicableLegislation se manca (indicatore MQA) -------------
+        # HVD -> 2023/138, DGA -> 2022/868, altri -> Direttiva 2019/1024
+        is_hvd = any(g.objects(dataset_ref, DCATAP.hvdCategory))
         if not any(g.objects(dataset_ref, DCATAP.applicableLegislation)):
             ar = str(dataset_dict.get("access_rights") or rules._get_extra(dataset_dict, "access_rights") or "")
             for obj in g.objects(dataset_ref, DCT.accessRights):
                 ar += " " + str(obj)
-            g.add((dataset_ref, DCATAP.applicableLegislation, URIRef(rules.default_legislation(ar))))
+            g.add((dataset_ref, DCATAP.applicableLegislation,
+                   URIRef(rules.default_legislation(ar, is_hvd=is_hvd))))
+        # dataset HVD: l'ELI 2023/138 anche su ogni distribuzione (shape HVD), dove manca
+        if is_hvd:
+            hvd_eli = URIRef(rules.HVD_LEGISLATION)
+            for dist in g.objects(dataset_ref, DCAT.distribution):
+                if (dist, DCATAP.applicableLegislation, hvd_eli) not in g:
+                    g.add((dist, DCATAP.applicableLegislation, hvd_eli))
 
         prov = dataset_dict.get("provenance") or rules._get_extra(dataset_dict, "provenance")
         if not prov:
