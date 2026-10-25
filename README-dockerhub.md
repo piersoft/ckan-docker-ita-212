@@ -178,15 +178,7 @@ docker compose -f docker-compose.hub.yml up -d
 ```
 
 I dati restano nei volumi `ckan_storage`, `pg_data` e `solr_data`, compresi i
-gruppi tematici. Il container ricreato rigenera pero' `ckan.ini`: per rimettere le
-impostazioni della mappatura tema→gruppo eseguire, a CKAN avviato,
-
-```sh
-docker compose -f docker-compose.hub.yml exec ckan bash /srv/app/setup_groups.sh
-docker compose -f docker-compose.hub.yml restart ckan
-```
-
-(i gruppi esistenti vengono saltati).
+gruppi tematici: non serve ricrearli.
 
 ## Sorgenti e licenza
 
