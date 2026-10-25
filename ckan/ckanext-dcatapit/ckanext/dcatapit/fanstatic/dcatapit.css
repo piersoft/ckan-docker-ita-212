@@ -626,3 +626,27 @@ ul.ui-tabs-nav {
 .checkboxes-wrap .checkbox label.checkbox-option:after {
     content: none !important;
 }
+
+/* CKAN 2.12 usa select2 v4 con width 'resolve': i campi che stanno in una
+   scheda nascosta all'avvio (es. Tag) prendono la larghezza minima, e il menu
+   dei suggerimenti la eredita. Il campo occupa la larghezza disponibile. */
+#field-tags + .select2-container,
+.control-full > .controls > .select2-container,
+.control-full .select2-container {
+    width: 100% !important;
+    max-width: 100%;
+}
+/* Il focus si vede sul riquadro intero (WCAG 2.4.7), non sul campo di
+   ricerca interno, che resta senza bordo proprio */
+.select2-container .select2-search--inline .select2-search__field,
+.select2-container .select2-search--inline .select2-search__field:focus {
+    outline: none;
+    box-shadow: none;
+    border: 0;
+    min-width: 8em;
+}
+.select2-container--focus .select2-selection--multiple,
+.select2-container--open .select2-selection--multiple {
+    outline: 2px solid #1a5fb4;
+    outline-offset: 1px;
+}
