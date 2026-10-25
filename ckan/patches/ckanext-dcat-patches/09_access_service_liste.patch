@@ -1,0 +1,37 @@
+diff --git a/ckanext/dcat/profiles/euro_dcat_ap_2.py b/ckanext/dcat/profiles/euro_dcat_ap_2.py
+index fd0a6bc..df51446 100644
+--- a/ckanext/dcat/profiles/euro_dcat_ap_2.py
++++ b/ckanext/dcat/profiles/euro_dcat_ap_2.py
+@@ -505,13 +505,28 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
+                     self._add_date_triple(access_service_node, DCT.modified, access_service_dict.get("modified"))
+ 
+ 
++                # Il parse salva contact e publisher come LISTE (_contact_details,
++                # _agents_details): accettare sia la lista sia il dict singolo,
++                # altrimenti l'export va in 500 ('list' object has no attribute 'get').
+                 contact_point_dict = access_service_dict.get("contact")
+-                if contact_point_dict:
+-                    self._add_contact_to_graph(access_service_node, DCAT.contactPoint, contact_point_dict)
++                if isinstance(contact_point_dict, dict):
++                    contact_point_dict = [contact_point_dict]
++                # Il servizio e' spesso un IRI condiviso da molte distribuzioni:
++                # contatto ed editore si scrivono una volta sola, non uno per distribuzione.
++                if (access_service_node, DCAT.contactPoint, None) in self.g:
++                    contact_point_dict = []
++                for _contact in contact_point_dict or []:
++                    if isinstance(_contact, dict) and any(_contact.values()):
++                        self._add_contact_to_graph(access_service_node, DCAT.contactPoint, _contact)
+ 
+                 publisher_dict = access_service_dict.get("publisher")
+-                if publisher_dict:
+-                    self._add_agent_to_graph(access_service_node, DCT.publisher, publisher_dict)
++                if isinstance(publisher_dict, dict):
++                    publisher_dict = [publisher_dict]
++                if (access_service_node, DCT.publisher, None) in self.g:
++                    publisher_dict = []
++                for _publisher in publisher_dict or []:
++                    if isinstance(_publisher, dict) and any(_publisher.values()):
++                        self._add_agent_to_graph(access_service_node, DCT.publisher, _publisher)
+ 
+                 for creator_dict in access_service_dict.get("creator", []):
+                     self._add_agent_to_graph(access_service_node, DCT.creator, creator_dict)
