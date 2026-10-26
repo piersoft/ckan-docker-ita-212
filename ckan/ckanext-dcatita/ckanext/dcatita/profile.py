@@ -33,6 +33,47 @@ def _ns(local):
     return URIRef(str(DCATAPIT) + local)
 
 
+# 26.10.26 dcat:bbox e dcat:centroid del luogo (raccomandati DCAT-AP 3).
+# Tabella geo_bbox.json accanto a questo file (rigenerabile con
+# tools/build_geo_bbox.py):
+#   istat    codice ISTAT del comune -> [bbox WKT, centroide WKT]
+#                (da Cruscotto Italia, estensione OSM del comune)
+#   geonames id GeoNames (comune ADM3 o localita') -> codice ISTAT
+#   place    codice EU place (ITA_MIL...) -> codice ISTAT
+#   aree     id GeoNames di regioni, province e Italia -> [bbox, centroide]
+_GEO_BBOX = None
+_WKT = URIRef("http://www.opengis.net/ont/geosparql#wktLiteral")
+
+
+def _geo_bbox(value):
+    import json
+    import os
+    import re
+    global _GEO_BBOX
+    if _GEO_BBOX is None:
+        try:
+            with open(os.path.join(os.path.dirname(__file__), "geo_bbox.json")) as fp:
+                _GEO_BBOX = json.load(fp)
+        except (IOError, ValueError) as err:
+            log.warning("[dcatita] geo_bbox.json non leggibile: %s", err)
+            _GEO_BBOX = {}
+    if not _GEO_BBOX or not value:
+        return None
+    v = str(value).strip()
+    m = re.search(r"geonames\.org/(\d+)", v) or re.fullmatch(r"(\d+)", v)
+    if m:
+        gid = m.group(1)
+        if gid in _GEO_BBOX["aree"]:
+            return _GEO_BBOX["aree"][gid]
+        return _GEO_BBOX["istat"].get(_GEO_BBOX["geonames"].get(gid))
+    m = re.search(r"/(?:place|country)/(ITA(?:_[A-Z]{3})?)/?$", v)
+    if m:
+        if m.group(1) == "ITA":
+            return _GEO_BBOX["aree"].get("ITA")
+        return _GEO_BBOX["istat"].get(_GEO_BBOX["place"].get(m.group(1)))
+    return None
+
+
 class DCATItaProfile(RDFProfile):
 
     # ------------------------------------------------------------------ parse
@@ -190,6 +231,23 @@ class DCATItaProfile(RDFProfile):
             for pg in set(g.objects(ref, FOAF.page)):
                 if pg != dataset_ref and pg != ref:
                     g.add((pg, RDF.type, FOAF.Document))
+
+        # 26.10.26 dcat:bbox e dcat:centroid dei luoghi (max 1 ciascuno), dalla
+        # tabella geo_bbox.json: per identificativo GeoNames o EU place
+        for loc in list(g.objects(dataset_ref, DCT.spatial)):
+            if any(g.objects(loc, DCAT.bbox)) and any(g.objects(loc, DCAT.centroid)):
+                continue
+            cands = list(g.objects(loc, _ns("geographicalIdentifier")))
+            if isinstance(loc, URIRef):
+                cands.append(loc)
+            for c in cands:
+                bc = _geo_bbox(c)
+                if bc:
+                    if not any(g.objects(loc, DCAT.bbox)):
+                        g.add((loc, DCAT.bbox, Literal(bc[0], datatype=_WKT)))
+                    if not any(g.objects(loc, DCAT.centroid)):
+                        g.add((loc, DCAT.centroid, Literal(bc[1], datatype=_WKT)))
+                    break
 
         self._prune_orphan_license_nodes()
 
