@@ -41,6 +41,55 @@ def _cfg():
     return rules.load_config(tk.config.get("ckanext.dcatita.subcatalogs_file"))
 
 
+# cache owner_org -> site dell'organizzazione ("" se assente), per l'harvest
+_ORG_SITE = {}
+
+
+def _org_site(dataset_dict):
+    """Campo `site` dell'organizzazione del dataset, o ""."""
+    org_id = dataset_dict.get("owner_org") or \
+        (dataset_dict.get("organization") or {}).get("id")
+    if not org_id:
+        return ""
+    if org_id not in _ORG_SITE:
+        try:
+            org = tk.get_action("organization_show")(
+                {"ignore_auth": True},
+                {"id": org_id, "include_datasets": False, "include_users": False})
+            _ORG_SITE[org_id] = (org.get("site") or "").strip()
+        except Exception as e:  # organizzazione non trovata o errore: nessun site
+            log.warning("dcatita: organization_show %s fallita: %s", org_id, e)
+            return ""
+    return _ORG_SITE[org_id]
+
+
+def _host(url):
+    from urllib.parse import urlparse
+    h = urlparse(url if "://" in url else "http://" + url).netloc.lower()
+    return h[4:] if h.startswith("www.") else h
+
+
+def _entry_for(dataset_dict, cfg):
+    """Voce di subcatalogs.json per il dataset, ma solo se non contraddice il
+    catalogo d'origine dichiarato dall'organizzazione (campo `site`).
+
+    Le regole decidono dal titolare (holder_identifier). Un catalogo con piu'
+    titolari per dataset (es. Cruscotto Italia: ISTAT, ACI, Ministero del
+    Lavoro...) ne vede salvato uno solo, e la regola di quel titolare
+    sposterebbe il dataset nel catalogo di un'altra amministrazione
+    (lod.aci.it, dati.lavoro.gov.it). Se l'organizzazione ha un site con un
+    dominio diverso da quello della voce, la voce non si applica: stesso
+    criterio del 2.10, dove il site dell'organizzazione prevale.
+    """
+    entry = rules.match_subcatalog(dataset_dict, cfg) or {}
+    site = _org_site(dataset_dict) if entry else ""
+    if site:
+        cat = entry.get("homepage") or entry.get("base_uri") or ""
+        if cat and _host(cat) != _host(site):
+            return {}
+    return entry
+
+
 # ---------------------------------------------------------------------------
 # Harvest
 # ---------------------------------------------------------------------------
@@ -161,7 +210,7 @@ class DCATItaHarvestPlugin(p.SingletonPlugin, DefaultTranslation):
 
     def _normalize(self, d, creating, harvest_object=None):
         cfg = _cfg()
-        entry = rules.match_subcatalog(d, cfg) or {}
+        entry = _entry_for(d, cfg)
 
         d.pop("package_id", None)
 
@@ -347,7 +396,7 @@ class DCATItaURIPlugin(p.SingletonPlugin):
         p.implements(IDCATURIGenerator, inherit=True)
 
     def dataset_uri(self, dataset_dict, default_uri):
-        entry = rules.match_subcatalog(dataset_dict, _cfg())
+        entry = _entry_for(dataset_dict, _cfg())
         if len(_ENTRY_BY_DATASET) > _ENTRY_CACHE_MAX:
             _ENTRY_BY_DATASET.clear()
         if dataset_dict.get("id"):

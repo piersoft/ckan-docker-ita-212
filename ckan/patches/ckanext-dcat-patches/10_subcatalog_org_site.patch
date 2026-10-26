@@ -1,0 +1,105 @@
+diff --git a/ckanext/dcat/processors.py b/ckanext/dcat/processors.py
+index a624501..c5c6c34 100644
+--- a/ckanext/dcat/processors.py
++++ b/ckanext/dcat/processors.py
+@@ -392,7 +392,10 @@ class RDFSerializer(RDFProcessor):
+                     # ckan-docker-ita: se l'organizzazione ha un proprio "site"
+                     # (campo dcatapit) il dataset va nel suo subcatalog, non nel root
+                     cat_ref = self._org_subcatalog_ref(catalog_ref, dataset_dict) or catalog_ref
+-                    self.g.add((cat_ref, DCAT.dataset, dataset_ref))
++                # ckan-docker-ita (come il 2.10): il dataset si collega SEMPRE al suo
++                # catalogo. Upstream _add_source_catalog collega solo il primo
++                # dataset, quando crea il sottocatalogo: gli altri restavano orfani.
++                self.g.add((cat_ref, DCAT.dataset, dataset_ref))
+                 # ckan-docker-ita: Catalog -> dcat:service per i DataService delle distribuzioni
+                 for dist in self.g.objects(dataset_ref, DCAT.distribution):
+                     for svc in self.g.objects(dist, DCAT.accessService):
+@@ -420,6 +423,42 @@ class RDFSerializer(RDFProcessor):
+             return site
+         return None
+ 
++    _ORG_INFO = {}
++
++    def _org_catalog_info(self, dataset_dict, site):
++        """ckan-docker-ita: metadati del sottocatalogo ricavati dall'organizzazione
++        (titolo, descrizione, lingua, editore con identificativo IPA e tipo ADMS),
++        per il caso in cui il sottocatalogo e' il suo `site`."""
++        org = dataset_dict.get('organization') or {}
++        org_id = org.get('id') or dataset_dict.get('owner_org')
++        if not org_id:
++            return None
++        if org_id not in self._ORG_INFO:
++            try:
++                full = p.toolkit.get_action('organization_show')(
++                    {'ignore_auth': True},
++                    {'id': org_id, 'include_datasets': False, 'include_users': False})
++            except Exception:
++                full = org
++            ident = (full.get('identifier') or '').strip()
++            ptype = ''
++            try:
++                from ckanext.dcatita import rules as _dcatita_rules
++                ptype = _dcatita_rules.publisher_type_from_ipa(ident) or ''
++            except Exception:
++                pass
++            title = full.get('title') or full.get('name') or 'Publisher'
++            self._ORG_INFO[org_id] = {
++                'source_catalog_title': title,
++                'source_catalog_description': (full.get('description') or '').strip() or title,
++                'source_catalog_language': 'ITA',
++                'source_catalog_publisher': json.dumps({
++                    'uri': '', 'name': title, 'email': '',
++                    'url': site, 'type': ptype}),
++                '_identifier': ident,
++            }
++        return self._ORG_INFO[org_id]
++
+     def _add_source_catalog(self, root_catalog_ref, dataset_dict, dataset_ref):
+         if not p.toolkit.asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):
+             return
+@@ -430,6 +469,23 @@ class RDFSerializer(RDFProcessor):
+                     return ex['value']
+ 
+         source_uri = _get_from_extra('source_catalog_homepage')
++        # ckan-docker-ita (come il 2.10): se l'organizzazione ha un proprio
++        # "site", il sottocatalogo e' quello, con i metadati dell'organizzazione.
++        # Gli extra source_catalog_* non contano: dcatita li deduceva dal primo
++        # titolare, e un dataset con piu' titolari (Cruscotto Italia) finiva nel
++        # catalogo di uno di essi (lod.aci.it, dati.lavoro.gov.it).
++        org_site = self._org_subcatalog_ref(root_catalog_ref, dataset_dict)
++        org_info = self._org_catalog_info(dataset_dict, str(org_site)) if org_site else None
++        if org_info is not None:
++            source_uri = str(org_site)
++            _from_extra = _get_from_extra
++
++            def _get_from_extra(key):
++                if key in org_info:
++                    return org_info[key]
++                if key.startswith('source_catalog_'):
++                    return None
++                return _from_extra(key)
+         if not source_uri:
+             return
+         # ckan-docker-ita: homepage del subcatalog normalizzata con "/"
+@@ -509,11 +565,19 @@ class RDFSerializer(RDFProcessor):
+                 agent = BNode()
+                 g.add((agent, RDF.type, FOAF.Agent))
+                 g.add((agent, RDF.type, DCATAPIT.Agent))
+-                if dataset_dict.get('holder_identifier'):
+-                    g.add((agent, DCT.identifier, Literal(dataset_dict['holder_identifier'])))
++                # identificativo dell'editore del sottocatalogo: quello
++                # dell'organizzazione se il catalogo e' il suo site, non il
++                # primo titolare del dataset
++                pub_id = (org_info or {}).get('_identifier') if org_info is not None \
++                    else dataset_dict.get('holder_identifier')
++                if pub_id:
++                    g.add((agent, DCT.identifier, Literal(pub_id)))
+                 g.add((catalog_ref, DCT.publisher, agent))
+ 
+                 for src_key, _type, predicate, required in publisher_sources:
++                    if src_key == 'identifier':
++                        # gia' scritto sopra come Literal (non e' un IRI)
++                        continue
+                     val = pub.get(src_key)
+                     if val is None and required:
+                         raise ValueError("Value for %s (%s) is required" % (src_key, predicate))
