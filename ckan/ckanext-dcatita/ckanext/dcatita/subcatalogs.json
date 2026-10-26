@@ -9,6 +9,7 @@
     "replace:   sostituzioni aggiuntive nelle URI (lista di coppie [da, a])",
     "access_url_from_download: true = dcat:accessURL = downloadURL invece della pagina risorsa CKAN",
     "Le voci sono in ordine: vince la prima che matcha.",
+    "match_exact: true = il valore deve essere uguale (maiuscole e spazi esclusi) a una voce di match, non solo contenerla.",
     "landing: dcat:landingPage dei dataset dell'ente. mode: 'name' = <base>/dataset/<name>; 'uri' = URI del dataset (base sostituita se 'base' e' data); 'url' = campo url del dataset; 'fixed' = 'value'. slash: aggiunge '/' prima di '#' (default true). strip: sottostringhe da rimuovere."
   ],
   "match_field": "holder_identifier",
@@ -109,6 +110,7 @@
       "match": [
         "aci"
       ],
+      "match_exact": true,
       "base_uri": "http://lod.aci.it/",
       "homepage": "http://lod.aci.it/",
       "language": "ITA",

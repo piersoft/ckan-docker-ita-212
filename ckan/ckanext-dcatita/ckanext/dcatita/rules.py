@@ -117,8 +117,12 @@ def match_subcatalog(dataset_dict, cfg=None):
         value = dataset_dict.get(field) or _get_extra(dataset_dict, field) or ""
         if not value:
             continue
+        # "match_exact": true -> confronto esatto (senza maiuscole/spazi) invece
+        # della sottostringa: un codice corto come "aci" altrimenti scatta su
+        # qualunque valore che lo contenga (es. "Consiglio di bacino ...").
+        exact = entry.get("match_exact", False)
         for needle in entry.get("match", []):
-            if needle in value:
+            if (value.strip().lower() == needle.strip().lower()) if exact else (needle in value):
                 return entry
     return None
 

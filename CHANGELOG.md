@@ -1,5 +1,8 @@
 # Changelog
 
+## `2026-10-26` — regola ACI con confronto esatto
+- `subcatalogs.json`: la voce ACI scattava su qualunque titolare che contenesse "aci" (su dati.gov.it, ad esempio, i "Consiglio di bacino ..." del Veneto). Nuova opzione `match_exact` per voce (confronto esatto, maiuscole e spazi esclusi), attiva per ACI.
+
 ## `2026-10-26` — cache dei dati dell'organizzazione con scadenza
 - dcat patch 10: i dati dell'organizzazione usati per il sottocatalogo (titolo, descrizione, editore) erano in una cache di classe, valida per tutta la vita del processo: una modifica dell'organizzazione non compariva nel catalogo fino al riavvio. Ora la cache vale per un singolo export.
 - dcatita: il `site` dell'organizzazione usato da `_entry_for` (harvest e URI) ora scade dopo 10 minuti invece di restare fisso fino al riavvio di web e consumer.
