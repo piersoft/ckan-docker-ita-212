@@ -56,25 +56,7 @@ else
   echo -e "\n[init] Init estensioni completata"
 fi
 
-# --- impostazioni idempotenti (rieseguite a ogni avvio) ---
-if [[ $CKAN__PLUGINS == *"dcat"* ]]; then
-  # Profili RDF: euro_dcat_ap_3 e' il profilo base DCAT-AP 3; it_dcat_ap lo estende.
-  # SE NON SERVE OpenAIRE/MQA togliere dcat_ap_edp_mqa da CKANEXT__DCAT__RDF__PROFILES nel .env
-  ckan config-tool "$CKAN_INI" "ckanext.dcat.rdf.profiles=${CKANEXT__DCAT__RDF__PROFILES:-euro_dcat_ap_3}"
-  ckan config-tool "$CKAN_INI" "ckanext.dcat.base_uri=${CKAN_SITE_URL}"
-  ckan config-tool "$CKAN_INI" "ckanext.dcat.expose_subcatalogs=True"
-  ckan config-tool "$CKAN_INI" "ckanext.dcat.normalize_ckan_format=true"
-  ckan config-tool "$CKAN_INI" "ckanext.dcat.clean_tags=True"
-  ckan config-tool "$CKAN_INI" "ckanext.dcat.resource.inherit.license=True"
-  ckan config-tool "$CKAN_INI" "solr_timeout=500"
-fi
-
-# log delle estensioni a INFO: il livello DEBUG di default (multilang, dcatapit)
-# scrive centinaia di righe per pagina di catalogo
-ckan config-tool "$CKAN_INI" -s logger_ckanext "level = ${CKAN_LOG_LEVEL_EXTENSIONS:-INFO}"
-ckan config-tool "$CKAN_INI" "ckan.locale_default=${CKAN_LOCALE_DEFAULT:-it}"
-ckan config-tool "$CKAN_INI" "ckan.locales_offered=it en"
-ckan config-tool "$CKAN_INI" "ckan.auth.create_user_via_web=false"
-ckan config-tool "$CKAN_INI" "ckan.auth.public_user_details=false"
-ckan config-tool "$CKAN_INI" "ckan.uploads_enabled=True"
-ckan config-tool "$CKAN_INI" "geonames.username=${GEONAMES_USERNAME:-demo}"
+# --- impostazioni idempotenti ---
+# Spostate in /srv/app/ckan-ita-settings.sh, eseguito dall'entrypoint a ogni
+# avvio di OGNI container (web e worker): qui giravano solo nel web e i
+# worker restavano con il ckan.ini di base.

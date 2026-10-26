@@ -59,4 +59,7 @@ if is_placeholder "${CKAN___SECRET_KEY:-}" \
   fi
 fi
 
+# Impostazioni idempotenti di ckan.ini, comuni a web e worker
+/srv/app/ckan-ita-settings.sh || echo "[entrypoint] ATTENZIONE: ckan-ita-settings.sh fallito"
+
 exec "$@"

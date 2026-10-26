@@ -133,7 +133,8 @@ RUN pip3 install --no-cache-dir -U \
 # Entrypoint: genera e conserva nel volume i segreti se nel .env mancano
 # (o sono CHANGE_ME). Con segreti reali nel .env non fa nulla. Vedi lo script.
 COPY setup/ckan-ita-entrypoint.sh ${APP_DIR}/ckan-ita-entrypoint.sh
-RUN chmod 755 ${APP_DIR}/ckan-ita-entrypoint.sh
+COPY setup/ckan-ita-settings.sh ${APP_DIR}/ckan-ita-settings.sh
+RUN chmod 755 ${APP_DIR}/ckan-ita-entrypoint.sh ${APP_DIR}/ckan-ita-settings.sh
 
 # Permessi: tutto cio' che e' stato aggiunto deve essere leggibile da `ckan`
 RUN chown -R ckan:ckan-sys ${SRC_DIR} ${APP_DIR}/patches ${APP_DIR}/setup_groups.sh
