@@ -41,8 +41,11 @@ def _cfg():
     return rules.load_config(tk.config.get("ckanext.dcatita.subcatalogs_file"))
 
 
-# cache owner_org -> site dell'organizzazione ("" se assente), per l'harvest
+# cache owner_org -> (site dell'organizzazione o "", istante di lettura).
+# Con scadenza: web e consumer harvest sono processi lunghi, e una modifica del
+# `site` dell'organizzazione deve valere senza riavviare i container.
 _ORG_SITE = {}
+_ORG_SITE_TTL = 600  # secondi
 
 
 def _org_site(dataset_dict):
@@ -51,16 +54,19 @@ def _org_site(dataset_dict):
         (dataset_dict.get("organization") or {}).get("id")
     if not org_id:
         return ""
-    if org_id not in _ORG_SITE:
+    import time
+    cached = _ORG_SITE.get(org_id)
+    if cached is None or time.time() - cached[1] > _ORG_SITE_TTL:
         try:
             org = tk.get_action("organization_show")(
                 {"ignore_auth": True},
                 {"id": org_id, "include_datasets": False, "include_users": False})
-            _ORG_SITE[org_id] = (org.get("site") or "").strip()
+            cached = ((org.get("site") or "").strip(), time.time())
+            _ORG_SITE[org_id] = cached
         except Exception as e:  # organizzazione non trovata o errore: nessun site
             log.warning("dcatita: organization_show %s fallita: %s", org_id, e)
             return ""
-    return _ORG_SITE[org_id]
+    return cached[0]
 
 
 def _host(url):

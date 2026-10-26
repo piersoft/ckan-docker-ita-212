@@ -18,8 +18,8 @@ index a624501..d706200 100644
              return site
          return None
  
-+    _ORG_INFO = {}
-+
++    # cache dei dati dell'organizzazione per istanza (= per export), non di classe: un
++    # dizionario di classe restava valido per tutta la vita del processo uwsgi
 +    def _org_catalog_info(self, dataset_dict, site):
 +        """ckan-docker-ita: metadati del sottocatalogo ricavati dall'organizzazione
 +        (titolo, descrizione, lingua, editore con identificativo IPA e tipo ADMS),
@@ -28,7 +28,7 @@ index a624501..d706200 100644
 +        org_id = org.get('id') or dataset_dict.get('owner_org')
 +        if not org_id:
 +            return None
-+        if org_id not in self._ORG_INFO:
++        if org_id not in self.__dict__.setdefault('_org_info', {}):
 +            try:
 +                full = p.toolkit.get_action('organization_show')(
 +                    {'ignore_auth': True},
@@ -43,7 +43,7 @@ index a624501..d706200 100644
 +            except Exception:
 +                pass
 +            title = full.get('title') or full.get('name') or 'Publisher'
-+            self._ORG_INFO[org_id] = {
++            self.__dict__.setdefault('_org_info', {})[org_id] = {
 +                'source_catalog_title': title,
 +                'source_catalog_description': (full.get('description') or '').strip() or title,
 +                'source_catalog_language': 'ITA',
@@ -52,7 +52,7 @@ index a624501..d706200 100644
 +                    'url': site, 'type': ptype}),
 +                '_identifier': ident,
 +            }
-+        return self._ORG_INFO[org_id]
++        return self.__dict__.setdefault('_org_info', {})[org_id]
 +
      def _add_source_catalog(self, root_catalog_ref, dataset_dict, dataset_ref):
          if not p.toolkit.asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):

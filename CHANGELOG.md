@@ -1,5 +1,9 @@
 # Changelog
 
+## `2026-10-26` — cache dei dati dell'organizzazione con scadenza
+- dcat patch 10: i dati dell'organizzazione usati per il sottocatalogo (titolo, descrizione, editore) erano in una cache di classe, valida per tutta la vita del processo: una modifica dell'organizzazione non compariva nel catalogo fino al riavvio. Ora la cache vale per un singolo export.
+- dcatita: il `site` dell'organizzazione usato da `_entry_for` (harvest e URI) ora scade dopo 10 minuti invece di restare fisso fino al riavvio di web e consumer.
+
 ## `2026-10-25` — form del dataset: piu' titolari e piu' categorie HVD
 - **Campo Tag** (CKAN 2.12, select2 v4): la larghezza veniva calcolata all'avvio (`width: 'resolve'`) mentre il campo era in una scheda nascosta, quindi il riquadro e il menu dei suggerimenti restavano stretti. Ora occupano tutta la larghezza del campo (`dcatapit.css`).
 - **Titolare** (`dct:rightsHolder`, 1..N): nel form era in sola lettura e il campo `holder` (lista JSON dei titolari) non veniva mostrato. Per i dataset inseriti a mano l'organizzazione resta sempre il primo titolare e compare come riga fissa (in un dataset nuovo segue la scelta nel menu dell'organizzazione); con «Aggiungi titolare» se ne indicano altri, con nome e codice IPA/IVA per riga. Nel campo `holder` si salvano solo i titolari aggiuntivi: l'organizzazione la aggiunge l'export del profilo `it_dcat_ap` (`_add_right_holder`), cosi' se il dataset cambia organizzazione il titolare la segue; un titolare con lo stesso codice dell'organizzazione non viene ripetuto. La pagina del dataset mostra l'organizzazione seguita dai titolari aggiuntivi. Dal form ogni riga deve avere nome e codice; harvest e API non sono toccati da questo controllo.
