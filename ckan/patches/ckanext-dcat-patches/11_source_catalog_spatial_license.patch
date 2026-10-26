@@ -1,0 +1,61 @@
+diff --git a/ckanext/dcat/processors.py b/ckanext/dcat/processors.py
+index d706200..6c0f42a 100644
+--- a/ckanext/dcat/processors.py
++++ b/ckanext/dcat/processors.py
+@@ -483,6 +483,9 @@ class RDFSerializer(RDFProcessor):
+             def _get_from_extra(key):
+                 if key in org_info:
+                     return org_info[key]
++                if key in ('source_catalog_spatial', 'source_catalog_license'):
++                    # dichiarati dal catalogo d'origine: valgono anche qui
++                    return _from_extra(key)
+                 if key == 'source_catalog_modified':
+                     # dct:modified obbligatorio in DCAT-AP_IT: ultima modifica
+                     # del dataset che apre il sottocatalogo (non una data fissa)
+@@ -537,6 +540,24 @@ class RDFSerializer(RDFProcessor):
+                     else:
+                         g.add((catalog_ref, predicate, _type(value)))
+ 
++            # ckan-docker-ita: copertura e licenza dichiarate dal catalogo d'origine
++            for key, predicate in (('source_catalog_spatial', DCT.spatial),
++                                   ('source_catalog_license', DCT.license)):
++                raw = _get_from_extra(key)
++                if not raw:
++                    continue
++                try:
++                    vals = json.loads(raw) if str(raw).startswith('[') else [raw]
++                except ValueError:
++                    vals = [raw]
++                for v in vals:
++                    node = URIRef(str(v).strip())
++                    g.add((catalog_ref, predicate, node))
++                    if predicate == DCT.license:
++                        g.add((node, RDF.type, DCT.LicenseDocument))
++                    else:
++                        g.add((node, RDF.type, DCT.Location))
++
+             publisher_sources = (
+                                  ('name', Literal, FOAF.name, True,),
+                                  ('email', Literal, FOAF.mbox, False,),
+diff --git a/ckanext/dcat/profiles/base.py b/ckanext/dcat/profiles/base.py
+index 9a29d26..3a36854 100644
+--- a/ckanext/dcat/profiles/base.py
++++ b/ckanext/dcat/profiles/base.py
+@@ -1531,6 +1531,17 @@ class RDFProfile(object):
+             if val:
+                 out.append({"key": key, "value": val})
+ 
++        # ckan-docker-ita: copertura geografica e licenza del catalogo d'origine
++        # (raccomandate da DCAT-AP sul Catalog). Senza questi extra il
++        # sottocatalogo esportato le perdeva. Solo IRI; piu' valori come lista JSON.
++        for key, predicate in (("source_catalog_spatial", DCT.spatial),
++                               ("source_catalog_license", DCT.license)):
++            vals = sorted({str(o) for o in self.g.objects(catalog_ref, predicate)
++                           if isinstance(o, URIRef)})
++            if vals:
++                out.append({"key": key,
++                            "value": vals[0] if len(vals) == 1 else json.dumps(vals)})
++
+         publishers = self._agents_details(catalog_ref, DCT.publisher)
+         if publishers:
+             publisher = publishers[0]
