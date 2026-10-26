@@ -1,0 +1,43 @@
+diff --git a/ckanext/dcat/processors.py b/ckanext/dcat/processors.py
+index 6c0f42a..5da5788 100644
+--- a/ckanext/dcat/processors.py
++++ b/ckanext/dcat/processors.py
+@@ -553,10 +553,10 @@ class RDFSerializer(RDFProcessor):
+                 for v in vals:
+                     node = URIRef(str(v).strip())
+                     g.add((catalog_ref, predicate, node))
++                    # niente rdf:type dct:Location sulla copertura: e' un IRI di
++                    # vocabolario (es. country/ITA) e la shape chiederebbe bbox/centroid
+                     if predicate == DCT.license:
+                         g.add((node, RDF.type, DCT.LicenseDocument))
+-                    else:
+-                        g.add((node, RDF.type, DCT.Location))
+ 
+             publisher_sources = (
+                                  ('name', Literal, FOAF.name, True,),
+diff --git a/ckanext/dcat/profiles/euro_dcat_ap_2.py b/ckanext/dcat/profiles/euro_dcat_ap_2.py
+index df51446..81bdda4 100644
+--- a/ckanext/dcat/profiles/euro_dcat_ap_2.py
++++ b/ckanext/dcat/profiles/euro_dcat_ap_2.py
+@@ -212,6 +212,11 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
+                             ("keyword", DCAT.keyword),
+                             ("applicable_legislation", DCATAP.applicableLegislation),
+                             ("theme", DCAT.theme),
++                            # ckan-docker-ita (come il 2.10): proprieta' HVD del
++                            # servizio (Reg. UE 2023/138), obbligatorie per i servizi
++                            # HVD; upstream non le legge e l'export le perdeva
++                            ("hvd_category", DCATAP.hvdCategory),
++                            ("page", FOAF.page),
+                         ):
+                             values = self._object_value_list(access_service, predicate)
+                             if values:
+@@ -540,6 +545,9 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
+                     ("landing_page", DCAT.landingPage, None, URIRefOrLiteral),
+                     ("applicable_legislation", DCATAP.applicableLegislation, None, URIRefOrLiteral, ELI.LegalResource),
+                     ("theme", DCAT.theme, None, URIRefOrLiteral),
++                    # ckan-docker-ita: proprieta' HVD del servizio (vedi parse)
++                    ("hvd_category", DCATAP.hvdCategory, None, URIRefOrLiteral),
++                    ("page", FOAF.page, None, URIRefOrLiteral, FOAF.Document),
+                 ]
+                 self._add_list_triples_from_dict(access_service_dict, access_service_node, extra_items)
+ 

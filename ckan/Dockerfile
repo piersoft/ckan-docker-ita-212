@@ -44,7 +44,7 @@ RUN cd ${SRC_DIR}/ckanext-harvest && for f in ${APP_DIR}/patches/ckanext-harvest
         echo "Applying $f"; patch -p1 < "$f"; done
 
 # ---------------------------------------------------------------------
-#  ckanext-dcat upstream (DCAT-AP 3) + 11 patch minime (patches/ckanext-dcat-patches:
+#  ckanext-dcat upstream (DCAT-AP 3) + 12 patch minime (patches/ckanext-dcat-patches:
 #  subcatalog per organizzazione, fq multipli sul catalog.ttl, file-type nel
 #  JSON harvester, export completo temporaneo per EDP) + ckanext-dcatita (regole dati.gov.it via interfacce
 #  ufficiali di ckanext-dcat, vedi ckanext-dcatita/README.md)
