@@ -1,5 +1,5 @@
 diff --git a/ckanext/dcat/processors.py b/ckanext/dcat/processors.py
-index a624501..c5c6c34 100644
+index a624501..d706200 100644
 --- a/ckanext/dcat/processors.py
 +++ b/ckanext/dcat/processors.py
 @@ -392,7 +392,10 @@ class RDFSerializer(RDFProcessor):
@@ -57,7 +57,7 @@ index a624501..c5c6c34 100644
      def _add_source_catalog(self, root_catalog_ref, dataset_dict, dataset_ref):
          if not p.toolkit.asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):
              return
-@@ -430,6 +469,23 @@ class RDFSerializer(RDFProcessor):
+@@ -430,6 +469,27 @@ class RDFSerializer(RDFProcessor):
                      return ex['value']
  
          source_uri = _get_from_extra('source_catalog_homepage')
@@ -75,13 +75,17 @@ index a624501..c5c6c34 100644
 +            def _get_from_extra(key):
 +                if key in org_info:
 +                    return org_info[key]
++                if key == 'source_catalog_modified':
++                    # dct:modified obbligatorio in DCAT-AP_IT: ultima modifica
++                    # del dataset che apre il sottocatalogo (non una data fissa)
++                    return (dataset_dict.get('metadata_modified') or '').split('.')[0] or None
 +                if key.startswith('source_catalog_'):
 +                    return None
 +                return _from_extra(key)
          if not source_uri:
              return
          # ckan-docker-ita: homepage del subcatalog normalizzata con "/"
-@@ -509,11 +565,19 @@ class RDFSerializer(RDFProcessor):
+@@ -509,11 +569,19 @@ class RDFSerializer(RDFProcessor):
                  agent = BNode()
                  g.add((agent, RDF.type, FOAF.Agent))
                  g.add((agent, RDF.type, DCATAPIT.Agent))
