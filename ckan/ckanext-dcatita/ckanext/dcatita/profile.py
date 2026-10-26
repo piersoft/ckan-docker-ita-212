@@ -80,6 +80,9 @@ class DCATItaProfile(RDFProfile):
                     g.remove((dist, DCATAP.availability, obj))
                     g.add((dist, DCATAP.availability,
                            URIRef("http://" + str(obj)[len("https://"):])))
+            # 26.10.26 raccomandata DCAT-AP 3 (max 1): se manca, STABLE
+            if not any(g.objects(dist, DCATAP.availability)):
+                g.add((dist, DCATAP.availability, URIRef(rules.DEFAULT_AVAILABILITY)))
 
         # --- dct:accessRights come RightsStatement (default PUBLIC) -------------
         if not any(g.objects(dataset_ref, DCT.accessRights)):
@@ -383,3 +386,14 @@ class DCATItaProfile(RDFProfile):
         taxonomy = URIRef("http://publications.europa.eu/resource/authority/data-theme")
         if (catalog_ref, DCAT.themeTaxonomy, taxonomy) not in g:
             g.add((catalog_ref, DCAT.themeTaxonomy, taxonomy))
+
+        # 26.10.26 licenza dei metadati (CC BY 4.0) e copertura (Italia) del
+        # catalogo, raccomandate DCAT-AP: solo se mancano
+        if not any(g.objects(catalog_ref, DCT.license)):
+            lic = URIRef(rules.FALLBACK_LICENSE)
+            g.add((catalog_ref, DCT.license, lic))
+            g.add((lic, RDF.type, DCT.LicenseDocument))
+            if not any(g.objects(lic, DCT.type)):
+                g.add((lic, DCT.type, URIRef("http://purl.org/adms/licencetype/Attribution")))
+        if not any(g.objects(catalog_ref, DCT.spatial)):
+            g.add((catalog_ref, DCT.spatial, URIRef(rules.CATALOG_SPATIAL)))

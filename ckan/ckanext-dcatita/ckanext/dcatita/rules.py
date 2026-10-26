@@ -65,6 +65,9 @@ LANG_AUTHORITY = "http://publications.europa.eu/resource/authority/language/"
 FILETYPE_AUTHORITY = "http://publications.europa.eu/resource/authority/file-type/"
 IANA_MEDIA_TYPES = "https://iana.org/assignments/media-types/"
 FALLBACK_LICENSE = "http://creativecommons.org/licenses/by/4.0/"
+# 26.10.26 valori di default raccomandati DCAT-AP 3
+DEFAULT_AVAILABILITY = "http://publications.europa.eu/resource/authority/planned-availability/STABLE"
+CATALOG_SPATIAL = "http://publications.europa.eu/resource/authority/country/ITA"
 SPDX_SHA1 = "http://spdx.org/rdf/terms#checksumAlgorithm_sha1"
 # adms:status della distribuzione. La shape DCAT-AP 3.0 :StatusRestriction (il
 # validatore di data.europa.eu la applica come dcatap300level1) impone insieme:

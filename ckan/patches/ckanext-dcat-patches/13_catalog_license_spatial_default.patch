@@ -1,0 +1,23 @@
+diff --git a/ckanext/dcat/processors.py b/ckanext/dcat/processors.py
+index 407100b..165fa36 100644
+--- a/ckanext/dcat/processors.py
++++ b/ckanext/dcat/processors.py
+@@ -558,6 +558,18 @@ class RDFSerializer(RDFProcessor):
+                     if predicate == DCT.license:
+                         g.add((node, RDF.type, DCT.LicenseDocument))
+ 
++            # ckan-docker-ita: licenza dei metadati (CC BY 4.0) e copertura (Italia)
++            # quando il catalogo d'origine non le dichiara (raccomandate DCAT-AP sul Catalog)
++            if not any(g.objects(catalog_ref, DCT.license)):
++                _lic = URIRef('http://creativecommons.org/licenses/by/4.0/')
++                g.add((catalog_ref, DCT.license, _lic))
++                g.add((_lic, RDF.type, DCT.LicenseDocument))
++                g.add((_lic, RDF.type, DCATAPIT.LicenseDocument))
++                g.add((_lic, DCT.type, URIRef('http://purl.org/adms/licencetype/Attribution')))
++                g.add((_lic, FOAF.name, Literal('Creative Commons Attribuzione 4.0 Internazionale (CC BY 4.0)', lang='it')))
++            if not any(g.objects(catalog_ref, DCT.spatial)):
++                g.add((catalog_ref, DCT.spatial, URIRef('http://publications.europa.eu/resource/authority/country/ITA')))
++
+             publisher_sources = (
+                                  ('name', Literal, FOAF.name, True,),
+                                  ('email', Literal, FOAF.mbox, False,),
