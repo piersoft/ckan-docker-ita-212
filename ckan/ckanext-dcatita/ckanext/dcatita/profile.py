@@ -78,6 +78,21 @@ class DCATItaProfile(RDFProfile):
 
     # ------------------------------------------------------------------ parse
     def parse_dataset(self, dataset_dict, dataset_ref):
+        # dct:provenance del catalogo d'origine (03.11.26): il parser di base
+        # legge solo i letterali e, per un dct:ProvenanceStatement, lascia l'id
+        # del nodo. Si conserva il suo rdfs:label; se non c'e', si scarta l'id
+        # e set_provenance() compone il testo all'harvest, come prima.
+        text, node_ids = rules.source_provenance(
+            self.g, dataset_ref, tk.config.get("ckan.locale_default", "it"))
+        if text:
+            dataset_dict["provenance"] = text
+            rules.set_extra(dataset_dict, "provenance", text)
+        elif node_ids:
+            if dataset_dict.get("provenance") in node_ids:
+                dataset_dict.pop("provenance", None)
+            dataset_dict["extras"] = [
+                ex for ex in dataset_dict.get("extras") or []
+                if not (ex.get("key") == "provenance" and ex.get("value") in node_ids)]
         return dataset_dict
 
     # ------------------------------------------------------------------ graph

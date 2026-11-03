@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-11-03` — harvest: si conserva la `dct:provenance` del catalogo d'origine
+- Il parser di base legge `dct:provenance` solo come letterale: con la forma DCAT-AP (`[ a dct:ProvenanceStatement ; rdfs:label "..." ]`) il testo d'origine si perdeva e `set_provenance()` componeva il proprio («Dataset pubblicato da {titolare} nel catalogo ...»), che con piu' titolari ne citava uno solo, diverso da un harvest all'altro.
+- dcatita: `DCATItaProfile.parse_dataset` usa la nuova `rules.source_provenance()` (letterale o `rdfs:label`, preferenza per la lingua di default del portale). Se il nodo non ha label si scarta l'id del nodo e resta il testo composto, come prima.
+- Vale dal prossimo harvest delle sorgenti RDF.
+
 ## `2026-10-26` — regola ACI con confronto esatto
 - `subcatalogs.json`: la voce ACI scattava su qualunque titolare che contenesse "aci" (su dati.gov.it, ad esempio, i "Consiglio di bacino ..." del Veneto). Nuova opzione `match_exact` per voce (confronto esatto, maiuscole e spazi esclusi), attiva per ACI.
 

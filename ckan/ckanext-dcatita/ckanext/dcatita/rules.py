@@ -424,6 +424,31 @@ def build_provenance(dataset_dict, site_title, source_url=None, template=None, c
     return None
 
 
+def source_provenance(graph, dataset_ref, default_lang="it"):
+    """dct:provenance del catalogo d'origine: (testo, id dei nodi).
+
+    Il testo e' il letterale o l'rdfs:label del dct:ProvenanceStatement, con
+    preferenza per la lingua di default, poi senza lingua, poi la prima
+    disponibile; None se non c'e'. Gli id dei nodi servono a scartare il valore
+    che il parser di base salva al posto del testo.
+    """
+    from rdflib import Literal
+    from rdflib.namespace import DCTERMS, RDFS
+    best, node_ids = {}, set()
+    for o in graph.objects(dataset_ref, DCTERMS.provenance):
+        if isinstance(o, Literal):
+            labels = [o]
+        else:
+            node_ids.add(str(o))
+            labels = list(graph.objects(o, RDFS.label))
+        for lab in labels:
+            if not isinstance(lab, Literal) or not str(lab).strip():
+                continue
+            rank = 0 if lab.language == default_lang else (1 if not lab.language else 2)
+            best.setdefault(rank, str(lab).strip())
+    return (best[min(best)] if best else None), node_ids
+
+
 # Serializzazione (05.10.26): la provenance si scrive nel DB solo quando il
 # dataset viene harvestato. Quelli harvestati prima della regola e mai piu'
 # ripassati, e quelli inseriti a mano, ne restano senza: un export completo
