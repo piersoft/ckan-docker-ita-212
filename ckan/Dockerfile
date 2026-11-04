@@ -4,7 +4,8 @@
 #
 #  Estensioni, nell'ordine di installazione:
 #    upstream (pip, tag fissato) : ckanext-xloader, ckanext-harvest, ckanext-dcat
-#    patch minime a upstream     : patches/ckanext-harvest-patches, patches/ckanext-dcat-patches
+#    patch minime a upstream     : patches/ckanext-xloader-patches, patches/ckanext-harvest-patches,
+#                                  patches/ckanext-dcat-patches
 #    fork nel repo (cartella ckan/): ckanext-dcatita, ckanext-dcatapit, ckanext-multilang,
 #                                  ckanext-oai-pmh-server, ckanext-dcat-ap-edp-mqa
 #    patch al core               : patches/ckan-core-patches
@@ -31,6 +32,13 @@ RUN apt-get update \
 # quello di site-packages e il plugin non viene trovato.
 RUN pip3 install --no-cache-dir -e git+https://github.com/ckan/ckanext-xloader.git@2.5.0#egg=ckanext-xloader \
     && pip3 install --no-cache-dir -r ${SRC_DIR}/ckanext-xloader/requirements.txt
+# Backport del fix upstream 4572304 (xloader 2.6.0): su CKAN 2.12 notify()
+# chiamava resource_show su risorse appena marcate deleted -> NotFound nel
+# before_commit, che faceva fallire l'harvest (fetch/import). Rimuovere la
+# patch quando si passa a xloader >= 2.6.0.
+COPY patches/ckanext-xloader-patches ${APP_DIR}/patches/ckanext-xloader-patches
+RUN cd ${SRC_DIR}/ckanext-xloader && for f in ${APP_DIR}/patches/ckanext-xloader-patches/*.patch; do \
+        echo "Applying $f"; patch -p1 < "$f"; done
 
 # ---------------------------------------------------------------------
 #  ckanext-harvest upstream + patch locali (patches/ckanext-harvest-patches:

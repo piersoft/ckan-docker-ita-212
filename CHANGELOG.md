@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-11-04` — harvest: errore `Resource was not found` da xloader
+- Su CKAN 2.12 l'harvest falliva nel commit (`ckan.logic.NotFound: Resource was not found.` da `ckanext/xloader/plugin.py` `notify`): quando un dataset harvestato sostituisce le risorse, quelle vecchie passano a `deleted` e l'observer `IDomainObjectModification` di xloader chiamava `resource_show` su di esse; dalla 2.12 `resource_show` non trova le risorse cancellate e l'eccezione nel `before_commit` annullava l'intero salvataggio.
+- Nuova patch `patches/ckanext-xloader-patches/0001-...`: backport del fix upstream (commit 4572304, xloader 2.6.0) — `notify` salta le risorse `deleted` e usa `entity.as_dict()` invece di `resource_show`. Si resta su xloader 2.5.0; patch da togliere passando a >= 2.6.0.
+- Richiede rebuild dell'immagine (`ckan` e `ckan-worker`).
+
 ## `2026-11-03` — harvest: si conserva la `dct:provenance` del catalogo d'origine
 - Il parser di base legge `dct:provenance` solo come letterale: con la forma DCAT-AP (`[ a dct:ProvenanceStatement ; rdfs:label "..." ]`) il testo d'origine si perdeva e `set_provenance()` componeva il proprio («Dataset pubblicato da {titolare} nel catalogo ...»), che con piu' titolari ne citava uno solo, diverso da un harvest all'altro.
 - dcatita: `DCATItaProfile.parse_dataset` usa la nuova `rules.source_provenance()` (letterale o `rdfs:label`, preferenza per la lingua di default del portale). Se il nodo non ha label si scarta l'id del nodo e resta il testo composto, come prima.
