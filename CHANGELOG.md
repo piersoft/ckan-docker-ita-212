@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-11-14` — form risorsa: elenco ristretto di licenze
+- La select «Licenza» del form risorsa proponeva tutte le ~60 voci del vocabolario licenze. Nuova impostazione `ckanext.dcatapit.form_licenses` (dal `.env`: `CKANEXT__DCATAPIT__FORM_LICENSES`, codici separati da spazi): default `A21_CCBY40 A31_CCBYSA40 A11_CCO10 A310_ODBL A29_IODL20` (CC BY 4.0, CC BY-SA 4.0, CC0 1.0, ODbL, IODL 2.0), in elenco piatto.
+- Se la risorsa ha gia' una licenza fuori elenco (harvest, dati precedenti) questa resta in fondo alla select e selezionata: salvando dal form non si perde.
+- Solo il form: vocabolario nel DB, mappatura delle licenze in harvest, export DCAT e MQA restano sull'elenco completo. Variabile vuota = comportamento precedente.
+
 ## `2026-11-04` — harvest: errore `Resource was not found` da xloader
 - Su CKAN 2.12 l'harvest falliva nel commit (`ckan.logic.NotFound: Resource was not found.` da `ckanext/xloader/plugin.py` `notify`): quando un dataset harvestato sostituisce le risorse, quelle vecchie passano a `deleted` e l'observer `IDomainObjectModification` di xloader chiamava `resource_show` su di esse; dalla 2.12 `resource_show` non trova le risorse cancellate e l'eccezione nel `before_commit` annullava l'intero salvataggio.
 - Nuova patch `patches/ckanext-xloader-patches/0001-...`: backport del fix upstream (commit 4572304, xloader 2.6.0) — `notify` salta le risorse `deleted` e usa `entity.as_dict()` invece di `resource_show`. Si resta su xloader 2.5.0; patch da togliere passando a >= 2.6.0.

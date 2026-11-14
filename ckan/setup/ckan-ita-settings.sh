@@ -26,6 +26,9 @@ if [[ "${CKAN__PLUGINS:-}" == *"dcat"* ]]; then
          "ckanext.dcat.normalize_ckan_format=true"
          "ckanext.dcat.clean_tags=True"
          "ckanext.dcat.resource.inherit.license=True"
+         # licenze proposte nel form risorsa (solo la select: harvest ed export
+         # usano il vocabolario completo). Vuoto = tutte.
+         "ckanext.dcatapit.form_licenses=${CKANEXT__DCATAPIT__FORM_LICENSES-A21_CCBY40 A31_CCBYSA40 A11_CCO10 A310_ODBL A29_IODL20}"
          "solr_timeout=500")
 fi
 ARGS+=("ckan.locale_default=${CKAN_LOCALE_DEFAULT:-it}"
