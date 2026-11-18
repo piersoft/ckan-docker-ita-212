@@ -1,5 +1,10 @@
 # Changelog
 
+## `2026-11-18` — immagine nginx: aggiornamento di sicurezza a nginx 1.30.7
+- nginx 1.30.7 (18/11/2026) corregge nove vulnerabilita'. Per questo stack conta CVE-2026-118899: i worker potevano restare in un ciclo infinito leggendo il corpo di una richiesta su SSL (NGINX qui termina l'HTTPS). Le altre riguardano funzioni non attive nella configurazione fornita: `try_files` con `alias`, HTTP/2, HTTP/3, moduli mail e stream, `resolver` con sottorichieste.
+- Nessuna modifica ai file: `nginx/Dockerfile` parte da `nginx:stable-alpine`, basta ricostruire l'immagine riscaricando la base: `docker compose build --pull nginx` e poi `docker compose up -d --no-deps nginx` (pochi secondi di fermo del solo proxy). Verifica: `docker compose exec nginx nginx -v`.
+- Docker Hub: immagini ripubblicate come `2.12-dcatapit-1.5.0` (con le modifiche del 3, 4 e 14 novembre). Chi usa `docker-compose.hub.yml`: `docker compose pull` e `docker compose up -d`.
+
 ## `2026-11-14` — form risorsa: elenco ristretto di licenze
 - La select «Licenza» del form risorsa proponeva tutte le ~60 voci del vocabolario licenze. Nuova impostazione `ckanext.dcatapit.form_licenses` (dal `.env`: `CKANEXT__DCATAPIT__FORM_LICENSES`, codici separati da spazi): default `A21_CCBY40 A31_CCBYSA40 A11_CCO10 A310_ODBL A29_IODL20` (CC BY 4.0, CC BY-SA 4.0, CC0 1.0, ODbL, IODL 2.0), in elenco piatto.
 - Se la risorsa ha gia' una licenza fuori elenco (harvest, dati precedenti) questa resta in fondo alla select e selezionata: salvando dal form non si perde.
