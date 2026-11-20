@@ -1,5 +1,11 @@
 # Changelog
 
+## `2026-11-20` — immagine nginx: versione fissa 1.30.7
+- `nginx/Dockerfile`: l'immagine di base passa da `nginx:stable-alpine` a `nginx:1.30.7-alpine`. Con il tag mobile la versione dipendeva da quando era stata scaricata la base: un'immagine costruita prima del 18/11/2026 restava su una versione affetta dalle vulnerabilita' NGINX2Root (CVE-2026-123007, CVE-2026-123633, CVE-2026-123634, CVE-2026-121810, CVE-2026-113425) finche' non veniva ricostruita con `--pull`.
+- La configurazione fornita usa `resolver` e `proxy_pass` con variabile ma non sottorichieste: chi ha aggiunto `auth_request`, `mirror` o SSI alla propria configurazione era esposto a CVE-2026-123634 e deve ricostruire l'immagine; lo stesso vale per chi ha aggiunto `http2` alle direttive `listen` (CVE-2026-123007).
+- I prossimi aggiornamenti di nginx arriveranno come modifica di questa riga.
+- Aggiornamento: `docker compose build --pull nginx` e poi `docker compose up -d --no-deps nginx`. Verifica: `docker compose exec nginx nginx -v` deve rispondere `nginx/1.30.7`.
+
 ## `2026-11-18` — immagine nginx: aggiornamento di sicurezza a nginx 1.30.7
 - nginx 1.30.7 (18/11/2026) corregge nove vulnerabilita'. Per questo stack conta CVE-2026-118899: i worker potevano restare in un ciclo infinito leggendo il corpo di una richiesta su SSL (NGINX qui termina l'HTTPS). Le altre riguardano funzioni non attive nella configurazione fornita: `try_files` con `alias`, HTTP/2, HTTP/3, moduli mail e stream, `resolver` con sottorichieste.
 - Nessuna modifica ai file: `nginx/Dockerfile` parte da `nginx:stable-alpine`, basta ricostruire l'immagine riscaricando la base: `docker compose build --pull nginx` e poi `docker compose up -d --no-deps nginx` (pochi secondi di fermo del solo proxy). Verifica: `docker compose exec nginx nginx -v`.
